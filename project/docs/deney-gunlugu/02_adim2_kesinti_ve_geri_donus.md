@@ -74,3 +74,25 @@ A2 politikasını yazmak, sonra aynı deneyi cihaz sayısını artırarak tekrar
 - `project/src/Simulator/Program.cs`, `Device.cs`, `ReconnectPolicy.cs`, `Stats.cs`
 - `project/scripts/adim2.ps1`
 - `project/results/adim2*.{csv,txt}`
+
+## Ek 2: A2 politikası (rastgeleli üstel) ve sayma hatası düzeltmesi
+
+**Kaynak doğrulaması (kendi gözümle, 11 Ekim 2026):**
+- RFC 6455 §7.2.3: ilk yeniden bağlanma denemesi rastgele geciktirilmeli; "0 ile 5 saniye arası rastgele değer makul bir ilk gecikme"; sonraki denemeler kesilmiş ikili üstel geri çekilme gibi bir yöntemle giderek uzamalı.
+- RFC 5626 §4.5: W = min(max-time, base-time * 2^ardışık-hata); gerçek gecikme W'nin %50-%100'ü arasında düzgün rastgele seçilir.
+
+**A2 uygulaması (`RastgeleliUstelGeriCekilme`):** 1. bekleme U(0, 5 sn). Sonrakiler U(0.5W, W), W = min(30, 1 * 2^(n-1)). İki standardın birleşimi, birebir bir RFC uygulaması değil. Raporda böyle yazılmalı.
+
+**Hata düzeltmesi (`Device.cs`):** Kopma sonrası ilk bekleme ile ilk başarısız denemeden sonraki bekleme aynı numarayı (1) alıyordu (1, 1, 2, 4 ...). Artık kesintide her beklemede sayaç artıyor (1, 2, 3 ...). Adım 2'deki ilk koşular bu hatadan etkilenmiş olabilir, `sabit` politikada etkisi yok (hep 1 sn) ama `ustel` ile yapılacak koşular düzeltilmiş kodla yapılmalı.
+
+**Kural testi (3 cihaz, tohum 1), bekleme sn:**
+
+| Bekleme no | sabit | ustel | ustel-rastgele (c1 / c2 / c3) |
+|---|---|---|---|
+| 1 | 1 | 1 | 3,90 / 1,51 / 4,12 |
+| 2 | 1 | 2 | 1,97 / 1,27 / 1,56 |
+| 3 | 1 | 4 | 2,53 / 3,93 / 3,33 |
+| 5 | 1 | 16 | 9,85 / 13,46 / 9,08 |
+| 6 | 1 | 30 | 18,20 / 16,31 / 29,42 |
+
+Rastgeleli kuralda her cihaz farklı süre bekliyor (tohum cihaz numarasına bağlı), diğer ikisinde hepsi aynı. Cihazlarla karşılaştırmalı koşu henüz yapılmadı.

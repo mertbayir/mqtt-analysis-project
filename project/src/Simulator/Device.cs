@@ -45,7 +45,7 @@ public class Device
             .WithCleanStart(true)
             .Build();
 
-        int denemeNo = 0;   // kopmadan beri kaçıncı başarısız deneme
+        int beklemeNo = 0;   // bu kesintide şimdiye kadar kaç kez bekledik (bağlanınca sıfırlanır)
 
         while (!dur.IsCancellationRequested)
         {
@@ -56,7 +56,7 @@ public class Device
                 await client.ConnectAsync(options, dur);
                 Interlocked.Exchange(ref _bagli, 1);
                 Stats.BagliOldu();
-                denemeNo = 0;
+                beklemeNo = 0;
 
                 // Kopana kadar burada bekle (hiçbir işlemci harcamadan).
                 await _koptu.Task.WaitAsync(dur);
@@ -69,12 +69,13 @@ public class Device
             {
                 // Bağlanılamadı (sunucu kapalı, reddedildi, zaman aşımı...)
                 Stats.BaglantiHatasi(ex.GetType().Name);
-                denemeNo++;
             }
 
             try
             {
-                var bekleme = _politika.SonrakiBekleme(Math.Max(denemeNo, 1), _rastgele);
+                // Her bekleme bir öncekinden sonra gelir: 1., 2., 3. ... (kopma sonrası ilk bekleme = 1)
+                beklemeNo++;
+                var bekleme = _politika.SonrakiBekleme(beklemeNo, _rastgele);
                 await Task.Delay(bekleme, dur);
             }
             catch (OperationCanceledException)

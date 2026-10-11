@@ -3,7 +3,7 @@
 
 public interface IReconnectPolicy
 {
-    // denemeNo: bu kopmadan beri kaçıncı başarısız deneme (1, 2, 3, ...)
+    // denemeNo: bu kesintide kaçıncı bekleme (1, 2, 3, ...). Kopma sonrası ilk bekleme = 1.
     // rastgele: bu cihaza özel, tohumlu rastgele sayı üreteci (deney tekrarlanabilsin diye)
     TimeSpan SonrakiBekleme(int denemeNo, Random rastgele);
 }
@@ -37,6 +37,35 @@ public class UstelGeriCekilme : IReconnectPolicy
         // 1. deneme: ilk * 2^0 = ilk, 2. deneme: ilk * 2^1, 3. deneme: ilk * 2^2, ...
         double sn = _ilkSn * Math.Pow(2, denemeNo - 1);
         sn = Math.Min(sn, _tavanSn);
+        return TimeSpan.FromSeconds(sn);
+    }
+}
+
+// A2: Rastgeleli üstel geri çekilme. İki standarttan birleşim:
+//  - RFC 6455 §7.2.3: ilk yeniden bağlanma rastgele geciktirilir, 0-5 sn "makul bir ilk gecikme".
+//    Sonraki denemeler kesilmiş ikili üstel geri çekilmeyle giderek uzar.
+//  - RFC 5626 §4.5: W = min(tavan, taban * 2^hata). Gerçek bekleme W'nin %50-%100'ü arasında rastgele seçilir.
+// Bizim uygulama: 1. bekleme U(0, ilkAralik); sonrakiler U(0.5W, W), W = min(tavan, ilk * 2^(n-1)).
+public class RastgeleliUstelGeriCekilme : IReconnectPolicy
+{
+    private readonly double _ilkAralikSn;  // ilk bekleme bu aralıktan rastgele seçilir (RFC 6455: 0-5 sn)
+    private readonly double _ilkSn;        // üstel hesabın tabanı (saniye)
+    private readonly double _tavanSn;      // W bunu geçemez (saniye)
+
+    public RastgeleliUstelGeriCekilme(double ilkAralikSn, double ilkSn, double tavanSn)
+    {
+        _ilkAralikSn = ilkAralikSn;
+        _ilkSn = ilkSn;
+        _tavanSn = tavanSn;
+    }
+
+    public TimeSpan SonrakiBekleme(int denemeNo, Random rastgele)
+    {
+        if (denemeNo == 1)
+            return TimeSpan.FromSeconds(rastgele.NextDouble() * _ilkAralikSn);
+
+        double ust = Math.Min(_ilkSn * Math.Pow(2, denemeNo - 1), _tavanSn);   // W
+        double sn = ust * (0.5 + 0.5 * rastgele.NextDouble());                 // W'nin %50-%100'ü
         return TimeSpan.FromSeconds(sn);
     }
 }

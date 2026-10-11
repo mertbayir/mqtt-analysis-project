@@ -18,16 +18,22 @@ IReconnectPolicy politika = (Environment.GetEnvironmentVariable("POLICY") ?? "sa
 {
     "sabit" => new SabitBekleme(TimeSpan.FromSeconds(1)),
     "ustel" => new UstelGeriCekilme(ilkSn: 1, tavanSn: 30),
+    "ustel-rastgele" => new RastgeleliUstelGeriCekilme(ilkAralikSn: 5, ilkSn: 1, tavanSn: 30),
     var bilinmeyen => throw new ArgumentException($"Bilinmeyen politika: {bilinmeyen}")
 };
 
-// Politika testi: cihaz yok, sunucu yok. Yalnızca "şu denemede ne kadar beklerim?" tablosu.
+// Politika testi: cihaz yok, sunucu yok. "Şu bekleme sırasında ne kadar beklerim?" tablosu.
+// 3 farklı cihaz yan yana gösterilir: rastgeleli kuralda her cihazın farklı çıkması gerekir.
 if (args.Contains("--politika-testi"))
 {
-    var rastgeleTest = new Random(1);
-    Console.WriteLine($"Politika: {politika.GetType().Name}");
-    for (int n = 1; n <= 10; n++)
-        Console.WriteLine($"  deneme {n,2} -> bekleme {politika.SonrakiBekleme(n, rastgeleTest).TotalSeconds,5:0.##} sn");
+    var cihazlar3 = new[] { 1, 2, 3 }.Select(id => new Random(tohum * 100_000 + id)).ToArray();
+    Console.WriteLine($"Politika: {politika.GetType().Name}  (3 cihaz, tohum={tohum})");
+    Console.WriteLine("  bekleme no |  cihaz 1 |  cihaz 2 |  cihaz 3   (saniye)");
+    for (int n = 1; n <= 8; n++)
+    {
+        var sureler = cihazlar3.Select(r => politika.SonrakiBekleme(n, r).TotalSeconds);
+        Console.WriteLine($"  {n,10} | " + string.Join(" | ", sureler.Select(s => $"{s,8:0.00}")));
+    }
     return;
 }
 
