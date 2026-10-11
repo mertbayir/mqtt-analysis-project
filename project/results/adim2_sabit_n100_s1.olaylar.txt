@@ -1,0 +1,2 @@
+﻿23:56:51.982  docker stop
+23:57:13.527  docker start
