@@ -1,0 +1,8 @@
+services:
+  broker:
+    image: eclipse-mosquitto:2
+    container_name: mqtt-broker
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    ports:
+      - "1883:1883"   # Adım 1'de Windows'tan bağlanabilmek için. Deneyde kullanılmayacak.
