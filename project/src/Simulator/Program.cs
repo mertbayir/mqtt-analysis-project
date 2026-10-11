@@ -1,45 +1,50 @@
+using System.Diagnostics;
 using System.Text;
-using MQTTnet;
-using MQTTnet.Protocol;
 
-// Adım 1: Tek bir sanal cihaz sunucuya bağlanır, bir mesaj yollar, aynı mesajı geri alır.
+Console.OutputEncoding = Encoding.UTF8;   // dosyaya yönlendirilince Türkçe karakter bozulmasın
 
-// Sunucu adresi: Windows'tan çalışırken "localhost", Docker içinde "broker" olacak.
+// Adım 2: N sanal cihaz bağlanır. Sunucu dışarıdan kapatılıp açılır.
+// Her saniye kaç cihaz bağlı, kaç deneme ve kaç hata olduğunu yazarız.
+
 var host = Environment.GetEnvironmentVariable("BROKER_HOST") ?? "localhost";
 var port = int.Parse(Environment.GetEnvironmentVariable("BROKER_PORT") ?? "1883");
+var cihazSayisi = int.Parse(Environment.GetEnvironmentVariable("DEVICES") ?? "100");
+var sureSn = int.Parse(Environment.GetEnvironmentVariable("DURATION_SEC") ?? "75");
+var tohum = int.Parse(Environment.GetEnvironmentVariable("SEED") ?? "1");
+var csvYolu = Environment.GetEnvironmentVariable("CSV_PATH") ?? "results/adim2.csv";
 
-var factory = new MqttClientFactory();
-using var client = factory.CreateMqttClient();
+// Hangi politika? Şimdilik tek seçenek: sabit 1 sn.
+IReconnectPolicy politika = new SabitBekleme(TimeSpan.FromSeconds(1));
 
-// Sunucudan mesaj gelince bu fonksiyon çalışır.
-client.ApplicationMessageReceivedAsync += e =>
+Console.WriteLine($"cihaz={cihazSayisi} sunucu={host}:{port} süre={sureSn}sn tohum={tohum} politika={politika.GetType().Name}");
+
+Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(csvYolu))!);
+using var csv = new StreamWriter(csvYolu, append: false);
+csv.WriteLine("saniye,bagli,deneme,hata");
+
+using var kesme = new CancellationTokenSource(TimeSpan.FromSeconds(sureSn));
+
+// Cihazları başlat. Hepsi aynı anda bağlanmaya başlar.
+var cihazlar = Enumerable.Range(1, cihazSayisi)
+    .Select(id => new Device(id, host, port, politika, tohum).RunAsync(kesme.Token))
+    .ToList();
+
+// Her saniye bir özet satırı.
+var saat = Stopwatch.StartNew();
+int saniye = 0;
+while (!kesme.IsCancellationRequested)
 {
-    var konu = e.ApplicationMessage.Topic;
-    var metin = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-    Console.WriteLine($"[ALINDI] konu={konu} mesaj={metin}");
-    return Task.CompletedTask;
-};
+    try { await Task.Delay(1000, kesme.Token); } catch (OperationCanceledException) { break; }
+    saniye++;
+    var (deneme, hata) = Stats.SaniyeLik();
+    var satir = $"{saniye},{Stats.Bagli},{deneme},{hata}";
+    csv.WriteLine(satir);
+    csv.Flush();
+    Console.WriteLine($"t={saniye,3}sn  bağlı={Stats.Bagli,4}  deneme/sn={deneme,4}  hata/sn={hata,4}");
+}
 
-var options = new MqttClientOptionsBuilder()
-    .WithTcpServer(host, port)
-    .WithClientId("cihaz-0001")
-    .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)  // MQTT 5
-    .WithKeepAlivePeriod(TimeSpan.FromSeconds(10))
-    .WithCleanStart(true)
-    .Build();
-
-Console.WriteLine($"Bağlanılıyor: {host}:{port}");
-var sonuc = await client.ConnectAsync(options);
-Console.WriteLine($"Bağlandı. Sonuç kodu: {sonuc.ResultCode}");
-
-// Kendi konumuza abone ol, sonra o konuya mesaj yolla.
-var konuAdi = "cihaz/0001/vital";
-await client.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
-    .WithTopicFilter(konuAdi)
-    .Build());
-
-await client.PublishStringAsync(konuAdi, "nabiz=72", MqttQualityOfServiceLevel.AtLeastOnce);
-
-await Task.Delay(500);   // mesajın dönmesi için kısa bekleme
-await client.DisconnectAsync();
-Console.WriteLine("Bağlantı kapatıldı.");
+await Task.WhenAll(cihazlar);
+Console.WriteLine("Hata türleri:");
+foreach (var (tur, sayi) in Stats.HataTurleri.OrderByDescending(x => x.Value))
+    Console.WriteLine($"  {tur}: {sayi}");
+Console.WriteLine("Bitti.");
