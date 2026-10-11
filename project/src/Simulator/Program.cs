@@ -13,8 +13,23 @@ var sureSn = int.Parse(Environment.GetEnvironmentVariable("DURATION_SEC") ?? "75
 var tohum = int.Parse(Environment.GetEnvironmentVariable("SEED") ?? "1");
 var csvYolu = Environment.GetEnvironmentVariable("CSV_PATH") ?? "results/adim2.csv";
 
-// Hangi politika? Şimdilik tek seçenek: sabit 1 sn.
-IReconnectPolicy politika = new SabitBekleme(TimeSpan.FromSeconds(1));
+// Hangi politika? POLICY ortam değişkeniyle seçilir: "sabit" (varsayılan) veya "ustel".
+IReconnectPolicy politika = (Environment.GetEnvironmentVariable("POLICY") ?? "sabit") switch
+{
+    "sabit" => new SabitBekleme(TimeSpan.FromSeconds(1)),
+    "ustel" => new UstelGeriCekilme(ilkSn: 1, tavanSn: 30),
+    var bilinmeyen => throw new ArgumentException($"Bilinmeyen politika: {bilinmeyen}")
+};
+
+// Politika testi: cihaz yok, sunucu yok. Yalnızca "şu denemede ne kadar beklerim?" tablosu.
+if (args.Contains("--politika-testi"))
+{
+    var rastgeleTest = new Random(1);
+    Console.WriteLine($"Politika: {politika.GetType().Name}");
+    for (int n = 1; n <= 10; n++)
+        Console.WriteLine($"  deneme {n,2} -> bekleme {politika.SonrakiBekleme(n, rastgeleTest).TotalSeconds,5:0.##} sn");
+    return;
+}
 
 Console.WriteLine($"cihaz={cihazSayisi} sunucu={host}:{port} süre={sureSn}sn tohum={tohum} politika={politika.GetType().Name}");
 

@@ -53,9 +53,21 @@ Rastgele bekleme (jitter) bu tepeyi yaymak için kullanılacak (politika A2).
 - Simülatör Windows'ta, sunucu Docker'da çalıştığı için trafik Docker Desktop'ın port yönlendirmesinden geçiyor. Planda "simülatör de Docker ağı içinde" olacak (15a §1). Büyük N'de bunu değiştireceğiz.
 - Bu koşu tek tekrar. Hiçbir istatistik iddiası yok, yalnızca ilk gözlem.
 
+## Ek: A1 politikası (üstel geri çekilme) eklendi
+
+`UstelGeriCekilme(ilkSn: 1, tavanSn: 30)`: bekleme = `ilk × 2^(denemeNo−1)`, en çok 30 sn. Rastgelelik yok.
+
+Cihazlar ve sunucu olmadan kuralın kendisi test edildi (`--politika-testi`):
+
+| Deneme | 1 | 2 | 3 | 4 | 5 | 6+ |
+|---|---|---|---|---|---|---|
+| Bekleme (sn) | 1 | 2 | 4 | 8 | 16 | 30 |
+
+Politika artık `POLICY` ortam değişkeniyle seçilir (`sabit` veya `ustel`). Bu sayede aynı program farklı kurallarla çalıştırılabilir. A2 (rastgele ilk bekleme + üstel) henüz yazılmadı.
+
 ## Sonraki adım
 
-`ReconnectPolicy` içine **üstel geri çekilme (A1)** ve **rastgele ilk bekleme + üstel (A2)** kurallarını yazmak (kullanıcı yazacak). Sonra aynı deneyi cihaz sayısını artırarak tekrarlamak (Adım 3).
+A2 politikasını yazmak, sonra aynı deneyi cihaz sayısını artırarak tekrarlamak (Adım 3).
 
 ## Dosyalar
 
