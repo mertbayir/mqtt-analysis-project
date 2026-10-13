@@ -4,6 +4,10 @@ using MQTTnet.Formatter;
 // Bir sanal cihaz. Yaşam döngüsü: bağlan -> bağlı kal -> kopunca beklemeden sonra tekrar bağlan.
 public class Device
 {
+    // Sabit ayarlar. Deney kaydına (girdi.json) yazılır, o yüzden tek yerde tutulur.
+    public const int KalpAtisiSn = 10;
+    public const int BaglantiZamanAsimiSn = 5;
+
     private readonly int _id;
     private readonly string _host;
     private readonly int _port;
@@ -40,8 +44,8 @@ public class Device
             .WithTcpServer(_host, _port)
             .WithClientId($"cihaz-{_id:D5}")
             .WithProtocolVersion(MqttProtocolVersion.V500)
-            .WithKeepAlivePeriod(TimeSpan.FromSeconds(10))
-            .WithTimeout(TimeSpan.FromSeconds(5))      // bağlantı zaman aşımı (planda 5 sn)
+            .WithKeepAlivePeriod(TimeSpan.FromSeconds(KalpAtisiSn))
+            .WithTimeout(TimeSpan.FromSeconds(BaglantiZamanAsimiSn))      // bağlantı zaman aşımı (planda 5 sn)
             .WithCleanStart(true)
             .Build();
 

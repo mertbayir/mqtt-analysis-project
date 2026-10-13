@@ -52,3 +52,20 @@ Deneme sayısı zaman serisi (kopmadan sonra, deneme yapılan saniyeler):
 ## Sonraki adım
 
 Adım 3: cihaz sayısını 1.000 → 5.000'e çıkarmak ve sunucunun gerçekten zorlanıp zorlanmadığına (fırtına çıkıyor mu) bakmak. Öncesinde `.wslconfig` ile Docker kaynak sınırı açıkça yazılacak, simülatör Docker ağının içine alınacak.
+
+## Ek (13 Ekim): Kayıt sistemi kuruldu, sabit kuralın 2. tekrarı
+
+Kayıt sistemi (`KAYIT_KURALLARI.md`) kuruldu: simülatör `girdi.json` yazıyor, betik `results/deney_kayitlari.csv`'ye commit numarasıyla birlikte satır ekliyor, `scripts/ozet.ps1` özet tabloyu üretiyor.
+
+`ozet.ps1` yukarıdaki üç koşunun sayılarını **birebir yeniden üretti** (elle hesapla uyumlu). Tablo: `results/ozet_adim2.txt`.
+
+Kayıt sistemini sınamak için `sabit` kuralı **tohum 2** ile tekrarladım (`adim2_sabit_n100_s2`):
+
+| Koşu | Tepe deneme/sn | Toplam deneme | TTR %50 / %95 / %100 | Kapalı kalma |
+|---|---|---|---|---|
+| sabit, tohum 1 | 100 | 599 | 0,5 / 2,5 / 2,5 sn | 21,5 sn |
+| sabit, tohum 2 | 100 | 500 | 2,8 / 2,8 / 2,8 sn | 21,2 sn |
+
+Aynı kural, farklı tohum: toplam deneme ve TTR değişti (tepe aynı). **Tek koşunun sonucu kesin değil**, bu yüzden nihai deneyde her hücre birden çok tekrarla yapılacak ve medyan/güven aralığı verilecek. Sabit kuralda cihazların kopma sonrası denemelerin zamanlaması koşuya göre hafifçe kayıyor (`bağlantı zaman aşımı` ve Docker port yönlendirmesi gibi etkiler).
+
+**Bulunan hata (kayıt betiği):** Türkçe yerel ayarda ondalık sayı virgülle yazıldığı için (`21,2`) CSV satırı bozuldu. Betikte `InvariantCulture` kullanıldı, bozuk satır elle düzeltildi.

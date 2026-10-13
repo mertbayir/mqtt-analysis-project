@@ -3,6 +3,9 @@
 
 public interface IReconnectPolicy
 {
+    // Kuralın adı ve parametreleri, deney kaydına yazılır (örn. "UstelGeriCekilme(ilk=1sn, tavan=30sn)")
+    string Aciklama { get; }
+
     // denemeNo: bu kesintide kaçıncı bekleme (1, 2, 3, ...). Kopma sonrası ilk bekleme = 1.
     // rastgele: bu cihaza özel, tohumlu rastgele sayı üreteci (deney tekrarlanabilsin diye)
     TimeSpan SonrakiBekleme(int denemeNo, Random rastgele);
@@ -14,6 +17,8 @@ public class SabitBekleme : IReconnectPolicy
 {
     private readonly TimeSpan _sure;
     public SabitBekleme(TimeSpan sure) => _sure = sure;
+
+    public string Aciklama => $"SabitBekleme(sure={_sure.TotalSeconds}sn)";
 
     public TimeSpan SonrakiBekleme(int denemeNo, Random rastgele) => _sure;
 }
@@ -31,6 +36,8 @@ public class UstelGeriCekilme : IReconnectPolicy
         _ilkSn = ilkSn;
         _tavanSn = tavanSn;
     }
+
+    public string Aciklama => $"UstelGeriCekilme(ilk={_ilkSn}sn, tavan={_tavanSn}sn)";
 
     public TimeSpan SonrakiBekleme(int denemeNo, Random rastgele)
     {
@@ -58,6 +65,9 @@ public class RastgeleliUstelGeriCekilme : IReconnectPolicy
         _ilkSn = ilkSn;
         _tavanSn = tavanSn;
     }
+
+    public string Aciklama =>
+        $"RastgeleliUstelGeriCekilme(ilkAralik=0-{_ilkAralikSn}sn, ilk={_ilkSn}sn, tavan={_tavanSn}sn, sonraki=U(0.5W,W))";
 
     public TimeSpan SonrakiBekleme(int denemeNo, Random rastgele)
     {

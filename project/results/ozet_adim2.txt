@@ -1,0 +1,5 @@
+﻿kosu                           cihaz  kopma   kapali  tepe_deneme toplam_deneme  TTR50  TTR95 TTR100
+adim2_sabit_n100_s1              100    t15     21.5          100           599    0.5    2.5    2.5
+adim2_ustel_n100_s1              100    t15     20.9           99           300    3.1    4.1    4.1
+adim2_ustel-rastgele_n100_s1     100    t15     23.0           39           369    3.0   13.0   16.0
+adim2_sabit_n100_s2              100    t15     21.2          100           500    2.8    2.8    2.8

@@ -37,9 +37,30 @@ if (args.Contains("--politika-testi"))
     return;
 }
 
-Console.WriteLine($"cihaz={cihazSayisi} sunucu={host}:{port} süre={sureSn}sn tohum={tohum} politika={politika.GetType().Name}");
+Console.WriteLine($"cihaz={cihazSayisi} sunucu={host}:{port} süre={sureSn}sn tohum={tohum} politika={politika.Aciklama}");
 
 Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(csvYolu))!);
+
+// Deney kaydı: bu koşunun TÜM girdileri, sonuç CSV'sinin yanına yazılır.
+var girdiYolu = Path.ChangeExtension(csvYolu, ".girdi.json");
+var girdi = new
+{
+    baslangic_utc = DateTime.UtcNow.ToString("o"),
+    sunucu = $"{host}:{port}",
+    cihaz_sayisi = cihazSayisi,
+    sure_sn = sureSn,
+    tohum,
+    politika = politika.Aciklama,
+    mqtt_surumu = "5.0",
+    kalp_atisi_sn = Device.KalpAtisiSn,
+    baglanti_zaman_asimi_sn = Device.BaglantiZamanAsimiSn,
+    temiz_baslangic = true,
+    kutuphane_otomatik_yeniden_baglanma = false,
+    dotnet = Environment.Version.ToString(),
+    ozet_aralik_sn = 1
+};
+File.WriteAllText(girdiYolu, System.Text.Json.JsonSerializer.Serialize(girdi,
+    new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
 using var csv = new StreamWriter(csvYolu, append: false);
 csv.WriteLine("saniye,bagli,deneme,hata");
 
