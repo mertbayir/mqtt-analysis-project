@@ -1,0 +1,3 @@
+﻿21:19:20.542  simulator basladi
+21:20:00.561  docker stop
+21:21:01.468  docker start

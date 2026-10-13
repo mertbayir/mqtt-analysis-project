@@ -97,3 +97,40 @@ Gözlemler:
 - Her hücre **tek koşu**. Değişkenlik büyük olduğundan N'ye bağlı hiçbir eğilim iddia edilemez.
 - Sunucu/simülatör CPU örnekleme ~0,7 Hz.
 - Dalga sayısı `hata_sonra / N` ile yaklaşık hesaplandı (ilk dalganın bir kısmı sunucu açılışından önce başlamış olabilir).
+
+## Bulgu 5 — Uzun gecikmenin kaynağı: Docker'ın dahili DNS çözücüsü (ön, tek koşu/hücre)
+
+Hipotez zinciri ve sonuçları (hepsi N=5.000 ya da 2.000, sabit kural, tohum 1):
+
+| Sınanan şey | Koşu | TTR %100 (sn) | Sonuç |
+|---|---|---|---|
+| Sunucu MAC adresi değişimi | `v3mac` (sabit MAC) N=2.000 / 5.000 | 11,0 / 31,2 | **Hipotez reddedildi.** Gecikme sabit MAC ile de sürdü (öncesi: 12,5 / 27,1; ilk koşu 69,3) |
+| Sunucu çekirdeğinde kuyruk taşması | `v3mac` N=5.000 sonrası sayaçlar | - | **Reddedildi.** `ListenOverflows=0`, `ListenDrops=0`, `TCPReqQFull*=0`, `TCPSynRetrans=0`. `PassiveOpens=5005`: sunucu her cihazın bağlantısını yalnızca **bir kez** kabul etmiş. Başarısız dalgalardaki denemeler sunucuya hiç ulaşmamış (somaxconn=4096, çekirdek 5.15.167.4-microsoft-standard-WSL2) |
+| Sunucuya **ad** (`broker`) yerine **IP** ile bağlanmak | `v4ip` N=5.000 (`-IpIleBaglan`) | **2,1** | **Gecikme kayboldu** (TTR %50: 1,1 sn; sunucu açılışından sonra 2 saniyede 4.867/5.000 bağlı) |
+
+Karşılaştırma, N=5.000, sunucu açıldıktan sonra tüm cihazların bağlanması:
+
+| Koşu | Sunucuya erişim | TTR %100 (sn) |
+|---|---|---|
+| `v2` | ad (`broker`) | 69,3 |
+| `v2b` | ad | 27,1 |
+| `v3mac` (sabit MAC) | ad | 31,2 |
+| **`v4ip`** | **IP** | **2,1** |
+
+**Yorum (ön):** Cihazlar sunucuyu `broker` adıyla çağırdığında, çözümleme Docker'ın dahili DNS'inden geçiyor. Sunucu kapalıyken ad çözülmüyor (alpine yoklayıcıda `bad address 'broker'` görüldü), 5.000 cihazın eşzamanlı sorgusu açılıştan sonra da çözücüyü uzun süre meşgul/yavaş tutmuş olabilir (gözlenen ~6 sn'lik dalgalar 5 sn'lik DNS/bağlantı zaman aşımıyla uyumlu). Mekanizmayı **doğrudan gözlemedik** (DNS sorgularını kaydetmedik); kanıt, IP ile gecikmenin yok olması ve sunucunun hiç denemeyi görmemesidir.
+
+**Sonuçları etkileyen karar:** Önceki (ad ile) koşuların toparlanma süreleri **ortam artefaktı** içeriyor ve MQTT'nin kendi davranışını yansıtmıyor. Bundan sonraki tüm koşular **IP ile** yapılacak. `v2`, `v2b`, `v3mac` koşuları silinmedi; "ad ile bağlanma, DNS etkisi" etiketiyle saklanıyor.
+
+**İlginç yan bulgu:** Gerçek dağıtımlarda cihazlar sunucuya alan adıyla bağlanır. Kesinti sonrası DNS'in kendisi toplu yeniden bağlanmanın bir parçası olabilir. Bu bizim kapsamımız dışında, ama "gelecek çalışma" olarak not edilebilir. **Kanıt zayıf** (tek ortam, tek koşu, DNS sorguları gözlenmedi).
+
+**Sınırlar:** Tek koşu/hücre. DNS mekanizması gözlenmedi. TTR'ler arası fark çok büyük olduğu için yönü güvenilir, büyüklüğü değil.
+
+## Güncel durum (Adım 3 sonu)
+
+- IP ile 5.000 cihaz, sabit kural, TLS'siz Mosquitto: kesinti sonrası ~2 sn'de toparlanma, sunucu CPU'su %32 (200 sınırı), sunucu açıkken başarısız bağlantı 2.360 (~%47 cihaz bir kez daha denedi).
+- Yani **bu koşullarda gerçek bir fırtına belirtisi yok.** Plan Risk 1'in gerçekleşme ihtimali yüksek (fırtına çıkmaması). Karşılığı: TLS'i açmak, cihaz sayısını artırmak, sunucuyu daha da kısıtlamak.
+
+## Sonraki adım
+
+1. `-IpIleBaglan`'ı varsayılan yap, yeni koşuları bununla tekrarla (2.000 ve 5.000, birkaç tekrar, üç bekleme kuralı).
+2. Fırtına çıkmıyorsa: TLS'li ve TLS'siz karşılaştırma pilotu, N = 15.000.
