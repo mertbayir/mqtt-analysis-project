@@ -12,6 +12,8 @@ var cihazSayisi = int.Parse(Environment.GetEnvironmentVariable("DEVICES") ?? "10
 var sureSn = int.Parse(Environment.GetEnvironmentVariable("DURATION_SEC") ?? "75");
 var tohum = int.Parse(Environment.GetEnvironmentVariable("SEED") ?? "1");
 var csvYolu = Environment.GetEnvironmentVariable("CSV_PATH") ?? "results/adim2.csv";
+var yayilimSn = double.Parse(Environment.GetEnvironmentVariable("START_SPREAD_SEC") ?? "0",
+    System.Globalization.CultureInfo.InvariantCulture);
 
 // Hangi politika? POLICY ortam değişkeniyle seçilir: "sabit" (varsayılan) veya "ustel".
 IReconnectPolicy politika = (Environment.GetEnvironmentVariable("POLICY") ?? "sabit") switch
@@ -55,6 +57,7 @@ var girdi = new
     kalp_atisi_sn = Device.KalpAtisiSn,
     baglanti_zaman_asimi_sn = Device.BaglantiZamanAsimiSn,
     temiz_baslangic = true,
+    ilk_baglanma_yayilimi_sn = yayilimSn,
     kutuphane_otomatik_yeniden_baglanma = false,
     dotnet = Environment.Version.ToString(),
     ozet_aralik_sn = 1
@@ -68,7 +71,7 @@ using var kesme = new CancellationTokenSource(TimeSpan.FromSeconds(sureSn));
 
 // Cihazları başlat. Hepsi aynı anda bağlanmaya başlar.
 var cihazlar = Enumerable.Range(1, cihazSayisi)
-    .Select(id => new Device(id, host, port, politika, tohum).RunAsync(kesme.Token))
+    .Select(id => new Device(id, host, port, politika, tohum, yayilimSn).RunAsync(kesme.Token))
     .ToList();
 
 // Her saniye bir özet satırı.

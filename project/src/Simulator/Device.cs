@@ -16,8 +16,11 @@ public class Device
     private TaskCompletionSource _koptu = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private int _bagli;   // 1 = şu an bağlı, 0 = değil
 
-    public Device(int id, string host, int port, IReconnectPolicy politika, int tohum)
+    private readonly double _ilkYayilimSn;   // ilk bağlanma bu süreye rastgele yayılır (başlangıç fırtınası olmasın)
+
+    public Device(int id, string host, int port, IReconnectPolicy politika, int tohum, double ilkYayilimSn = 0)
     {
+        _ilkYayilimSn = ilkYayilimSn;
         _id = id;
         _host = host;
         _port = port;
@@ -50,6 +53,13 @@ public class Device
             .Build();
 
         int beklemeNo = 0;   // bu kesintide şimdiye kadar kaç kez bekledik (bağlanınca sıfırlanır)
+
+        // Deney başında herkes aynı anda bağlanmasın: ilk bağlanma [0, yayılım] sn'ye dağıtılır.
+        if (_ilkYayilimSn > 0)
+        {
+            try { await Task.Delay(TimeSpan.FromSeconds(_rastgele.NextDouble() * _ilkYayilimSn), dur); }
+            catch (OperationCanceledException) { return; }
+        }
 
         while (!dur.IsCancellationRequested)
         {

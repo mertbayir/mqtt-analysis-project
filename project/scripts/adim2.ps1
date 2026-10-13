@@ -54,7 +54,7 @@ $sim.WaitForExit()
 # Kayıt defterine satır ekle
 $kayit = Join-Path $klasor "deney_kayitlari.csv"
 if (-not (Test-Path $kayit)) {
-    "kosu,tarih,git_commit,kod_degisikligi_var,politika,cihaz,tohum,sure_sn,kesinti_turu,kapali_sn,stop_zamani,start_zamani,sunucu,not" |
+    "kosu,tarih,git_commit,kod_degisikligi_var,politika,cihaz,tohum,sure_sn,kesinti_turu,kapali_sn,stop_zamani,start_zamani,sunucu,sunucu_kaynak,sim_yeri,ilk_yayilim_sn,not" |
         Out-File $kayit -Encoding utf8
 }
 $kapali = [math]::Round(($tStart - $tStop).TotalSeconds, 1)
@@ -62,6 +62,7 @@ $kapali = [math]::Round(($tStart - $tStop).TotalSeconds, 1)
 $kapaliYazi = $kapali.ToString("0.0", [Globalization.CultureInfo]::InvariantCulture)
 $satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, $Politika, $Cihaz, $Tohum, $SureSn,
     "temiz", $kapaliYazi, $tStop.ToString("HH:mm:ss.fff"), $tStart.ToString("HH:mm:ss.fff"),
-    "mosquitto:2.1.2", ('"' + $Not.Replace('"', "'") + '"')) -join ","
+    "mosquitto:2.1.2", '"sinirsiz (Docker: 12 CPU, ~8 GB)"', '"windows-host (localhost:1883)"', "0",
+    ('"' + $Not.Replace('"', "'") + '"')) -join ","
 Add-Content -Path $kayit -Value $satir -Encoding utf8
 Write-Host "Bitti: $ad (kod=$commit, değişiklik var=$kirli, kapalı=$kapali sn)"

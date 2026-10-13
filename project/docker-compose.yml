@@ -2,7 +2,22 @@ services:
   broker:
     image: eclipse-mosquitto:2
     container_name: mqtt-broker
+    # Sunucuya bilerek küçük, SABİT bir pay veriyoruz (tüm çalıştırmalarda aynı).
+    cpus: 2
+    mem_limit: 2g
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
     ports:
-      - "1883:1883"   # Adım 1'de Windows'tan bağlanabilmek için. Deneyde kullanılmayacak.
+      - "1883:1883"   # Yalnızca Windows'tan elle denemek için. Deneyde simülatör bu portu KULLANMAZ.
+
+  sim:
+    build: ./src/Simulator
+    container_name: mqtt-sim
+    profiles: ["sim"]          # "docker compose up" ile kendiliğinden başlamaz, betik çalıştırır
+    cpus: 4
+    mem_limit: 3g
+    environment:
+      BROKER_HOST: broker      # Docker ağı içinde sunucunun adı
+      BROKER_PORT: "1883"
+    volumes:
+      - ./results:/results
