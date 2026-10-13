@@ -1,0 +1,5 @@
+﻿kosu                              cihaz  kopma  kapali tepe_deneme tepe_sonra hata_sonra toplam_den  TTR50  TTR95 TTR100 srv_cpu_tepe
+adim3_sabit_n500_s1                 500    t40    60.7         500          1          2        514    4.3    4.3    5.3            1
+adim3_sabit_n1000_s1               1000    t41    60.8        1000          1          1       1014    3.2    3.2    4.2           17
+adim3_sabit_n2000_s1               2000    t41    60.8        2000          1          1       2014    4.2    4.2    4.2           17
+adim3_sabit_n5000_s1               5000    t41    62.0        4998          1          1       5037    4.0    4.0    5.0           39

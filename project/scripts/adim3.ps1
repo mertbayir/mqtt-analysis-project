@@ -14,7 +14,8 @@ param(
     [int]$OncesiSn = 40,
     [int]$KesintiSn = 60,
     [int]$SonrasiSn = 120,
-    [string]$Not = ""
+    [string]$Not = "",
+    [string]$Surum = "v2"   # kod/yöntem sürümü; yöntem değişince artırılır (v1: zaman aşımı uygulanmıyordu, geçersiz)
 )
 $ErrorActionPreference = "Stop"
 $ci = [Globalization.CultureInfo]::InvariantCulture
@@ -23,7 +24,7 @@ Set-Location $proje
 $klasor = Join-Path $proje "results"
 New-Item -ItemType Directory -Force $klasor | Out-Null
 
-$ad = "adim3_${Politika}_n${Cihaz}_s${Tohum}"
+$ad = "adim3_${Politika}_n${Cihaz}_s${Tohum}_${Surum}"
 $sureSn = $OncesiSn + $KesintiSn + $SonrasiSn + 5
 $commit = (git rev-parse --short HEAD).Trim()
 $kirli = [bool](git status --porcelain -- src scripts docker-compose.yml mosquitto)
@@ -83,4 +84,5 @@ $satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, $Politik
     ('"' + $Not.Replace('"', "'") + '"')) -join ","
 Add-Content -Path $kayit -Value $satir -Encoding utf8
 Write-Host "Bitti: $ad (kod=$commit, deÄŸiÅŸiklik var=$kirli, kapalÄ±=$kapali sn)"
+
 

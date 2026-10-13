@@ -67,7 +67,11 @@ public class Device
             try
             {
                 _koptu = new(TaskCreationOptions.RunContinuationsAsynchronously);
-                await client.ConnectAsync(options, dur);
+                // Zaman aşımını kendimiz zorlarız: MQTTnet'in WithTimeout'u, karşıdan hiç cevap
+                // gelmeyen (SYN'e yanıt yok) bağlantı kurulumunu sınırlamıyor. Bkz. günlük 04.
+                using var zamanAsimi = CancellationTokenSource.CreateLinkedTokenSource(dur);
+                zamanAsimi.CancelAfter(TimeSpan.FromSeconds(BaglantiZamanAsimiSn));
+                await client.ConnectAsync(options, zamanAsimi.Token);
                 Interlocked.Exchange(ref _bagli, 1);
                 Stats.BagliOldu();
                 beklemeNo = 0;
@@ -82,7 +86,8 @@ public class Device
             catch (Exception ex)
             {
                 // Bağlanılamadı (sunucu kapalı, reddedildi, zaman aşımı...)
-                Stats.BaglantiHatasi(ex.GetType().Name);
+                // Süre dolduysa "BaglantiZamanAsimi", diğerleri istisna türüyle sınıflanır
+                Stats.BaglantiHatasi(ex is OperationCanceledException ? "BaglantiZamanAsimi" : ex.GetType().Name);
             }
 
             try
