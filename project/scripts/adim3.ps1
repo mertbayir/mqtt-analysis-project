@@ -1,11 +1,11 @@
-﻿# AdÄ±m 3: bÃ¼yÃ¼k N ile temiz kesinti. SimÃ¼latÃ¶r Docker iÃ§inde, sunucu sabit kaynak sÄ±nÄ±rÄ±yla.
-# Zaman Ã§izelgesi (simÃ¼latÃ¶r baÅŸladÄ±ktan itibaren):
-#   0 .. YayilimSn      cihazlar yayÄ±larak ilk kez baÄŸlanÄ±r
+﻿# Adım 3: büyük N ile temiz kesinti. Simülatör Docker içinde, sunucu sabit kaynak sınırıyla.
+# Zaman çizelgesi (simülatör başladıktan itibaren):
+#   0 .. YayilimSn      cihazlar yayılarak ilk kez bağlanır
 #   OncesiSn            sunucu durdurulur (temiz kesinti)
-#   OncesiSn + KesintiSn sunucu baÅŸlatÄ±lÄ±r
-#   ... + SonrasiSn     koÅŸu biter
-# KullanÄ±m: ./scripts/adim3.ps1 -Politika sabit -Cihaz 1000 [-Tohum 1] [-Not "..."]
-# Ã‡Ä±ktÄ±lar results/ altÄ±nda: <ad>.csv, .girdi.json, .konsol.txt, .olaylar.txt, .broker.csv (+ deney_kayitlari.csv satÄ±rÄ±)
+#   OncesiSn + KesintiSn sunucu başlatılır
+#   ... + SonrasiSn     koşu biter
+# Kullanım: ./scripts/adim3.ps1 -Politika sabit -Cihaz 1000 [-Tohum 1] [-Not "..."]
+# Çıktılar results/ altında: <ad>.csv, .girdi.json, .konsol.txt, .olaylar.txt, .broker.csv (+ deney_kayitlari.csv satırı)
 param(
     [ValidateSet("sabit", "ustel", "ustel-rastgele")] [string]$Politika = "sabit",
     [int]$Cihaz = 1000,
@@ -33,7 +33,7 @@ $csv = "$ad.csv"; $girdi = Join-Path $klasor "$ad.girdi.json"
 $log = Join-Path $klasor "$ad.konsol.txt"; $olay = Join-Path $klasor "$ad.olaylar.txt"; $brokerCsv = Join-Path $klasor "$ad.broker.csv"
 Remove-Item $girdi, $log, $olay, $brokerCsv, (Join-Path $klasor $csv) -ErrorAction SilentlyContinue
 
-# Her koÅŸuda yÄ±ÄŸÄ±nÄ± temiz kur (Ã¶nceki koÅŸudan kalÄ±ntÄ± olmasÄ±n)
+# Her koşuda yığını temiz kur (önceki koşudan kalıntı olmasın)
 docker compose --profile sim down --remove-orphans | Out-Null
 docker compose up -d broker | Out-Null
 Start-Sleep 3
@@ -41,7 +41,7 @@ $sunucuAdr = "broker"
 if ($IpIleBaglan) { $sunucuAdr = (docker inspect mqtt-broker --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}').Trim() }
 docker compose --profile sim build sim | Out-Null
 
-# Sunucu kaynak kullanÄ±mÄ± Ã¶rnekleyicisi (arka planda)
+# Sunucu kaynak kullanımı örnekleyicisi (arka planda)
 $ornekleyici = {
     param($yol, $kap)
     "zaman,cpu_yuzde,bellek" | Out-File $yol -Encoding utf8
@@ -63,9 +63,9 @@ $dockerArgs = @("compose", "run", "--rm", "--name", "mqtt-sim",
     "-e", "START_SPREAD_SEC=$YayilimSn", "-e", "BROKER_HOST=$sunucuAdr", "-e", "CSV_PATH=/results/$csv", "sim")
 $sim = Start-Process docker -ArgumentList $dockerArgs -NoNewWindow -PassThru -RedirectStandardOutput $log
 
-# SimÃ¼latÃ¶r gerÃ§ekten baÅŸlayana kadar bekle (girdi.json baÅŸlangÄ±Ã§ta yazÄ±lÄ±r)
+# Simülatör gerçekten başlayana kadar bekle (girdi.json başlangıçta yazılır)
 $bekle = 0
-while (-not (Test-Path $girdi)) { Start-Sleep -Milliseconds 200; $bekle++; if ($bekle -gt 300) { throw "simÃ¼latÃ¶r baÅŸlamadÄ±" } }
+while (-not (Test-Path $girdi)) { Start-Sleep -Milliseconds 200; $bekle++; if ($bekle -gt 300) { throw "simülatör başlamadı" } }
 $tSim = Get-Date
 "$($tSim.ToString('HH:mm:ss.fff'))  simulator basladi" | Tee-Object -FilePath $olay
 
@@ -81,7 +81,7 @@ docker start mqtt-broker | Out-Null
 $sim.WaitForExit()
 Stop-Job $sampler, $sampler2; Remove-Job $sampler, $sampler2
 
-# KayÄ±t defterine satÄ±r ekle
+# Kayıt defterine satır ekle
 $kayit = Join-Path $klasor "deney_kayitlari.csv"
 $kapali = ($tStart - $tStop).TotalSeconds.ToString("0.0", $ci)
 $satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, $Politika, $Cihaz, $Tohum, $sureSn,
@@ -89,7 +89,7 @@ $satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, $Politik
     '"2 CPU, 2 GB (konteyner sinirli)"', ("`"docker-konteyner (adres=${sunucuAdr}:1883), sim 4 CPU 3 GB`""), $YayilimSn,
     ('"' + $Not.Replace('"', "'") + '"')) -join ","
 Add-Content -Path $kayit -Value $satir -Encoding utf8
-Write-Host "Bitti: $ad (kod=$commit, deÄŸiÅŸiklik var=$kirli, kapalÄ±=$kapali sn)"
+Write-Host "Bitti: $ad (kod=$commit, değişiklik var=$kirli, kapalı=$kapali sn)"
 
 
 

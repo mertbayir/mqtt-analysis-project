@@ -62,3 +62,11 @@ Rapor bölümü: <Yöntem / Bulgular / Tartışma>
 - Adım 2'nin ilk üç koşusu (`s1`) geriye dönük kaydedildi, `girdi.json` dosyaları yok. Girdileri kayıt defterinde ve `03_adim2b` günlüğünde.
 - Adım 2'nin en ilk koşuları (tek cihaz ve sayacı hatalı 100 cihaz koşusu) git geçmişinde (`412f4d2`), `results/` altında değil. Sayaç hatalı olduğu için analizde **kullanılmaz.**
 - Docker/WSL kaynak sınırı (`.wslconfig`) henüz açık yazılmadı. Büyük cihaz sayısından önce yazılacak ve `00_ortam.md`'ye eklenecek.
+
+## 6. Bilinen tuzaklar (yaşandı)
+
+- **Türkçe karakterli dosyayı PowerShell 5.1 ile düzenlerken** `Get-Content` kodlamayı ANSI sanır; `-Raw | Set-Content` ile geri yazınca karakterler bozulur (`Tasarım` → `TasarÄ±m`). Okurken `[IO.File]::ReadAllText(yol, UTF8)`, yazarken UTF-8 kullan; ya da dosyayı Edit/Write araçlarıyla düzenle. 13 Ekim'de `karar_defteri.md` ve `adim3.ps1` bu yüzden bozuldu, düzeltildi (commit `077c9a3` bozuk sürümü içerir, sonraki commit onarılmış hâli).
+- **Ondalık ayraç:** Türkçe yerel ayarda `21,2` yazılır, CSV bozulur. Sayıları `InvariantCulture` ile yaz.
+- **Konsol çıktısı:** Dosyaya yönlendirilen çıktı UTF-8'dir; ekranda bozuk görünüyorsa `Get-Content -Encoding UTF8` ile oku.
+- **Sunucuya ad ile bağlanmak** Docker'da ölçümü bozar (DNS artefaktı). Koşular IP ile yapılır (günlük 04, Bulgu 5).
+- **Toplam "bağlandı" sayısına güvenme:** kesinti sırasındaki deneme sayısını da doğrula (günlük 04, Bulgu 1).
