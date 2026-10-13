@@ -1,0 +1,16 @@
+{
+  "baslangic_utc": "2026-10-13T17:42:03.8039212Z",
+  "sunucu": "broker:1883",
+  "cihaz_sayisi": 50,
+  "sure_sn": 155,
+  "tohum": 1,
+  "politika": "SabitBekleme(sure=1sn)",
+  "mqtt_surumu": "5.0",
+  "kalp_atisi_sn": 10,
+  "baglanti_zaman_asimi_sn": 5,
+  "temiz_baslangic": true,
+  "ilk_baglanma_yayilimi_sn": 5,
+  "kutuphane_otomatik_yeniden_baglanma": false,
+  "dotnet": "8.0.31",
+  "ozet_aralik_sn": 1
+}

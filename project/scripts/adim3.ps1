@@ -39,11 +39,11 @@ Start-Sleep 3
 docker compose --profile sim build sim | Out-Null
 
 # Sunucu kaynak kullanÄ±mÄ± Ã¶rnekleyicisi (arka planda)
-$sampler = Start-Job -ArgumentList $brokerCsv -ScriptBlock {
-    param($yol)
+$ornekleyici = {
+    param($yol, $kap)
     "zaman,cpu_yuzde,bellek" | Out-File $yol -Encoding utf8
     while ($true) {
-        $s = docker stats --no-stream --format "{{.CPUPerc}};{{.MemUsage}}" mqtt-broker 2>$null
+        $s = docker stats --no-stream --format "{{.CPUPerc}};{{.MemUsage}}" $kap 2>$null
         if ($s) {
             $p = $s -split ";"
             "$((Get-Date).ToString('HH:mm:ss.fff')),$($p[0].Trim().TrimEnd('%')),$($p[1].Split('/')[0].Trim())" | Add-Content $yol -Encoding utf8
@@ -51,6 +51,9 @@ $sampler = Start-Job -ArgumentList $brokerCsv -ScriptBlock {
         Start-Sleep -Milliseconds 200
     }
 }
+$sampler = Start-Job -ArgumentList $brokerCsv, "mqtt-broker" -ScriptBlock $ornekleyici
+$simCsv = Join-Path $klasor "$ad.sim.csv"
+$sampler2 = Start-Job -ArgumentList $simCsv, "mqtt-sim" -ScriptBlock $ornekleyici
 
 $dockerArgs = @("compose", "run", "--rm", "--name", "mqtt-sim",
     "-e", "POLICY=$Politika", "-e", "DEVICES=$Cihaz", "-e", "DURATION_SEC=$sureSn", "-e", "SEED=$Tohum",
@@ -73,7 +76,7 @@ $tStart = Get-Date
 docker start mqtt-broker | Out-Null
 
 $sim.WaitForExit()
-Stop-Job $sampler; Remove-Job $sampler
+Stop-Job $sampler, $sampler2; Remove-Job $sampler, $sampler2
 
 # KayÄ±t defterine satÄ±r ekle
 $kayit = Join-Path $klasor "deney_kayitlari.csv"
@@ -84,5 +87,6 @@ $satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, $Politik
     ('"' + $Not.Replace('"', "'") + '"')) -join ","
 Add-Content -Path $kayit -Value $satir -Encoding utf8
 Write-Host "Bitti: $ad (kod=$commit, deÄŸiÅŸiklik var=$kirli, kapalÄ±=$kapali sn)"
+
 
 
