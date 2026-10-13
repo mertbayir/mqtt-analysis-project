@@ -5,6 +5,9 @@ services:
     # Sunucuya bilerek küçük, SABİT bir pay veriyoruz (tüm çalıştırmalarda aynı).
     cpus: 2
     mem_limit: 2g
+    # Sabit MAC: konteyner yeniden başlayınca MAC değişmesin (gerçek bir sunucunun ağ kartı da
+    # yeniden başlatmada MAC değiştirmez). Günlük 04, Bulgu 3-4 hipotezini sınamak için.
+    mac_address: "02:42:ac:15:00:02"
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
     ports:
