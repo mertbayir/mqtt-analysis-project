@@ -16,6 +16,7 @@ param(
     [int]$SonrasiSn = 120,
     [string]$Not = "",
     [string]$Surum = "v2"   # kod/yöntem sürümü; yöntem değişince artırılır (v1: zaman aşımı uygulanmıyordu, geçersiz)
+,    [switch]$IpIleBaglan   # cihazlar sunucuya adıyla (broker) değil IP adresiyle bağlanır (DNS etkisini ayırmak için)
 )
 $ErrorActionPreference = "Stop"
 $ci = [Globalization.CultureInfo]::InvariantCulture
@@ -36,6 +37,8 @@ Remove-Item $girdi, $log, $olay, $brokerCsv, (Join-Path $klasor $csv) -ErrorActi
 docker compose --profile sim down --remove-orphans | Out-Null
 docker compose up -d broker | Out-Null
 Start-Sleep 3
+$sunucuAdr = "broker"
+if ($IpIleBaglan) { $sunucuAdr = (docker inspect mqtt-broker --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}').Trim() }
 docker compose --profile sim build sim | Out-Null
 
 # Sunucu kaynak kullanÄ±mÄ± Ã¶rnekleyicisi (arka planda)
@@ -57,7 +60,7 @@ $sampler2 = Start-Job -ArgumentList $simCsv, "mqtt-sim" -ScriptBlock $ornekleyic
 
 $dockerArgs = @("compose", "run", "--rm", "--name", "mqtt-sim",
     "-e", "POLICY=$Politika", "-e", "DEVICES=$Cihaz", "-e", "DURATION_SEC=$sureSn", "-e", "SEED=$Tohum",
-    "-e", "START_SPREAD_SEC=$YayilimSn", "-e", "CSV_PATH=/results/$csv", "sim")
+    "-e", "START_SPREAD_SEC=$YayilimSn", "-e", "BROKER_HOST=$sunucuAdr", "-e", "CSV_PATH=/results/$csv", "sim")
 $sim = Start-Process docker -ArgumentList $dockerArgs -NoNewWindow -PassThru -RedirectStandardOutput $log
 
 # SimÃ¼latÃ¶r gerÃ§ekten baÅŸlayana kadar bekle (girdi.json baÅŸlangÄ±Ã§ta yazÄ±lÄ±r)
@@ -83,10 +86,12 @@ $kayit = Join-Path $klasor "deney_kayitlari.csv"
 $kapali = ($tStart - $tStop).TotalSeconds.ToString("0.0", $ci)
 $satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, $Politika, $Cihaz, $Tohum, $sureSn,
     "temiz", $kapali, $tStop.ToString("HH:mm:ss.fff"), $tStart.ToString("HH:mm:ss.fff"), "mosquitto:2.1.2",
-    '"2 CPU, 2 GB (konteyner sinirli)"', '"docker-konteyner (broker:1883), sim 4 CPU 3 GB"', $YayilimSn,
+    '"2 CPU, 2 GB (konteyner sinirli)"', ("`"docker-konteyner (adres=${sunucuAdr}:1883), sim 4 CPU 3 GB`""), $YayilimSn,
     ('"' + $Not.Replace('"', "'") + '"')) -join ","
 Add-Content -Path $kayit -Value $satir -Encoding utf8
 Write-Host "Bitti: $ad (kod=$commit, deÄŸiÅŸiklik var=$kirli, kapalÄ±=$kapali sn)"
+
+
 
 
 
