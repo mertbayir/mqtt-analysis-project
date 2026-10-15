@@ -16,7 +16,7 @@ param(
     [int]$SonrasiSn = 120,
     [string]$Not = "",
     [string]$Surum = "v2"   # kod/yöntem sürümü; yöntem değişince artırılır (v1: zaman aşımı uygulanmıyordu, geçersiz)
-,    [switch]$IpIleBaglan   # cihazlar sunucuya adıyla (broker) değil IP adresiyle bağlanır (DNS etkisini ayırmak için)
+,    [switch]$AdlaBaglan   # VARSAYILAN: cihazlar sunucuya IP ile bağlanır. Bu anahtar adla (broker) bağlanmayı seçer (Docker DNS artefaktı, günlük 04 Bulgu 5)
 )
 $ErrorActionPreference = "Stop"
 $ci = [Globalization.CultureInfo]::InvariantCulture
@@ -37,8 +37,8 @@ Remove-Item $girdi, $log, $olay, $brokerCsv, (Join-Path $klasor $csv) -ErrorActi
 docker compose --profile sim down --remove-orphans | Out-Null
 docker compose up -d broker | Out-Null
 Start-Sleep 3
-$sunucuAdr = "broker"
-if ($IpIleBaglan) { $sunucuAdr = (docker inspect mqtt-broker --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}').Trim() }
+$sunucuAdr = (docker inspect mqtt-broker --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}').Trim()
+if ($AdlaBaglan) { $sunucuAdr = "broker" }
 docker compose --profile sim build sim | Out-Null
 
 # Sunucu kaynak kullanımı örnekleyicisi (arka planda)
