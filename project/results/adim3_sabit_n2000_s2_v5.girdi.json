@@ -1,0 +1,16 @@
+{
+  "baslangic_utc": "2026-10-15T19:10:54.9808575Z",
+  "sunucu": "172.21.0.2:1883",
+  "cihaz_sayisi": 2000,
+  "sure_sn": 195,
+  "tohum": 2,
+  "politika": "SabitBekleme(sure=1sn)",
+  "mqtt_surumu": "5.0",
+  "kalp_atisi_sn": 10,
+  "baglanti_zaman_asimi_sn": 5,
+  "temiz_baslangic": true,
+  "ilk_baglanma_yayilimi_sn": 20,
+  "kutuphane_otomatik_yeniden_baglanma": false,
+  "dotnet": "8.0.32",
+  "ozet_aralik_sn": 1
+}

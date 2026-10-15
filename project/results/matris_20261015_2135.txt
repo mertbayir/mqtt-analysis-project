@@ -1,0 +1,4 @@
+﻿Matris baÅŸladÄ±: 2026-10-15 21:35:50  tekrar=3 cihazlar=2000,5000 kurallar=sabit,ustel,ustel-rastgele sÃ¼rÃ¼m=v5 sonrasiSn=90
+--- Blok 1 (tohum 1), sÄ±ra: ustel-rastgele/5000  sabit/5000  sabit/2000  ustel-rastgele/2000  ustel/5000  ustel/2000
+21:35:50  BAÅLA adim3_ustel-rastgele_n5000_s1_v5
+21:3x  İPTAL: Docker Desktop kapalıydı (engine yok), ilk başlatma denemesi koşu sayılmaz. Görev elle durduruldu. Bu denemenin kısmi dosyaları (adim3_ustel-rastgele_n5000_s1_v5.*) geçersizdir, kayıt defterinde satırı yoktur. Matris yeniden başlatıldı.

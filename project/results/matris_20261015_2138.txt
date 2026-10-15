@@ -1,0 +1,41 @@
+﻿Matris baÅŸladÄ±: 2026-10-15 21:38:16  tekrar=3 cihazlar=2000,5000 kurallar=sabit,ustel,ustel-rastgele sÃ¼rÃ¼m=v5 sonrasiSn=90
+--- Blok 1 (tohum 1), sÄ±ra: sabit/5000  ustel/2000  ustel/5000  ustel-rastgele/5000  ustel-rastgele/2000  sabit/2000
+21:38:16  BAÅLA adim3_sabit_n5000_s1_v5
+21:41:48  BÄ°TTÄ° adim3_sabit_n5000_s1_v5
+21:41:48  BAÅLA adim3_ustel_n2000_s1_v5
+21:45:00  BÄ°TTÄ° adim3_ustel_n2000_s1_v5
+21:45:00  BAÅLA adim3_ustel_n5000_s1_v5
+21:48:21  BÄ°TTÄ° adim3_ustel_n5000_s1_v5
+21:48:21  BAÅLA adim3_ustel-rastgele_n5000_s1_v5
+21:51:32  BÄ°TTÄ° adim3_ustel-rastgele_n5000_s1_v5
+21:51:32  BAÅLA adim3_ustel-rastgele_n2000_s1_v5
+21:54:43  BÄ°TTÄ° adim3_ustel-rastgele_n2000_s1_v5
+21:54:43  BAÅLA adim3_sabit_n2000_s1_v5
+21:57:59  BÄ°TTÄ° adim3_sabit_n2000_s1_v5
+--- Blok 2 (tohum 2), sÄ±ra: ustel/2000  sabit/5000  ustel/5000  ustel-rastgele/5000  sabit/2000  ustel-rastgele/2000
+21:57:59  BAÅLA adim3_ustel_n2000_s2_v5
+22:01:09  BÄ°TTÄ° adim3_ustel_n2000_s2_v5
+22:01:09  BAÅLA adim3_sabit_n5000_s2_v5
+22:04:21  BÄ°TTÄ° adim3_sabit_n5000_s2_v5
+22:04:21  BAÅLA adim3_ustel_n5000_s2_v5
+22:07:32  BÄ°TTÄ° adim3_ustel_n5000_s2_v5
+22:07:32  BAÅLA adim3_ustel-rastgele_n5000_s2_v5
+22:10:48  BÄ°TTÄ° adim3_ustel-rastgele_n5000_s2_v5
+22:10:48  BAÅLA adim3_sabit_n2000_s2_v5
+22:13:58  BÄ°TTÄ° adim3_sabit_n2000_s2_v5
+22:13:58  BAÅLA adim3_ustel-rastgele_n2000_s2_v5
+22:17:08  BÄ°TTÄ° adim3_ustel-rastgele_n2000_s2_v5
+--- Blok 3 (tohum 3), sÄ±ra: ustel/2000  ustel-rastgele/2000  ustel/5000  sabit/5000  sabit/2000  ustel-rastgele/5000
+22:17:08  BAÅLA adim3_ustel_n2000_s3_v5
+22:20:17  BÄ°TTÄ° adim3_ustel_n2000_s3_v5
+22:20:17  BAÅLA adim3_ustel-rastgele_n2000_s3_v5
+22:23:28  BÄ°TTÄ° adim3_ustel-rastgele_n2000_s3_v5
+22:23:28  BAÅLA adim3_ustel_n5000_s3_v5
+22:26:38  BÄ°TTÄ° adim3_ustel_n5000_s3_v5
+22:26:38  BAÅLA adim3_sabit_n5000_s3_v5
+22:29:48  BÄ°TTÄ° adim3_sabit_n5000_s3_v5
+22:29:48  BAÅLA adim3_sabit_n2000_s3_v5
+22:32:59  BÄ°TTÄ° adim3_sabit_n2000_s3_v5
+22:32:59  BAÅLA adim3_ustel-rastgele_n5000_s3_v5
+22:36:11  BÄ°TTÄ° adim3_ustel-rastgele_n5000_s3_v5
+Matris bitti: 2026-10-15 22:36:11
