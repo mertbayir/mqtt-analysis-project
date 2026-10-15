@@ -24,3 +24,15 @@ services:
       BROKER_PORT: "1883"
     volumes:
       - ./results:/results
+
+  collector:
+    build: ./src/Collector
+    container_name: mqtt-collector
+    profiles: ["sim"]
+    cpus: 2
+    mem_limit: 1g
+    environment:
+      BROKER_HOST: broker
+      BROKER_PORT: "1883"
+    volumes:
+      - ./results:/results

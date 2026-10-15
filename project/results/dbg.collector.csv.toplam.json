@@ -1,0 +1,14 @@
+{
+  "benzersiz_alinan": {
+    "canli_vital": 1170,
+    "canli_alarm": 390
+  },
+  "tekrar_alinan": 0,
+  "sync_yanit_verilen": 0,
+  "bozuk_mesaj": 0,
+  "negatif_gecikmeli_mesaj_20ms_alti": 0,
+  "en_negatif_gecikme_ms": 0,
+  "baglanti_olaylari": [
+    "2026-10-15T19:58:35.0288804Z baglandi"
+  ]
+}

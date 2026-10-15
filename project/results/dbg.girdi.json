@@ -1,0 +1,23 @@
+{
+  "baslangic_utc": "2026-10-15T19:58:35.7468393Z",
+  "baslangic_mono_ms": 5228885,
+  "sunucu": "172.21.0.2:1883",
+  "cihaz_sayisi": 20,
+  "sure_sn": 60,
+  "tohum": 1,
+  "politika": "SabitBekleme(sure=1sn)",
+  "mqtt_surumu": "5.0",
+  "kalp_atisi_sn": 10,
+  "baglanti_zaman_asimi_sn": 5,
+  "temiz_baslangic": true,
+  "ilk_baglanma_yayilimi_sn": 3,
+  "is_yuku_acik": true,
+  "vital_aralik_sn": 1,
+  "alarm_aralik_sn": 3,
+  "mesaj_bayt": 128,
+  "sync_zaman_asimi_sn": 10,
+  "baglanti_sonrasi_politika": "B0Referans(sync=yok, biriken=atilir)",
+  "kutuphane_otomatik_yeniden_baglanma": false,
+  "dotnet": "8.0.32",
+  "ozet_aralik_sn": 1
+}

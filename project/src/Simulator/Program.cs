@@ -24,6 +24,20 @@ IReconnectPolicy politika = (Environment.GetEnvironmentVariable("POLICY") ?? "sa
     var bilinmeyen => throw new ArgumentException($"Bilinmeyen politika: {bilinmeyen}")
 };
 
+// İş yükü (Adım 5): VITAL_SEC = 0 ise cihazlar yalnızca bağlanır. Açıksa vital + alarm üretilir,
+// kesintide biriktirilir ve bağlantı sonrası politikaya (B) göre eşitlenir/boşaltılır.
+int Ortam(string ad, int varsayilan) => int.Parse(Environment.GetEnvironmentVariable(ad) ?? varsayilan.ToString());
+IPostConnectPolicy bPolitika = (Environment.GetEnvironmentVariable("POLICY_B") ?? "b0") switch
+{
+    "b0" => new B0Referans(),
+    "b1" => new B1Hemen(),
+    "b2" => new B2Ayrik(pencereSn: Ortam("B2_WINDOW_SEC", 30), aralikMs: Ortam("B2_INTERVAL_MS", 200)),
+    var bilinmeyen => throw new ArgumentException($"Bilinmeyen B politikası: {bilinmeyen}")
+};
+var isYuku = new IsYuku(VitalSn: Ortam("VITAL_SEC", 0), AlarmSn: Ortam("ALARM_SEC", 10),
+    MesajBayt: Ortam("MSG_BYTES", 128), SyncZamanAsimiSn: Ortam("SYNC_TIMEOUT_SEC", 10), B: bPolitika,
+    UretimBitisSn: sureSn - Ortam("PRODUCE_STOP_BEFORE_END_SEC", 5));
+
 // Politika testi: cihaz yok, sunucu yok. "Şu bekleme sırasında ne kadar beklerim?" tablosu.
 // 3 farklı cihaz yan yana gösterilir: rastgeleli kuralda her cihazın farklı çıkması gerekir.
 if (args.Contains("--politika-testi"))
@@ -48,6 +62,7 @@ var girdiYolu = Path.ChangeExtension(csvYolu, ".girdi.json");
 var girdi = new
 {
     baslangic_utc = DateTime.UtcNow.ToString("o"),
+    baslangic_mono_ms = Zaman.MonoMs,   // gecikme ve zaman ekseni hizalaması bu saatle (duvar saati sıçrayabilir)
     sunucu = $"{host}:{port}",
     cihaz_sayisi = cihazSayisi,
     sure_sn = sureSn,
@@ -58,6 +73,13 @@ var girdi = new
     baglanti_zaman_asimi_sn = Device.BaglantiZamanAsimiSn,
     temiz_baslangic = true,
     ilk_baglanma_yayilimi_sn = yayilimSn,
+    is_yuku_acik = isYuku.Acik,
+    vital_aralik_sn = isYuku.VitalSn,
+    alarm_aralik_sn = isYuku.AlarmSn,
+    mesaj_bayt = isYuku.MesajBayt,
+    sync_zaman_asimi_sn = isYuku.SyncZamanAsimiSn,
+    baglanti_sonrasi_politika = isYuku.B.Aciklama,
+    uretim_bitis_sn = isYuku.UretimBitisSn,
     kutuphane_otomatik_yeniden_baglanma = false,
     dotnet = Environment.Version.ToString(),
     ozet_aralik_sn = 1
@@ -69,10 +91,33 @@ csv.WriteLine("saniye,bagli,deneme,hata");
 
 using var kesme = new CancellationTokenSource(TimeSpan.FromSeconds(sureSn));
 
+Stats.Saat.Restart();   // olay zamanları ve üretim bitişi "cihazlar başladığı andan" ölçülür
+
 // Cihazları başlat. Hepsi aynı anda bağlanmaya başlar.
 var cihazlar = Enumerable.Range(1, cihazSayisi)
-    .Select(id => new Device(id, host, port, politika, tohum, yayilimSn).RunAsync(kesme.Token))
+    .Select(id => new Device(id, host, port, politika, tohum, isYuku, yayilimSn).RunAsync(kesme.Token))
     .ToList();
+
+// Saat bekçisi: duvar saati (UtcNow) ile tek yönlü sayaç (Stopwatch) arasındaki fark ani değişirse,
+// makinenin (WSL2 sanal makinesi) saati sıçramıştır. Gecikme ölçümünü bozabileceği için olay olarak kaydedilir.
+if (isYuku.Acik)
+{
+    _ = Task.Run(async () =>
+    {
+        var sw = Stopwatch.StartNew();
+        double taban = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - sw.Elapsed.TotalMilliseconds;
+        while (!kesme.IsCancellationRequested)
+        {
+            try { await Task.Delay(100, kesme.Token); } catch (OperationCanceledException) { break; }
+            double ofset = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - sw.Elapsed.TotalMilliseconds;
+            if (Math.Abs(ofset - taban) > 30)
+            {
+                Stats.Olay(0, "saat_sicramasi", ofset - taban, 0);   // sure_ms sütunu: sıçrama miktarı (ms), + ileri / - geri
+                taban = ofset;
+            }
+        }
+    });
+}
 
 // Her saniye bir özet satırı.
 var saat = Stopwatch.StartNew();
@@ -89,6 +134,17 @@ while (!kesme.IsCancellationRequested)
 }
 
 await Task.WhenAll(cihazlar);
+
+// Olay günlüğü (eşitleme/boşaltma bitişleri) ve toplamlar
+if (isYuku.Acik)
+{
+    File.WriteAllLines(Path.ChangeExtension(csvYolu, ".olay.csv"),
+        new[] { "t_sn,cihaz,tur,sure_ms,adet" }.Concat(Stats.Olaylar));
+    File.WriteAllText(Path.ChangeExtension(csvYolu, ".toplam.json"),
+        System.Text.Json.JsonSerializer.Serialize(Stats.Toplamlar(), new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine("Toplamlar: " + System.Text.Json.JsonSerializer.Serialize(Stats.Toplamlar()));
+}
+
 Console.WriteLine("Hata türleri:");
 foreach (var (tur, sayi) in Stats.HataTurleri.OrderByDescending(x => x.Value))
     Console.WriteLine($"  {tur}: {sayi}");
