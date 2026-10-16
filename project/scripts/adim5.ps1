@@ -23,9 +23,11 @@ param(
     [int]$B2AralikMs = 200,
     [string]$Surum = "p1",
     [switch]$AdlaBaglan,
+    [switch]$Tls,         # Adım 6: cihazlar sunucuya TLS ile (8883) bağlanır; toplayıcı TLS'siz kalır
     [switch]$HamKayit,   # toplayıcı her mesajı ham dosyaya yazar (kayıp analizi için; büyük dosya, git dışı)
     [string]$Not = ""
 )
+if ($Tls) { $Not = "TLS (RSA-2048, port 8883, sertifika dogrulanmaz). " + $Not }
 $ErrorActionPreference = "Stop"
 $ci = [Globalization.CultureInfo]::InvariantCulture
 $proje = Split-Path $PSScriptRoot -Parent
@@ -87,6 +89,7 @@ $simArgs = @("compose", "run", "--rm", "--name", "mqtt-sim",
     "-e", "START_SPREAD_SEC=$YayilimSn", "-e", "BROKER_HOST=$sunucuAdr", "-e", "CSV_PATH=/results/$csv",
     "-e", "VITAL_SEC=$VitalSn", "-e", "ALARM_SEC=$AlarmSn", "-e", "MSG_BYTES=$MesajBayt",
     "-e", "B2_WINDOW_SEC=$B2PencereSn", "-e", "B2_INTERVAL_MS=$B2AralikMs", "sim")
+if ($Tls) { $simArgs = @($simArgs[0..($simArgs.Count - 2)]) + @("-e", "TLS=1", "-e", "BROKER_PORT=8883", "sim") }
 $sim = Start-Process docker -ArgumentList $simArgs -NoNewWindow -PassThru -RedirectStandardOutput $log
 
 $bekle = 0

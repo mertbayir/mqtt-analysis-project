@@ -22,6 +22,7 @@ public class Device
     // Sabit ayarlar. Deney kaydına (girdi.json) yazılır, o yüzden tek yerde tutulur.
     public const int KalpAtisiSn = 10;
     public const int BaglantiZamanAsimiSn = 5;
+    public static bool TlsAcik;   // Adım 6: TLS ile bağlan (Program.cs TLS=1 ortam değişkeninden ayarlar)
 
     private readonly int _id;
     private readonly string _host;
@@ -79,6 +80,13 @@ public class Device
 
         var options = new MqttClientOptionsBuilder()
             .WithTcpServer(_host, _port)
+            .WithTlsOptions(o =>
+            {
+                if (!TlsAcik) return;
+                // Yük testi: test sertifikası (kendi imzalı CA) doğrulanmaz; el sıkışma maliyeti (asimetrik işlem) aynıdır.
+                o.UseTls();
+                o.WithCertificateValidationHandler(_ => true);
+            })
             .WithClientId($"cihaz-{_id:D5}")
             .WithProtocolVersion(MqttProtocolVersion.V500)
             .WithKeepAlivePeriod(TimeSpan.FromSeconds(KalpAtisiSn))

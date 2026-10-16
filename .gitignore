@@ -3,3 +3,6 @@ obj/
 *.user
 .vs/
 project/results/*.ham.csv
+
+# Test sertifikalari (yerel, atilabilir). Anahtarlar depoya girmez; scripts/tls_sertifika.sh ile uretilir.
+project/mosquitto/certs/

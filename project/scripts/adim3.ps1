@@ -17,7 +17,9 @@ param(
     [string]$Not = "",
     [string]$Surum = "v2"   # kod/yöntem sürümü; yöntem değişince artırılır (v1: zaman aşımı uygulanmıyordu, geçersiz)
 ,    [switch]$AdlaBaglan   # VARSAYILAN: cihazlar sunucuya IP ile bağlanır. Bu anahtar adla (broker) bağlanmayı seçer (Docker DNS artefaktı, günlük 04 Bulgu 5)
+,    [switch]$Tls          # Adım 6: cihazlar sunucuya TLS ile (8883) bağlanır
 )
+if ($Tls) { $Not = "TLS (RSA-2048, port 8883, sertifika dogrulanmaz). " + $Not }
 $ErrorActionPreference = "Stop"
 $ci = [Globalization.CultureInfo]::InvariantCulture
 $proje = Split-Path $PSScriptRoot -Parent
@@ -61,6 +63,7 @@ $sampler2 = Start-Job -ArgumentList $simCsv, "mqtt-sim" -ScriptBlock $ornekleyic
 $dockerArgs = @("compose", "run", "--rm", "--name", "mqtt-sim",
     "-e", "POLICY=$Politika", "-e", "DEVICES=$Cihaz", "-e", "DURATION_SEC=$sureSn", "-e", "SEED=$Tohum",
     "-e", "START_SPREAD_SEC=$YayilimSn", "-e", "BROKER_HOST=$sunucuAdr", "-e", "CSV_PATH=/results/$csv", "sim")
+if ($Tls) { $dockerArgs = @($dockerArgs[0..($dockerArgs.Count - 2)]) + @("-e", "TLS=1", "-e", "BROKER_PORT=8883", "sim") }
 $sim = Start-Process docker -ArgumentList $dockerArgs -NoNewWindow -PassThru -RedirectStandardOutput $log
 
 # Simülatör gerçekten başlayana kadar bekle (girdi.json başlangıçta yazılır)
