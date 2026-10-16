@@ -26,6 +26,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 20 | 16 Ekim | Kayıp araştırması için toplayıcı ham kaydı (`-HamKayit`, git dışı) ve bağlantı olaylarına mono zaman damgası eklendi; hücre: rastgeleli/B1/N = 5.000, 6 tekrar | 6/39 koşuda küçük kayıp var, nedeni bilinmiyor; ham kayıt olmadan açıklanamaz (günlük 09) |
 | 21 | 16 Ekim | Adım 6: TLS (RSA-2048, test CA, **sertifika doğrulanmaz**), 18 koşu, izleme 150 sn | Sunucuyu bağlanma aşamasında gerçekten zorlamak (Adım 4'te zorlanmadı); doğrulama maliyeti ve TLS sürümü ölçüm dışı (günlük 10) |
 | 22 | 16 Ekim | TLS matrisi tamamlandı (t1); sonuç: TLS ile sunucu zorlanıyor, rastgeleli kuralın yönü tersine döndü. Sonraki: bağlantı sonrası iş TLS'te (F1b) ve EMQX (F5) | Günlük 10 |
+| 23 | 17 Ekim | Adım 6b: TLS + bağlantı sonrası iş; toplayıcı TLS'siz kalır; N = 5.000, 6 hücre, 18 koşu, izleme 180 sn | İki yükü birlikte ölçmek (günlük 11) |
 
 ## Açık kararlar
 
