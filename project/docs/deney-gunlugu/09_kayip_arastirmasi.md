@@ -1,7 +1,7 @@
 # 09 — Kayıp araştırması: toplayıcıya ulaşmayan mesajlar
 
 Tarih: 16 Ekim 2026
-Durum: **1. tur (k1) bitti, kayıp yeniden üretilemedi; 2. tur (k2, N = 10.000) başlıyor**. Hipotezler sonuçlar görülmeden önce yazıldı
+Durum: **2 tur bitti (k1, k2): 12 ham kayıtlı koşuda kayıp 0; neden açıklanamadı**. Hipotezler sonuçlar görülmeden önce yazıldı
 Rapor bölümü: Bulgular (5.5-5.7 kayıp notları), Tartışma ve Sınırlar
 
 ## Sorun
@@ -74,7 +74,29 @@ Matris günlüğü: `results/matris5_20261016_*.txt` (en yeni), 6/6 koşu, 0 bet
 
 Büyük kayıplar (91 ve 132 mesaj) N = 10.000 + B2'de görülmüştü. 2. turda bu hücre ham kayıtla 6 kez koşulur: **rastgeleli A + B2 (30 sn / 200 ms), N = 10.000, tohum 1-6, sürüm `k2`**. Hipotezler aynı (HK1, HK2); HK3 k1'de çürüdüğü için çıkarıldı. Komut: `./scripts/matris5.ps1 -Tekrar 6 -Cihazlar 10000 -Politikalar ustel-rastgele -BPolitikalari b2 -HamKayit -Surum k2`; süre ≈ 40 dk.
 
-`[ ]` k2 sonuçları bitince doldurulacak.
+### 2. tur (k2): rastgeleli A + B2 (30 sn / 200 ms), N = 10.000, 6 tekrar, ham kayıt açık
+
+6/6 koşu, 0 betik hatası. Analiz: `results/kayip_k2_ozet.csv`.
+
+| Tohum | Üretilen | Alınan | Kayıp | Toplayıcı yeniden abone gecikmesi (sn) |
+|---|---|---|---|---|
+| 1 | 1.079.149 | 1.079.149 | 0 | 0,61 |
+| 2 | 1.079.098 | 1.079.098 | 0 | 0,61 |
+| 3 | 1.079.019 | 1.079.019 | 0 | 0,57 |
+| 4 | 1.079.329 | 1.079.329 | 0 | 0,61 |
+| 5 | 1.079.283 | 1.079.283 | 0 | 0,62 |
+| 6 | 1.079.003 | 1.079.003 | 0 | 0,57 |
+
+### Sonuç
+
+- **12 ham kayıtlı koşuda (k1 + k2) kayıp 0.** Önceki 39 koşuda 6 kayıp vardı (ham kayıt yoktu). HK1 ve HK2 sınanamadı, çünkü kayıp mesaj yok; HK3 k1'de çürüdü.
+- **Neden bilinmiyor.** Üç açıklama ayırt edilemiyor: (i) olay gerçekten nadir (aynı hücrede önceki oran: v7 B2 N = 10.000 için 6 koşunun 2'sinde; ham kayıtla 6 koşunun 0'ında; bu fark 6'ya 6 koşuyla istatistiksel olarak ayırt edilemez), (ii) ham kayıt toplayıcının zamanlamasını değiştirip olayı bastırıyor, (iii) önceki koşularda bir ortam etkisi vardı (ör. aynı gün Docker/WSL2 durumu).
+- **Mekanizma B için pencere gerçek:** toplayıcı sunucu açıldıktan 0,4-0,6 sn sonra yeniden abone oluyor; bu aralıkta gelen mesajlara abone yok. Bu, B'nin işleyebileceğini gösterir ama kayıp gözlenmediğinden B'yi desteklemez. Cihazların bu pencerede gönderip göndermediğini doğrudan ölçmedik.
+- **Makale için ifade:** "Kayıp nadir (39 koşunun 6'sı, ≤ %0,02 mesaj), ham kayıtlı 12 koşuda yeniden üretilemedi, nedeni açıklanamadı." Kayıp yok sayılmaz, sınır olarak yazılır.
+
+### Açık seçenek (yapılmadı)
+
+Ham kayıt kapalı, N = 10.000 + B2 hücresini 6 kez daha koşmak (i) ile (ii)'yi ayırırdı (kayıp geri gelirse ham kayıt bastırıyordur). Karar bekliyor.
 
 ## Sınırlar (önceden bilinen)
 
