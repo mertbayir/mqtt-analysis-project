@@ -116,3 +116,114 @@ for ax, (k, ad) in zip(eksenler, kurallar):
 ax.set_xlabel("Sunucu başlatıldıktan sonra geçen süre (sn)   [kırmızı: durdurma, yeşil: başlatma]")
 fig.suptitle("N = 5.000, tohum 2: saniyedeki bağlantı denemesi", fontsize=10)
 kaydet(fig, "sekil_deneme_n5000_v5")
+
+# ---------------------------------------------------------------------------------------------
+# Adım 5 şekilleri: canlı alarm gecikmesi (toplayıcıdan, tek yönlü saat). 0 = sunucunun yeniden başlatıldığı an.
+# ---------------------------------------------------------------------------------------------
+import json
+import math
+
+
+def alarm_serisi(kosu):
+    """Canlı alarm saniyelik p99 (ms), zaman ekseni sunucu başlatma anına göre."""
+    n = int(kayit.loc[kosu, "cihaz"])
+    kapali = float(kayit.loc[kosu, "kapali_sn"])
+    g = json.load(open(SONUC / f"{kosu}.girdi.json", encoding="utf-8"))
+    sim = pd.read_csv(SONUC / f"{kosu}.csv")
+    ulasti = sim["bagli"].cummax() >= math.ceil(0.9 * n)
+    kopma = int(sim.loc[ulasti & (sim["bagli"] == 0), "saniye"].iloc[0])
+    col = pd.read_csv(SONUC / f"{kosu}.collector.csv")
+    col = col[col["sinif"] == "canli_alarm"].copy()
+    col["t"] = col["mono_s"] - g["baslangic_mono_ms"] / 1000.0 - (kopma + kapali)
+    return col.set_index("t")["p99_ms"]
+
+
+HUCRE_RENK = {"b0": "#7f8c8d", "b1": "#c0392b", "b2": "#2c7fb8",
+              "b2-w60i1000": "#27ae60", "b2-w90i500": "#8e44ad"}
+HUCRE_AD = {"b0": "B0 (birikeni at)", "b1": "B1 (hemen)", "b2": "B2 (30 sn / 200 ms)",
+            "b2-w60i1000": "B2 (60 sn / 1 sn)", "b2-w90i500": "B2 (90 sn / 500 ms)"}
+
+# Şekil E: N=5.000, tohum 1, canlı alarm p99 zaman serisi, iki A kuralı yan yana (log ekseni)
+fig, eksenler = plt.subplots(1, 2, figsize=(7.5, 3.4), sharey=True)
+for ax, (a, ad) in zip(eksenler, [("ustel", "Üstel"), ("ustel-rastgele", "Rastgeleli üstel")]):
+    for b in ["b0", "b1", "b2"]:
+        s = alarm_serisi(f"adim5_{a}_{b}_n5000_s1_v6")
+        s = s[(s.index >= -45) & (s.index <= 80)]
+        ax.plot(s.index, s.values, color=HUCRE_RENK[b], label=HUCRE_AD[b], lw=1.2)
+    ax.axvline(0, color="black", lw=1, ls="--")
+    ax.axhline(100, color="gray", lw=0.8, ls=":")
+    ax.set_yscale("log")
+    ax.set_xlabel("Sunucu başlatıldıktan sonra geçen süre (sn)")
+    ax.set_title(ad, fontsize=10)
+eksenler[0].set_ylabel("Canlı alarm gecikmesi p99 (ms)")
+eksenler[0].legend(fontsize=8)
+fig.suptitle("N = 5.000, tohum 1: canlı alarm gecikmesi (kesikli: sunucu başlatma, noktalı: 100 ms)", fontsize=9)
+fig.tight_layout()
+kaydet(fig, "sekil_alarm_zaman_n5000")
+
+# Şekil F: N=10.000, rastgeleli A, tohum 1, B0 / B1 / B2 üç ayar (v8 ve v7)
+fig, ax = plt.subplots(figsize=(6.5, 3.6))
+for kosu, anahtar in [
+    ("adim5_ustel-rastgele_b0_n10000_s1_v8", "b0"),
+    ("adim5_ustel-rastgele_b1_n10000_s1_v7", "b1"),
+    ("adim5_ustel-rastgele_b2_n10000_s1_v7", "b2"),
+    ("adim5_ustel-rastgele_b2-w60i1000_n10000_s1_v8", "b2-w60i1000"),
+    ("adim5_ustel-rastgele_b2-w90i500_n10000_s1_v8", "b2-w90i500"),
+]:
+    s = alarm_serisi(kosu)
+    s = s[(s.index >= -45) & (s.index <= 150)]
+    ax.plot(s.index, s.values, color=HUCRE_RENK[anahtar], label=HUCRE_AD[anahtar], lw=1.2)
+ax.axvline(0, color="black", lw=1, ls="--")
+ax.axhline(100, color="gray", lw=0.8, ls=":")
+ax.set_yscale("log")
+ax.set_xlabel("Sunucu başlatıldıktan sonra geçen süre (sn)")
+ax.set_ylabel("Canlı alarm gecikmesi p99 (ms)")
+ax.set_title("N = 10.000, rastgeleli üstel, tohum 1 (B1 ve B2 30/200: v7; diğerleri: v8)", fontsize=9)
+ax.legend(fontsize=8)
+kaydet(fig, "sekil_alarm_zaman_n10000")
+
+# Şekil G: tepe alarm p99 (her nokta bir koşu, çizgi medyan), N=5.000 ve 10.000, hücre başına
+def topla(*etiketler):
+    return pd.concat([pd.read_csv(SONUC / f"ozet_adim5_{e}_kosular.csv") for e in etiketler])
+
+tum = topla("v6", "v7", "v8")
+sira = [("ustel", "b0"), ("ustel", "b1"), ("ustel", "b2"), ("ustel-rastgele", "b0"), ("ustel-rastgele", "b1"),
+        ("ustel-rastgele", "b2"), ("ustel-rastgele", "b2-w60i1000"), ("ustel-rastgele", "b2-w90i500")]
+etiket = ["üstel\nB0", "üstel\nB1", "üstel\nB2", "rastgeleli\nB0", "rastgeleli\nB1", "rastgeleli\nB2\n30/200",
+          "rastgeleli\nB2\n60/1000", "rastgeleli\nB2\n90/500"]
+fig, ax = plt.subplots(figsize=(7.5, 3.8))
+for j, (n, renk) in enumerate([(5000, "#3b6ea5"), (10000, "#c0392b")]):
+    for i, (a, b) in enumerate(sira):
+        g = tum[(tum["A"] == a) & (tum["B"] == b) & (tum["cihaz"] == n)]["tepe_p99_ms"]
+        if g.empty:
+            continue
+        x0 = i + (j - 0.5) * 0.28
+        ax.scatter(x0 + np.linspace(-0.05, 0.05, len(g)), g, color=renk, s=16, zorder=3,
+                   label=f"N={n:,}".replace(",", ".") if i == 0 or (n == 10000 and i == 1) else None)
+        ax.hlines(g.median(), x0 - 0.09, x0 + 0.09, color=renk, lw=2)
+ax.set_yscale("log")
+ax.axhline(100, color="gray", lw=0.8, ls=":")
+ax.set_xticks(range(len(sira)))
+ax.set_xticklabels(etiket, fontsize=7)
+ax.set_ylabel("Tepe canlı alarm p99 (ms)")
+ax.set_title("Sunucu açıldıktan sonra canlı alarm gecikmesinin tepesi (3 koşu/hücre; çizgi medyan)", fontsize=9)
+h, l = ax.get_legend_handles_labels()
+ax.legend(dict(zip(l, h)).values(), dict(zip(l, h)).keys(), fontsize=8, loc="upper right")
+kaydet(fig, "sekil_alarm_tepe_hucre")
+
+# Şekil H: bedel/kazanç, N=10.000 (medyan): tepe alarm p99'a karşı boşaltma bitişi
+fig, ax = plt.subplots(figsize=(5.8, 3.8))
+n10 = tum[tum["cihaz"] == 10000]
+for (a, b), g in n10.groupby(["A", "B"]):
+    if b == "b0":
+        continue
+    ax.scatter(g["bosaltma_bitis_sn"].median(), g["tepe_p99_ms"].median(), s=40,
+               color=HUCRE_RENK[b], marker="o" if a == "ustel-rastgele" else "s", zorder=3)
+    ax.annotate(f"{'rastg.' if a == 'ustel-rastgele' else 'üstel'} {HUCRE_AD[b]}", (g["bosaltma_bitis_sn"].median(), g["tepe_p99_ms"].median()),
+                fontsize=7, xytext=(4, -10) if (a == "ustel-rastgele" and b == "b2") else (4, 4), textcoords="offset points")
+ax.set_yscale("log")
+ax.set_xlabel("Boşaltmanın bitişi (sunucu açıldıktan sonra, sn; medyan)")
+ax.set_ylabel("Tepe canlı alarm p99 (ms; medyan)")
+ax.set_title("N = 10.000: gecikme ve boşaltma süresi arasındaki denge (B0 çizilmedi, veri atar)", fontsize=8)
+ax.set_xlim(20, 200)
+kaydet(fig, "sekil_alarm_denge_n10000")
