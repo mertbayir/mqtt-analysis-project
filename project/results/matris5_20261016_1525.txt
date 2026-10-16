@@ -1,0 +1,23 @@
+﻿Matris5 başladı: 2026-10-16 15:25:16  tekrar=3 cihazlar=10000 A=ustel-rastgele B=b0,b2 sürüm=v8
+--- Blok 1 (tohum 1), sıra: ustel-rastgele/b0/10000  ustel-rastgele/b2-w90i500/10000  ustel-rastgele/b2-w60i1000/10000
+15:25:16  BAŞLA adim5_ustel-rastgele_b0_n10000_s1_v8
+15:30:42  BİTTİ adim5_ustel-rastgele_b0_n10000_s1_v8
+15:30:42  BAŞLA adim5_ustel-rastgele_b2-w90i500_n10000_s1_v8
+15:36:06  BİTTİ adim5_ustel-rastgele_b2-w90i500_n10000_s1_v8
+15:36:06  BAŞLA adim5_ustel-rastgele_b2-w60i1000_n10000_s1_v8
+15:41:32  BİTTİ adim5_ustel-rastgele_b2-w60i1000_n10000_s1_v8
+--- Blok 2 (tohum 2), sıra: ustel-rastgele/b0/10000  ustel-rastgele/b2-w60i1000/10000  ustel-rastgele/b2-w90i500/10000
+15:41:32  BAŞLA adim5_ustel-rastgele_b0_n10000_s2_v8
+15:46:58  BİTTİ adim5_ustel-rastgele_b0_n10000_s2_v8
+15:46:58  BAŞLA adim5_ustel-rastgele_b2-w60i1000_n10000_s2_v8
+15:52:23  BİTTİ adim5_ustel-rastgele_b2-w60i1000_n10000_s2_v8
+15:52:23  BAŞLA adim5_ustel-rastgele_b2-w90i500_n10000_s2_v8
+15:57:49  BİTTİ adim5_ustel-rastgele_b2-w90i500_n10000_s2_v8
+--- Blok 3 (tohum 3), sıra: ustel-rastgele/b2-w90i500/10000  ustel-rastgele/b0/10000  ustel-rastgele/b2-w60i1000/10000
+15:57:49  BAŞLA adim5_ustel-rastgele_b2-w90i500_n10000_s3_v8
+16:03:14  BİTTİ adim5_ustel-rastgele_b2-w90i500_n10000_s3_v8
+16:03:14  BAŞLA adim5_ustel-rastgele_b0_n10000_s3_v8
+16:08:40  BİTTİ adim5_ustel-rastgele_b0_n10000_s3_v8
+16:08:40  BAŞLA adim5_ustel-rastgele_b2-w60i1000_n10000_s3_v8
+16:14:06  BİTTİ adim5_ustel-rastgele_b2-w60i1000_n10000_s3_v8
+Matris5 bitti: 2026-10-16 16:14:06

@@ -1,0 +1,13 @@
+{
+  "uretilen_vital": 1349018,
+  "uretilen_alarm": 269798,
+  "canli_gonderilen": 1178572,
+  "biriken_eklenen": 440244,
+  "atilan_biriken": 440244,
+  "bosaltilan": 0,
+  "gonderim_hatasi": 3337,
+  "erken_uyanma_sayisi": 301746,
+  "en_buyuk_erken_uyanma_ms": 17,
+  "sync_tamam": 0,
+  "sync_hata": 0
+}
