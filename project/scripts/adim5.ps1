@@ -23,6 +23,7 @@ param(
     [int]$B2AralikMs = 200,
     [string]$Surum = "p1",
     [switch]$AdlaBaglan,
+    [switch]$HamKayit,   # toplayıcı her mesajı ham dosyaya yazar (kayıp analizi için; büyük dosya, git dışı)
     [string]$Not = ""
 )
 $ErrorActionPreference = "Stop"
@@ -72,7 +73,9 @@ $sampler2 = Start-Job -ArgumentList $simCsv, "mqtt-sim" -ScriptBlock $ornekleyic
 # Toplayıcıyı önce başlat, abone olmasını bekle
 $colArgs = @("compose", "run", "--rm", "--name", "mqtt-collector",
     "-e", "BROKER_HOST=$sunucuAdr", "-e", "DURATION_SEC=$colSureSn", "-e", "SYNC_BYTES=$SyncBayt",
-    "-e", "OUT_PATH=/results/$ad.collector.csv", "collector")
+    "-e", "OUT_PATH=/results/$ad.collector.csv")
+if ($HamKayit) { $colArgs += @("-e", "RAW_PATH=/results/$ad.collector.ham.csv") }
+$colArgs += "collector"
 $col = Start-Process docker -ArgumentList $colArgs -NoNewWindow -PassThru -RedirectStandardOutput $colLog
 $bekle = 0
 while (-not ((Test-Path $colLog) -and ((Get-Content $colLog -Encoding UTF8 -ErrorAction SilentlyContinue) -match "abone oldu"))) {

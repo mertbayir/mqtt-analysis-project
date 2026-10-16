@@ -8,6 +8,7 @@ param(
     [string[]]$BPolitikalari = @("b0", "b1", "b2"),
     [string[]]$B2Varyantlari = @(),   # "pencereSn:aralikMs" listesi, örn. "60:1000","90:500"; boşsa B2 varsayılan (30:200)
     [int]$SonrasiSn = 90,
+    [switch]$HamKayit,
     [string]$Surum = "v6",
     [string]$Not = "Adim 5 matris",
     [switch]$TamamlananiAtla   # kayıt defterinde zaten olan koşuları atlar (yarıda kesilen matrisi sürdürmek için)
@@ -37,7 +38,7 @@ for ($blok = 1; $blok -le $Tekrar; $blok++) {
         }
         "{0}  BAŞLA {1}" -f (Get-Date -Format "HH:mm:ss"), $ad | Tee-Object -FilePath $gunluk -Append
         try {
-            ./scripts/adim5.ps1 -A $h.A -B $h.B -Cihaz $h.N -Tohum $blok -SonrasiSn $SonrasiSn -B2PencereSn $h.W -B2AralikMs $h.I -Surum $Surum -Not "$Not (blok $blok)" | Out-Null
+            ./scripts/adim5.ps1 -HamKayit:$HamKayit -A $h.A -B $h.B -Cihaz $h.N -Tohum $blok -SonrasiSn $SonrasiSn -B2PencereSn $h.W -B2AralikMs $h.I -Surum $Surum -Not "$Not (blok $blok)" | Out-Null
             "{0}  BİTTİ {1}" -f (Get-Date -Format "HH:mm:ss"), $ad | Tee-Object -FilePath $gunluk -Append
         } catch {
             "{0}  HATA  {1}: {2}" -f (Get-Date -Format "HH:mm:ss"), $ad, $_.Exception.Message | Tee-Object -FilePath $gunluk -Append

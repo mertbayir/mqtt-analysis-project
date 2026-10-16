@@ -48,7 +48,7 @@ TaskCompletionSource koptu = new(TaskCreationOptions.RunContinuationsAsynchronou
 
 client.DisconnectedAsync += _ =>
 {
-    lock (kilit) baglantiOlaylari.Add($"{DateTime.UtcNow:o} koptu");
+    lock (kilit) baglantiOlaylari.Add($"{DateTime.UtcNow:o} koptu mono_ms={MonoMs()}");
     koptu.TrySetResult();
     return Task.CompletedTask;
 };
@@ -123,7 +123,7 @@ while (!iptal.IsCancellationRequested)
         zamanAsimi.CancelAfter(TimeSpan.FromSeconds(3));
         await client.ConnectAsync(secenekler, zamanAsimi.Token);
         await client.SubscribeAsync(abonelik, zamanAsimi.Token);
-        lock (kilit) baglantiOlaylari.Add($"{DateTime.UtcNow:o} baglandi");
+        lock (kilit) baglantiOlaylari.Add($"{DateTime.UtcNow:o} baglandi mono_ms={MonoMs()}");   // mono_ms: tek yönlü saat, kayıp analizi için
         Console.WriteLine($"{DateTime.UtcNow:HH:mm:ss.fff} toplayıcı bağlandı ve abone oldu");
         await koptu.Task.WaitAsync(iptal.Token);
     }
