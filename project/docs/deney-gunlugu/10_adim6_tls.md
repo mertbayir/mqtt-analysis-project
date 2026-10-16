@@ -1,7 +1,7 @@
 # 10 — Adım 6: TLS ile toplu yeniden bağlanma
 
 Tarih: 16 Ekim 2026
-Durum: **Matris başlıyor** (hipotezler sonuçlar görülmeden önce yazıldı; ölçek pilotunun sonucu yazım sırasında biliniyordu, bkz. "Pilot")
+Durum: **Matris tamamlandı (18/18 koşu, sürüm t1)**. Hipotezler sonuçlar görülmeden önce yazıldı; ölçek pilotunun sonucu yazım sırasında biliniyordu, bkz. "Pilot")
 Rapor bölümü: Bulgular (5.4), Tartışma
 Önceki adım: `05_adim4_matris_v5.md` (TLS'siz; sunucu zorlanmadı)
 
@@ -62,7 +62,49 @@ TLS ile sunucu bağlanma aşamasında zorlanmaya başladı (ilk kez başarısız
 
 ## Sonuçlar
 
-`[ ]` Matris bitince doldurulacak.
+### Koşu akışı (kayıt)
+
+Matris günlüğü `results/matris_20261016_1835.txt`; 18 koşu, 0 betik hatası. Koşu başına ve hücre özetleri: `results/ozet_adim4_t1_kosular.csv`, `ozet_adim4_t1_hucreler.csv` (`scripts/tekrar_ozet.py t1`). Not: betik ilk çalıştırmada v5 dosyalarının (`ozet_adim4_kosular.csv`, `_hucreler.csv`) üzerine yazdı; git'ten geri yüklendi ve betik sürüm etiketli dosya adı yazacak şekilde düzeltildi.
+
+### Hücre başına sonuçlar (TLS; medyan [en küçük-en büyük]) ve TLS'siz (v5) medyan
+
+| N | Kural | TTR %50 (sn) | TTR %100 (sn) | Sunucu açıkken başarısız bağlantı | Sunucu CPU tepe |
+|---|---|---|---|---|---|
+| 2.000 | sabit | 2,1 [1,2-2,2] (v5: 5,3) | 3,2 [3,1-3,2] (6,3) | 670 [64-700] (2.065) | 78,4 [70,7-79,5] (9,9) |
+| 2.000 | üstel | 26,2 [26,1-27,1] (24,2) | **61,2** [60,1-63,1] (25,2) | 325 [105-571] (0) | 33,9 [19,8-36,8] (3,3) |
+| 2.000 | rastgeleli üstel | 12,0 [11,2-12,1] (12,3) | 28,1 [27,2-30,0] (34,3) | 0 [0-26] (243) | 13,0 [12,5-13,6] (1,8) |
+| 5.000 | sabit | 3,9 [3,0-4,0] (5,1) | 9,9 [8,0-11,0] (7,1) | 1.128 [321-1.780] (5.098) | 85,4 [82,0-89,0] (24,2) |
+| 5.000 | üstel | 28,0 [26,0-28,9] (24,1) | **62,9** [62,0-95,0] (25,1) | **1.836** [1.119-1.919] (0) | 63,7 [63,5-89,8] (12,2) |
+| 5.000 | rastgeleli üstel | 10,9 [10,9-11,9] (12,1) | 28,9 [28,9-29,9] (35,1) | 0 [0-0] (576) | 30,0 [29,7-31,9] (6,8) |
+
+Kesintideki tepe deneme/sn TLS'siz değerlerle aynı (sabit ve üstelde N; rastgelelide N'nin ≈ %25-29'u).
+
+### Hipotezlerin durumu
+
+| # | Sonuç | Kanıt |
+|---|---|---|
+| HT1 | **Destekleniyor** | Üstel, N = 5.000: TTR %100 62,9 sn (62,0-95,0), TLS'siz 25,1 sn; 2,5 kat |
+| HT2 | **Destekleniyor** | Üstel, N = 5.000: sunucu açıkken başarısız bağlantı 1.119-1.919 (3 koşunun hepsinde > 1.000; TLS'siz 0) |
+| HT3 | **Destekleniyor** | TLS'te rastgeleli kural TTR %100'ü yarıdan fazla kısaltır: N = 5.000'de 28,9 sn (üstel 62,9), N = 2.000'de 28,1 sn (üstel 61,2). TLS'siz durumda yön tersti (rastgeleli 34-35 sn, üstel 25 sn); **yön TLS ile ters döndü** |
+| HT4 | **Destekleniyor** | N = 5.000'de sunucu CPU tepesi TLS/TLS'siz: sabit 3,5 kat, üstel 5,2 kat, rastgeleli 4,4 kat |
+| HT5 | **Çürüdü** | N = 2.000'de üstel kural TLS'te TTR %100 61,2 sn (≤ 38 sn bekleniyordu, TLS'siz 25,2); etki N = 2.000'de de var, ve başarısız bağlantı 105-571. Devrilme noktası N = 2.000'in altında (ya da yok) |
+| HT6 | **Çürüdü** | Sabit kural TLS'te TLS'siz değerden kötü değil: N = 2.000'de 3,2 sn (TLS'siz 6,3), N = 5.000'de 9,9 sn (7,1; yalnızca 1,4 kat) |
+
+### Gözlemler
+
+1. **TLS bağlanma aşamasını gerçek bir yük hâline getiriyor.** Aynı kural ve N için sunucu CPU tepesi 3,5-5,2 kat yükseliyor (üstel/N = 5.000'de TLS'siz %12 → %64); üstel kuralda ilk kez sunucu açıkken başarısız bağlantılar görülüyor (N = 5.000: 1.119-1.919; TLS'siz 0).
+2. **Üstel kuralın TLS'teki TTR'si yine bir takvim sonucu.** TTR %100 üç tohumda 60-63 sn (N = 2.000) ve 62-63 sn (N = 5.000; biri 95 sn). Hesap: kopmadan sonra denemeler t = 1, 8, 17, 30, 51, 86 sn'de; sunucu t ≈ 60,9 sn'de açılıyor; 86. saniyedeki ilk dalganın el sıkışması sunucuyu aşınca zaman aşımına uğrayanlar 5 sn sonra, 30 sn'lik üst sınır beklemesiyle t = 121 sn'de dener: 121 − 60,9 = 60,1 sn. Bir koşuda (N = 5.000, tohum 3) ikinci dalga da yetmeyip üçüncü dalga t = 156 sn'de gerçekleşir: 156 − 60,9 = 95,1 sn; ölçülen 95,0 sn. Sayısal örtüşme güçlü, ama mekanizma (ikinci dalganın zaman aşımı yüzünden olduğu) doğrudan gözlenmedi, hesapla tutarlı.
+3. **Rastgeleli kuralın faydası ancak sunucu zorlanınca görünüyor.** TLS'siz ortamda yalnızca bedeli ölçülüyordu (TTR %100 +9-10 sn); TLS'te kural hem toparlanmayı kısaltıyor (≈ 62 → ≈ 29 sn) hem sunucu açıkken başarısız bağlantıyı sıfırlıyor (N = 5.000'de 0) hem de sunucu CPU'sunu yarıya indiriyor (63,7 → 30,0). Adım 4'ün "faydası ölçülemedi" sınırının cevabı budur.
+4. **Sabit kural TLS'te sunucuyu en çok yoran kural:** N = 5.000'de CPU tepesi 82-89 (tek çekirdeğin ≈ %85'i). TTR yine kısa (9,9 sn) çünkü yeniden deneme sıklığı yüksek.
+5. **Sabit kuralın N = 2.000'de TLS'siz değerden hızlı çıkması (3,2 sn'ye karşı 6,3 sn) açıklanmadı;** faz etkisi olabilir (Adım 4'te de sabit kuralda faz etkisi görülmüştü), ölçülmedi.
+
+### Sınırlar ve açık noktalar
+
+- TLS'siz karşılaştırma Adım 4'ten, aynı blokta değil; ayrıca Adım 4'te izleme 90 sn idi, burada 150 sn (TTR bu pencerede tamamlandı, ölçüm sınırı aşılmadı).
+- İstemci tarafı el sıkışma maliyeti ayrılamıyor; simülatör CPU tepesi en çok 320 (sınır 400; üstel/N = 5.000, tohum 1), yani yük üreticisi bazı koşularda sınırın ≈ %80'ine dayandı; TLS'te gecikmenin bir kısmı istemci tarafından olabilir.
+- Sertifika doğrulanmadı; TLS sürümü ve şifre takımı ölçülmedi; oturum devam ettirmenin etkisi bilinmiyor.
+- Yalnızca bağlanma aşaması ve TLS'li; bağlantı sonrası iş (Adım 5) TLS'te denenmedi.
+- Hücre başına 3 koşu; üstel/N = 5.000'de tek koşu 95 sn ile aykırı görünür, çıkarılmadı.
 
 ## Sınırlar (önceden bilinen)
 

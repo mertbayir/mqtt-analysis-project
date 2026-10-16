@@ -1,7 +1,7 @@
 """Tekrarlı koşuların özeti: koşu başına ölçütler + hücre (kural x N) başına medyan ve aralık.
 
 Kullanım:  python scripts/tekrar_ozet.py [sürüm_etiketi]      (varsayılan: v5)
-Çıktı:     results/ozet_adim4_koşular.csv, results/ozet_adim4_hucreler.csv, ekrana tablo
+Çıktı:     results/ozet_adim4_kosular.csv, ozet_adim4_hucreler.csv (v5); diğer sürümler: ozet_adim4_<sürüm>_*.csv; ekrana tablo
 
 Ölçüt tanımları scripts/ozet.ps1 ile aynıdır:
   kopma       : bağlı sayısı en az %90'a ulaştıktan sonra ilk kez 0 olan saniye
@@ -55,7 +55,8 @@ for _, k in kayit.iterrows():
     })
 
 kosular = pd.DataFrame(satirlar).sort_values(["cihaz", "kural", "tohum"])
-kosular.to_csv(SONUC / "ozet_adim4_kosular.csv", index=False)
+_ek = "" if SURUM == "v5" else f"_{SURUM}"   # v5 dosya adları değişmesin; diğer sürümler kendi dosyasına yazar
+kosular.to_csv(SONUC / f"ozet_adim4{_ek}_kosular.csv", index=False)
 
 olcutler = ["tepe_kesinti", "toplam_deneme", "tepe_sonra", "hata_sonra", "TTR50", "TTR95", "TTR100",
             "srv_cpu_tepe", "sim_cpu_tepe"]
@@ -68,7 +69,7 @@ for (cihaz, kural), g in kosular.groupby(["cihaz", "kural"]):
         s[f"{o}_max"] = g[o].max()
     hucre_satirlari.append(s)
 hucreler = pd.DataFrame(hucre_satirlari)
-hucreler.to_csv(SONUC / "ozet_adim4_hucreler.csv", index=False)
+hucreler.to_csv(SONUC / f"ozet_adim4{_ek}_hucreler.csv", index=False)
 
 pd.set_option("display.width", 220)
 pd.set_option("display.max_columns", 30)

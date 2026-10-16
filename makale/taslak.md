@@ -30,7 +30,7 @@ Yeniden bağlanma anındaki bağlantı yükünü azaltmak için bilinen yöntem,
 
 Bu çalışma yeni bir algoritma önermez. Bilinen bekleme kurallarını, açık kaynaklı bir MQTT 5 sunucusu ve kendi geliştirdiğimiz bir cihaz simülatöründen oluşan tekrarlanabilir bir ortamda karşılaştırır. Katkılarımız: (i) tekrarlanabilir bir ölçüm ortamı ve kayıt düzeni, (ii) üç bekleme kuralının toplu yeniden bağlanma altında karşılaştırması, (iii) ölçüm ortamının kendisinin sonuçları nasıl çarpıtabildiğine dair doğrulanmış bulgular (Bölüm 4). (iv) bağlantı sonrası yükün (durum eşitleme ve biriken mesajların boşaltılması) canlı alarm gecikmesine etkisinin, bağlanma aşamasından ayrı olarak ölçülmesi ve üç boşaltma politikasının karşılaştırılması (Bölüm 5.5-5.7).
 
-Çalışma tek bir bilgisayarda, sanal cihazlarla ve TLS'siz yapılmıştır; sonuçlar bu ortama göreceli olarak raporlanır, mutlak kapasite iddiası taşımaz. Tıbbi çerçeve bir senaryo olarak kullanılmıştır, klinik güvenlik iddiası yoktur.
+Çalışma tek bir bilgisayarda, sanal cihazlarla yapılmıştır; deneylerin çoğu TLS'sizdir, TLS yalnızca bağlanma aşamasında denenmiştir (Bölüm 5.4); sonuçlar bu ortama göreceli olarak raporlanır, mutlak kapasite iddiası taşımaz. Tıbbi çerçeve bir senaryo olarak kullanılmıştır, klinik güvenlik iddiası yoktur.
 
 ## 2. İlgili Çalışmalar
 
@@ -49,7 +49,7 @@ Bu çalışma yeni bir algoritma önermez. Bilinen bekleme kurallarını, açık
 
 *Durum: yazılabilir, şekil gerekli.*
 
-Ortam iki katmandan oluşur: uç cihazları temsil eden bir simülatör ve merkezi bir MQTT 5 sunucusu. İkisi de aynı bilgisayarda, ayrı Docker konteynerlerinde, aynı Docker ağı içinde çalışır. Sunucu Eclipse Mosquitto 2.1.2'dir, 2 CPU ve 2 GB bellekle sınırlanmıştır; simülatör 4 CPU ve 3 GB ile çalışır. TLS ve kimlik doğrulama kullanılmamıştır. Bağlantı sonrası yük deneylerinde (Bölüm 5.5-5.7) üçüncü bir bileşen eklenir: tüm cihaz mesajlarına abone olan ve gecikmeyi ölçen ayrı bir toplayıcı konteyner (2 CPU, 1 GB). Toplayıcı ayrıca cihazların durum eşitleme isteklerine yanıt verir. Aradaki bir kenar geçidi (edge gateway) katmanı kapsam dışıdır.
+Ortam iki katmandan oluşur: uç cihazları temsil eden bir simülatör ve merkezi bir MQTT 5 sunucusu. İkisi de aynı bilgisayarda, ayrı Docker konteynerlerinde, aynı Docker ağı içinde çalışır. Sunucu Eclipse Mosquitto 2.1.2'dir, 2 CPU ve 2 GB bellekle sınırlanmıştır; simülatör 4 CPU ve 3 GB ile çalışır. Kimlik doğrulama kullanılmamıştır; TLS yalnızca Bölüm 5.4'te açıktır (cihazlar 8883 numaralı portta TLS ile bağlanır), diğer deneyler TLS'sizdir. Bağlantı sonrası yük deneylerinde (Bölüm 5.5-5.7) üçüncü bir bileşen eklenir: tüm cihaz mesajlarına abone olan ve gecikmeyi ölçen ayrı bir toplayıcı konteyner (2 CPU, 1 GB). Toplayıcı ayrıca cihazların durum eşitleme isteklerine yanıt verir. Aradaki bir kenar geçidi (edge gateway) katmanı kapsam dışıdır.
 
 `[Şekil 1: mimari şema]`
 
@@ -108,7 +108,7 @@ Toparlanma süresi (TTR): sunucunun başlatıldığı andan bağlı cihazların 
 
 ## 5. Bulgular
 
-*Durum: 5.1-5.3 (Adım 4, sürüm v5) ve 5.5-5.7 (Adım 5, 5b, 5c; sürümler v6, v7, v8) yazıldı. 5.4 (TLS) yapılmadı; yapılmazsa bölüm kaldırılacak.*
+*Durum: 5.1-5.3 (Adım 4, sürüm v5), 5.4 (Adım 6, TLS, sürüm t1) ve 5.5-5.7 (Adım 5, 5b, 5c; sürümler v6, v7, v8) yazıldı.*
 
 Bölüm 5.1-5.3'te sunucu açılışında yalnızca *bağlanma* aşaması ölçülür (iş yükü yok); 5.5-5.7 bağlantı sonrası işi ekler. Hipotezler (H1-H4) koşulardan önce günlüğe yazılmıştır (`05_adim4_matris_v5.md`). Tüm koşular IP ile bağlanır (Bölüm 4.2). Tasarım: kural (sabit, üstel, rastgeleli üstel) × N (2.000, 5.000) = 6 hücre, her hücre 3 tekrar (tohum 1-3), bloklar içinde rastgele sırayla (18 koşu, sürüm v5); kesinti temiz, 60 sn.
 
@@ -163,17 +163,36 @@ Sabit kuralda N = 5.000, tohum 1 koşusu (TTR %100 2,9 sn, başarısız bağlant
 
 Bu ortamda (TLS'siz Mosquitto, 2 CPU, N ≤ 5.000) sunucu bağlanma aşamasında zorlanmamıştır: CPU tepesi en çok 29,8'dir (sınır 200). Üstel kuralda sunucu açıldığında 5.000 cihazın tamamı ilk denemede bağlanmıştır (sunucu açıkken başarısız bağlantı 0), yani saniyede yaklaşık 5.000 eşzamanlı bağlantı kurulumu sunucuyu doyurmamıştır. Sabit ve rastgeleli kurallardaki sunucu açıkken başarısız bağlantıların (Tablo 2) nedeni incelenmemiştir. Simülatörün CPU tepesi sabit kuralda N = 5.000'de 244,6'ya (sınırın yaklaşık %61'i) çıkmıştır: yük üreticisi sınıra dayanmamış ama yüksektir.
 
-Bu sonuç iki biçimde yorumlanmalıdır. Birincisi, rastgeleli kuralın faydası bu ortamda ölçülememiştir, yalnızca bedeli (TTR %100'ün 6-7 sn'den 34-35 sn'ye çıkması) ölçülmüştür; "rastgele bekleme gereksizdir" sonucu çıkarılmamalıdır, çünkü bulgu TLS'siz, tek sunuculu, sunucunun yetiştiği bir ortama özgüdür. İkincisi, bağlanma aşamasının kendisi bu ölçekte sunucuyu zorlamazken, bağlantı sonrası iş (eşitleme ve biriken mesajların boşaltılması) zorlamıştır (Bölüm 5.5-5.7); bu çalışmanın asıl sorusu budur.
+Bu sonuç iki biçimde yorumlanmalıdır. Birincisi, rastgeleli kuralın faydası bu TLS'siz ortamda ölçülememiştir, yalnızca bedeli (TTR %100'ün 6-7 sn'den 34-35 sn'ye çıkması) ölçülmüştür; "rastgele bekleme gereksizdir" sonucu çıkarılmamalıdır, çünkü bulgu tek sunuculu, sunucunun yetiştiği bir ortama özgüdür; TLS eklendiğinde yön tersine döner (Bölüm 5.4). İkincisi, bağlanma aşamasının kendisi bu ölçekte sunucuyu zorlamazken, bağlantı sonrası iş (eşitleme ve biriken mesajların boşaltılması) zorlamıştır (Bölüm 5.5-5.7); bu çalışmanın asıl sorusu budur.
 
-### 5.4 TLS'li durum
+### 5.4 TLS ile toplu yeniden bağlanma (sürüm t1)
 
-`[ ]` Yapılmadı. Yapılırsa: TLS el sıkışmasının tek iş parçacıklı sunucuda kuyruklanıp kuyruklanmadığı. Yapılmazsa bu bölüm kaldırılacak ve Gelecek Çalışma'ya taşınacak.
+Bölüm 5.1-5.3'teki aynı tasarım (kural × N = 2.000 ve 5.000 × 3 tekrar, 18 koşu, temiz kesinti 60 sn), tek fark cihazların sunucuya TLS ile bağlanmasıdır (RSA-2048 anahtarlı test sertifikası; sertifika doğrulanmaz, yük testi; TLS sürümü ve şifre takımı ölçülmemiştir). İzleme 150 sn'dir (TLS'siz deneylerde 90 sn). Hipotezler (HT1-HT6) koşulardan önce günlüğe yazılmıştır (`10_adim6_tls.md`); 5.000 cihazlık tek bir pilot koşunun sonucu yazım sırasında biliniyordu.
+
+**Tablo 4.** TLS ile (t1) medyan [en küçük-en büyük]; parantez içinde TLS'siz (v5) medyan (Tablo 2 ve 3). Kaynak: `scripts/tekrar_ozet.py t1` çıktısı, `results/adim3_*_t1.*`.
+
+| N | Kural | TTR %50 (sn) | TTR %100 (sn) | Sunucu açıkken başarısız bağlantı | Sunucu CPU tepe |
+|---|---|---|---|---|---|
+| 2.000 | sabit | 2,1 [1,2-2,2] (5,3) | 3,2 [3,1-3,2] (6,3) | 670 [64-700] (2.065) | 78,4 [70,7-79,5] (9,9) |
+| 2.000 | üstel | 26,2 [26,1-27,1] (24,2) | 61,2 [60,1-63,1] (25,2) | 325 [105-571] (0) | 33,9 [19,8-36,8] (3,3) |
+| 2.000 | rastgeleli üstel | 12,0 [11,2-12,1] (12,3) | 28,1 [27,2-30,0] (34,3) | 0 [0-26] (243) | 13,0 [12,5-13,6] (1,8) |
+| 5.000 | sabit | 3,9 [3,0-4,0] (5,1) | 9,9 [8,0-11,0] (7,1) | 1.128 [321-1.780] (5.098) | 85,4 [82,0-89,0] (24,2) |
+| 5.000 | üstel | 28,0 [26,0-28,9] (24,1) | 62,9 [62,0-95,0] (25,1) | 1.836 [1.119-1.919] (0) | 63,7 [63,5-89,8] (12,2) |
+| 5.000 | rastgeleli üstel | 10,9 [10,9-11,9] (12,1) | 28,9 [28,9-29,9] (35,1) | 0 [0-0] (576) | 30,0 [29,7-31,9] (6,8) |
+
+`[Şekil: sekil_tls_toparlanma_n5000.png]`
+
+TLS, bağlanma aşamasını sunucu için gerçek bir yüke dönüştürür: aynı kural ve N için sunucu CPU tepesi 3,5-5,2 kat yükselir (N = 5.000'de sabit 24,2 → 85,4; üstel 12,2 → 63,7; rastgeleli 6,8 → 30,0) ve üstel kuralda sunucu açıkken başarısız bağlantı, TLS'siz durumdaki 0 yerine N = 5.000'de 1.119-1.919'a çıkar. Üstel kuralda TTR %100 25 sn'den 60-63 sn'ye (N = 2.000 ve 5.000'de) çıkar; etki N = 2.000'de de vardır. Bu süreler bir takvim sonucu olarak yorumlanabilir: 86. saniyedeki ilk deneme dalgasının el sıkışmaları sunucuyu aşınca zaman aşımına uğrayan cihazlar, 5 sn sonra 30 sn'lik üst sınır beklemesiyle t = 121 sn'de yeniden dener (121 − 60,9 = 60,1 sn); bir koşuda (N = 5.000, tohum 3) üçüncü dalga t = 156 sn'de gerçekleşir (156 − 60,9 = 95,1 sn) ve ölçülen değer 95,0 sn'dir. Şekilde (N = 5.000, tohum 2) bu iki dalga görülür: ilk dalgada yaklaşık 3.100 cihaz bağlanır, kalanlar yaklaşık 60. saniyedeki ikinci dalgada. Sayısal örtüşme güçlüdür, ancak ikinci dalganın nedeni doğrudan gözlenmemiş, hesapla tutarlıdır.
+
+**Rastgeleli kuralın yönü TLS ile tersine döner.** TLS'siz ortamda rastgeleli kural yalnızca bedel getirmişti (TTR %100 üstelden yaklaşık 1,4 kat uzun, Bölüm 5.2). TLS'te ise TTR %100'ü yarıdan fazla kısaltır (N = 5.000'de 28,9 sn; üstel 62,9 sn), sunucu açıkken başarısız bağlantıyı N = 5.000'de sıfırlar (üstel 1.836) ve sunucu CPU tepesini yarıya indirir (30,0; üstel 63,7). Yani Bölüm 5.3'te "ölçülememiş" olan fayda, sunucu zorlandığında görünür hâle gelir. Sabit kural TLS'te sunucuyu en çok yoran kuraldır (N = 5.000'de CPU tepesi 82-89, tek çekirdeğin yaklaşık %85'i); TTR %100 yine kısadır (9,9 sn), çünkü yeniden deneme sıklığı yüksektir. Sabit kuralın N = 2.000'de TLS'te TLS'siz değerden hızlı çıkması (3,2 sn'ye karşı 6,3 sn) açıklanamamıştır; faz etkisi olabilir, ölçülmemiştir.
+
+*Sınırlar:* TLS'siz karşılaştırma Bölüm 5.1-5.3'ten alınmıştır ve aynı blokta koşulmamıştır. İstemci tarafı el sıkışma maliyeti ayrılamamıştır; simülatörün CPU tepesi bazı koşularda sınırın yaklaşık %80'ine ulaşmıştır (en çok 320, sınır 400), dolayısıyla gecikmenin bir kısmı istemciden gelmiş olabilir. Sertifika doğrulama maliyeti, TLS sürümü ve oturum devam ettirmenin etkisi ölçülmemiştir. Üstel/N = 5.000'de tek koşu 95 sn ile aykırı görünür ve çıkarılmamıştır. Bağlantı sonrası iş TLS'te denenmemiştir.
 
 ### 5.5 Bağlantı sonrası yük, N = 5.000 (sürüm v6)
 
 A = {üstel, rastgeleli üstel} × B = {B0, B1, B2} = 6 hücre, her hücre 3 tekrar (18 koşu; tohum 1-3). Kesinti öncesi canlı alarm gecikmesi (taban) tüm koşularda 26-37 ms'dir.
 
-**Tablo 4.** N = 5.000, sunucu açıldıktan sonra canlı alarm gecikmesi (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v6_hucreler.csv`.
+**Tablo 5.** N = 5.000, sunucu açıldıktan sonra canlı alarm gecikmesi (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v6_hucreler.csv`.
 
 | A | B | Alarm p99 tepe (ms) | >100 ms süre (sn) | Boşaltma bitişi (sn) | Sunucu CPU tepe (%) |
 |---|---|---|---|---|---|
@@ -194,7 +213,7 @@ A = {üstel, rastgeleli üstel} × B = {B0, B1, B2} = 6 hücre, her hücre 3 tek
 
 Aynı düzenek N = 10.000 ile, A × {B1, B2} = 4 hücre, her hücre 3 tekrar (12 koşu). Başlangıç yayılımı 20 sn'de sabit tutulmuştur (varış hızı iki katına çıkar). Taban 51-59 ms'dir.
 
-**Tablo 5.** N = 10.000 (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v7_hucreler.csv`.
+**Tablo 6.** N = 10.000 (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v7_hucreler.csv`.
 
 | A | B | Alarm p99 tepe (ms) | >100 ms süre (sn) | Boşaltma bitişi (sn) | Sunucu CPU tepe (%) |
 |---|---|---|---|---|---|
@@ -209,7 +228,7 @@ N = 5.000'de yeterli olan çözümlerin hiçbiri N = 10.000'de yeterli kalmaz: r
 
 Bölüm 5.6'daki sorunun yeniden bağlanmadan mı, bağlantı sonrası işten mi geldiğini ayırmak için N = 10.000'de rastgeleli kuralla B0 kontrol olarak koşulmuş; ayrıca B2'nin pencere ve aralığı büyütülmüştür (toplam boşaltma hızını düşürmek için). Üç hücre, 3 tekrar (9 koşu), izleme 180 sn. Taban 51-54 ms.
 
-**Tablo 6.** N = 10.000, rastgeleli üstel kural (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v8_hucreler.csv`.
+**Tablo 7.** N = 10.000, rastgeleli üstel kural (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v8_hucreler.csv`.
 
 | Politika | Alarm p99 tepe (ms) | >100 ms süre (sn) | Boşaltma bitişi (sn) | Sunucu CPU tepe (%) |
 |---|---|---|---|---|
@@ -230,11 +249,11 @@ B0'ın tepesinin 82-112 ms olması, N = 10.000'de yaklaşık 6 sn'lik tepenin ye
 
 **Bağlantı sonrası yük deneylerine özgü sınırlar.** (i) Mosquitto tek iş parçacıklıdır; bulgular çok çekirdekli bir sunucuya genellenemez. (ii) Toplayıcı tek istemcidir ve onun yavaşlaması gecikmeye karışmış olabilir; toplayıcının işlem yükü ölçülmemiştir. (iii) N = 10.000'de taban gecikmenin yükselmesi simülatörün yükünü düşündürür; doğrulanmamıştır. (iv) 39 koşunun 6'sında 1 ile 132 arasında mesaj, toplayıcıya ulaşmamıştır (toplam yaklaşık 540 bin ile 1,6 milyon mesaj içinde, yani en çok yaklaşık %0,01). Ham kayıt açıkken yapılan 12 ek koşuda (iki hücre, 6'şar tekrar) kayıp görülmemiş, olay yeniden üretilememiştir; nedeni açıklanamamıştır. Olası ama doğrulanmamış açıklamalardan biri, sunucunun açıldığı an ile toplayıcının yeniden abone olduğu an arasındaki yaklaşık 0,4-0,6 sn'lik pencerede cihazların gönderdiği mesajların abonesiz kalmasıdır (ölçülen yalnızca pencerenin varlığıdır); diğeri, durdurma anında sunucu belleğindeki iletilmemiş mesajların kaybıdır. Kaybın ham kayıt tarafından bastırılmış olması da dışlanamamıştır (günlük `09`). (v) B2 yalnızca iki ek ayarla sınanmış, ayar uzayı taranmamıştır. (vi) Biriken vital ve alarm mesajları aynı sırayla boşaltılır; alarmları önceliklendirmek gelecek çalışmadır. (vii) İş yükü (mesaj boyutu, vital ve alarm sıklığı, eşitleme boyutu) varsayımsaldır, klinik gerçekliği temsil etmez.
 
-`[ ]` Sınırlar (günlüklerden toplanacak): tek bilgisayar, sanal cihaz, sıfır gecikmeli ağ, TLS'siz, tek sunucu, tek kesinti türü (temiz), tekrar sayısı, CPU örnekleme sıklığı, çözünürlük 1 sn, mekanizmaların bir kısmı doğrudan gözlenmedi.
+`[ ]` Sınırlar (günlüklerden toplanacak): tek bilgisayar, sanal cihaz, sıfır gecikmeli ağ, TLS yalnızca bağlanma aşamasında denenmiş (doğrulamasız), tek sunucu, tek kesinti türü (temiz), tekrar sayısı, CPU örnekleme sıklığı, çözünürlük 1 sn, mekanizmaların bir kısmı doğrudan gözlenmedi.
 
 ## 7. Sonuç ve Gelecek Çalışma
 
-`[ ]` Sonuç (Adım 5 için ön metin, Bölüm 5.1-5.4 tamamlanınca birleştirilecek): bu ortamda, aynı anda dönen çok sayıda cihazın bağlantı sonrası işi (eşitleme ve birikenin boşaltılması) canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırmıştır; dönüşü dağıtmak bu etkiyi N = 5.000'de ortadan kaldırmış, N = 10.000'de yetmemiştir; boşaltmayı zamana yayan B2 politikası ancak parametreleri cihaz sayısına göre büyütüldüğünde N = 10.000'de gecikmeyi yüzlerce milisaniyeye indirmiş, bedel olarak boşaltmanın yaklaşık 4 kat uzamasına yol açmıştır. Gelecek çalışma adayları: sessiz kesinti, TLS maliyeti, kenar geçidi katmanı, sunucunun "ne kadar sonra gel" bilgisi vermesi, alan adı çözümlemesinin toplu yeniden bağlanmadaki rolü.
+`[ ]` Sonuç (Adım 5 için ön metin, Bölüm 5.1-5.7 birleştirilecek): bu ortamda, aynı anda dönen çok sayıda cihazın bağlantı sonrası işi (eşitleme ve birikenin boşaltılması) canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırmıştır; dönüşü dağıtmak bu etkiyi N = 5.000'de ortadan kaldırmış, N = 10.000'de yetmemiştir; boşaltmayı zamana yayan B2 politikası ancak parametreleri cihaz sayısına göre büyütüldüğünde N = 10.000'de gecikmeyi yüzlerce milisaniyeye indirmiş, bedel olarak boşaltmanın yaklaşık 4 kat uzamasına yol açmıştır. Bağlanma aşamasında ise TLS'siz ortamda sunucu zorlanmamış ve rastgeleli kuralın yalnızca bedeli ölçülmüş, TLS ile sunucu CPU'su 3,5-5,2 kat yükselmiş ve rastgeleli kural toparlanmayı yarıdan fazla kısaltıp sunucu açıkken başarısız bağlantıyı sıfırlamıştır (Bölüm 5.4). Gelecek çalışma adayları: sessiz kesinti, TLS'te bağlantı sonrası iş ve oturum devam ettirme, kenar geçidi katmanı, sunucunun "ne kadar sonra gel" bilgisi vermesi, alan adı çözümlemesinin toplu yeniden bağlanmadaki rolü.
 
 ## Kaynakça
 

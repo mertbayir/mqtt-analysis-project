@@ -25,6 +25,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 19 | 16 Ekim | Adım 5c: B2 parametreleri (pencere/aralık) deney değişkeni oldu; hücre etiketi `b2-w<pencere>i<aralık>`; B0 N = 10.000'de kontrol olarak eklendi; izleme 180 sn | 07'de B2 ölçeklenmedi ve B0 bu ölçekte yoktu; sorunun kaynağını ayırmak için (günlük 08) |
 | 20 | 16 Ekim | Kayıp araştırması için toplayıcı ham kaydı (`-HamKayit`, git dışı) ve bağlantı olaylarına mono zaman damgası eklendi; hücre: rastgeleli/B1/N = 5.000, 6 tekrar | 6/39 koşuda küçük kayıp var, nedeni bilinmiyor; ham kayıt olmadan açıklanamaz (günlük 09) |
 | 21 | 16 Ekim | Adım 6: TLS (RSA-2048, test CA, **sertifika doğrulanmaz**), 18 koşu, izleme 150 sn | Sunucuyu bağlanma aşamasında gerçekten zorlamak (Adım 4'te zorlanmadı); doğrulama maliyeti ve TLS sürümü ölçüm dışı (günlük 10) |
+| 22 | 16 Ekim | TLS matrisi tamamlandı (t1); sonuç: TLS ile sunucu zorlanıyor, rastgeleli kuralın yönü tersine döndü. Sonraki: bağlantı sonrası iş TLS'te (F1b) ve EMQX (F5) | Günlük 10 |
 
 ## Açık kararlar
 

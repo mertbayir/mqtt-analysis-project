@@ -1,0 +1,41 @@
+﻿Matris baÅŸladÄ±: 2026-10-16 18:35:55  tekrar=3 cihazlar=2000,5000 kurallar=sabit,ustel,ustel-rastgele sÃ¼rÃ¼m=t1 sonrasiSn=150
+--- Blok 1 (tohum 1), sÄ±ra: ustel/2000  sabit/2000  sabit/5000  ustel/5000  ustel-rastgele/2000  ustel-rastgele/5000
+18:35:55  BAÅLA adim3_ustel_n2000_s1_t1
+18:40:20  BÄ°TTÄ° adim3_ustel_n2000_s1_t1
+18:40:20  BAÅLA adim3_sabit_n2000_s1_t1
+18:44:45  BÄ°TTÄ° adim3_sabit_n2000_s1_t1
+18:44:45  BAÅLA adim3_sabit_n5000_s1_t1
+18:49:10  BÄ°TTÄ° adim3_sabit_n5000_s1_t1
+18:49:10  BAÅLA adim3_ustel_n5000_s1_t1
+18:53:36  BÄ°TTÄ° adim3_ustel_n5000_s1_t1
+18:53:36  BAÅLA adim3_ustel-rastgele_n2000_s1_t1
+18:58:01  BÄ°TTÄ° adim3_ustel-rastgele_n2000_s1_t1
+18:58:01  BAÅLA adim3_ustel-rastgele_n5000_s1_t1
+19:02:26  BÄ°TTÄ° adim3_ustel-rastgele_n5000_s1_t1
+--- Blok 2 (tohum 2), sÄ±ra: ustel-rastgele/2000  sabit/2000  ustel-rastgele/5000  sabit/5000  ustel/2000  ustel/5000
+19:02:26  BAÅLA adim3_ustel-rastgele_n2000_s2_t1
+19:06:51  BÄ°TTÄ° adim3_ustel-rastgele_n2000_s2_t1
+19:06:51  BAÅLA adim3_sabit_n2000_s2_t1
+19:11:16  BÄ°TTÄ° adim3_sabit_n2000_s2_t1
+19:11:16  BAÅLA adim3_ustel-rastgele_n5000_s2_t1
+19:15:42  BÄ°TTÄ° adim3_ustel-rastgele_n5000_s2_t1
+19:15:42  BAÅLA adim3_sabit_n5000_s2_t1
+19:20:07  BÄ°TTÄ° adim3_sabit_n5000_s2_t1
+19:20:07  BAÅLA adim3_ustel_n2000_s2_t1
+19:24:31  BÄ°TTÄ° adim3_ustel_n2000_s2_t1
+19:24:31  BAÅLA adim3_ustel_n5000_s2_t1
+19:28:57  BÄ°TTÄ° adim3_ustel_n5000_s2_t1
+--- Blok 3 (tohum 3), sÄ±ra: sabit/5000  ustel-rastgele/2000  ustel/2000  ustel-rastgele/5000  ustel/5000  sabit/2000
+19:28:57  BAÅLA adim3_sabit_n5000_s3_t1
+19:33:22  BÄ°TTÄ° adim3_sabit_n5000_s3_t1
+19:33:22  BAÅLA adim3_ustel-rastgele_n2000_s3_t1
+19:37:47  BÄ°TTÄ° adim3_ustel-rastgele_n2000_s3_t1
+19:37:47  BAÅLA adim3_ustel_n2000_s3_t1
+19:42:12  BÄ°TTÄ° adim3_ustel_n2000_s3_t1
+19:42:12  BAÅLA adim3_ustel-rastgele_n5000_s3_t1
+19:46:37  BÄ°TTÄ° adim3_ustel-rastgele_n5000_s3_t1
+19:46:37  BAÅLA adim3_ustel_n5000_s3_t1
+19:51:03  BÄ°TTÄ° adim3_ustel_n5000_s3_t1
+19:51:03  BAÅLA adim3_sabit_n2000_s3_t1
+19:55:28  BÄ°TTÄ° adim3_sabit_n2000_s3_t1
+Matris bitti: 2026-10-16 19:55:28

@@ -227,3 +227,20 @@ ax.set_ylabel("Tepe canlı alarm p99 (ms; medyan)")
 ax.set_title("N = 10.000: gecikme ve boşaltma süresi arasındaki denge (B0 çizilmedi, veri atar)", fontsize=8)
 ax.set_xlim(20, 200)
 kaydet(fig, "sekil_alarm_denge_n10000")
+
+
+# Şekil I: TLS'siz (v5) ve TLS'li (t1), N=5.000, tohum 2: sunucu açıldıktan sonra bağlı cihaz sayısı
+fig, eksenler = plt.subplots(1, 3, figsize=(7.5, 3.0), sharey=True)
+for ax, (k, ad) in zip(eksenler, kurallar):
+    for kosu, etiket, renk in [(f"adim3_{k}_n5000_s2_v5", "TLS'siz", "#3b6ea5"), (f"adim3_{k}_n5000_s2_t1", "TLS", "#c0392b")]:
+        df, n, kapali = yukle(kosu)
+        d = df[(df["t"] >= -2) & (df["t"] <= 100)]
+        ax.plot(d["t"], d["bagli"], color=renk, label=etiket, lw=1.3)
+    ax.axvline(0, color="black", lw=0.8, ls="--")
+    ax.set_title(ad, fontsize=9)
+    ax.set_xlabel("Sunucu açıldıktan sonra (sn)", fontsize=8)
+eksenler[0].set_ylabel("Bağlı cihaz sayısı")
+eksenler[0].legend(fontsize=8, loc="center right")
+fig.suptitle("N = 5.000, tohum 2: TLS'siz (v5) ve TLS'li (t1) toparlanma", fontsize=9)
+fig.tight_layout()
+kaydet(fig, "sekil_tls_toparlanma_n5000")

@@ -1,0 +1,2 @@
+cihaz,kural,tekrar,tepe_kesinti_med,tepe_kesinti_min,tepe_kesinti_max,toplam_deneme_med,toplam_deneme_min,toplam_deneme_max,tepe_sonra_med,tepe_sonra_min,tepe_sonra_max,hata_sonra_med,hata_sonra_min,hata_sonra_max,TTR50_med,TTR50_min,TTR50_max,TTR95_med,TTR95_min,TTR95_max,TTR100_med,TTR100_min,TTR100_max,srv_cpu_tepe_med,srv_cpu_tepe_min,srv_cpu_tepe_max,sim_cpu_tepe_med,sim_cpu_tepe_min,sim_cpu_tepe_max
+5000,ustel,1,5000.0,5000,5000,25000.0,25000,25000,5000.0,5000,5000,984.0,984,984,27.8,27.8,27.8,62.8,62.8,62.8,62.8,62.8,62.8,63.65,63.65,63.65,256.64,256.64,256.64
