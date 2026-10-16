@@ -1,0 +1,10 @@
+﻿Matris5 baÅŸladÄ±: 2026-10-15 23:09:38  tekrar=3 cihazlar=5000 A=ustel,ustel-rastgele B=b0,b1,b2 sÃ¼rÃ¼m=v6
+--- Blok 1 (tohum 1), sÄ±ra: ustel/b1/5000  ustel/b2/5000  ustel-rastgele/b0/5000  ustel/b0/5000  ustel-rastgele/b1/5000  ustel-rastgele/b2/5000
+23:09:38  BAÅLA adim5_ustel_b1_n5000_s1_v6
+23:13:18  BÄ°TTÄ° adim5_ustel_b1_n5000_s1_v6
+23:13:18  BAÅLA adim5_ustel_b2_n5000_s1_v6
+23:16:55  BÄ°TTÄ° adim5_ustel_b2_n5000_s1_v6
+23:16:55  BAÅLA adim5_ustel-rastgele_b0_n5000_s1_v6
+23:20:33  BÄ°TTÄ° adim5_ustel-rastgele_b0_n5000_s1_v6
+23:20:33  BAÅLA adim5_ustel_b0_n5000_s1_v6
+=== Docker Desktop 4. kosuda (ustel/b0/s1) kapandi; kosu yarim, dosyalari results/iptal_docker_kapandi/ altina tasindi. Matris -TamamlananiAtla ile surduruluyor: 2026-10-16 11:17:57 ===

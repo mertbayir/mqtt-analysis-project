@@ -1,4 +1,4 @@
-# Adım 5 matrisi: A (yeniden bağlanma) x B (bağlantı sonrası) hücrelerini BLOKLAR hâlinde, her blokta RASTGELE sırayla çalıştırır.
+﻿# Adım 5 matrisi: A (yeniden bağlanma) x B (bağlantı sonrası) hücrelerini BLOKLAR hâlinde, her blokta RASTGELE sırayla çalıştırır.
 # Blok = bir tekrar; blok numarası = tohum. Sıra ve ilerleme results/matris5_<zaman>.txt dosyasına yazılır.
 # Kullanım: ./scripts/matris5.ps1 -Tekrar 3 -Cihazlar 5000 -Surum v6
 param(
@@ -7,7 +7,8 @@ param(
     [string[]]$Politikalar = @("ustel", "ustel-rastgele"),
     [string[]]$BPolitikalari = @("b0", "b1", "b2"),
     [string]$Surum = "v6",
-    [string]$Not = "Adim 5 matris"
+    [string]$Not = "Adim 5 matris",
+    [switch]$TamamlananiAtla   # kayıt defterinde zaten olan koşuları atlar (yarıda kesilen matrisi sürdürmek için)
 )
 $proje = Split-Path $PSScriptRoot -Parent
 Set-Location $proje
@@ -23,6 +24,10 @@ for ($blok = 1; $blok -le $Tekrar; $blok++) {
     "--- Blok $blok (tohum $blok), sıra: " + (($sirali | ForEach-Object { "$($_.A)/$($_.B)/$($_.N)" }) -join "  ") | Tee-Object -FilePath $gunluk -Append
     foreach ($h in $sirali) {
         $ad = "adim5_$($h.A)_$($h.B)_n$($h.N)_s${blok}_${Surum}"
+        if ($TamamlananiAtla -and (Select-String -Path (Join-Path $proje "results\deney_kayitlari.csv") -Pattern ("^" + [regex]::Escape($ad) + ",") -Quiet)) {
+            "{0}  ATLANDI (zaten tamam) {1}" -f (Get-Date -Format "HH:mm:ss"), $ad | Tee-Object -FilePath $gunluk -Append
+            continue
+        }
         "{0}  BAŞLA {1}" -f (Get-Date -Format "HH:mm:ss"), $ad | Tee-Object -FilePath $gunluk -Append
         try {
             ./scripts/adim5.ps1 -A $h.A -B $h.B -Cihaz $h.N -Tohum $blok -Surum $Surum -Not "$Not (blok $blok)" | Out-Null

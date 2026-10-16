@@ -16,6 +16,11 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 10 | 13 Ekim | Sunucu 2 CPU / 2 GB, simülatör 4 CPU / 3 GB, konteyner sınırı; `.wslconfig` değiştirilmedi | Makinenin genel ayarına dokunmadan sabit kaynak payı; Docker varsayılanı 12 CPU / ~8 GB olduğu gibi kayıtlı |
 | 11 | 13 Ekim | Cihazlar sunucuya **IP ile** bağlanır (`-IpIleBaglan`) | Ad ile bağlanınca toparlanma 27-69 sn, IP ile 2,1 sn; fark Docker DNS artefaktı (günlük 04, Bulgu 5). Ad ile yapılan koşular (`v2`, `v2b`, `v3mac`) artefakt içeriyor |
 | 12 | 13 Ekim | Sunucu konteynerine sabit MAC verildi | Gerçek sunucunun MAC adresi yeniden başlatmada değişmez. MAC'in gecikmeye etkisi sınandı: yok (Bulgu 5) |
+| 13 | 15 Ekim | Gecikme **tek yönlü saatle** (CLOCK_MONOTONIC) ölçülür; duvar saati kullanılmaz. Cihaz zamanlayıcısı erken uyanırsa mesaj planlanan andan önce gönderilmez | WSL2 duvar saati ~30 sn'de bir ±3 sn sıçrıyor, negatif gecikme üretti (günlük 06, Bulgu 1) |
+| 14 | 15 Ekim | Ayrı **toplayıcı** konteyner (2 CPU / 1 GB) eklendi; sunucuda `max_queued_messages 0`, `max_inflight_messages 100` | Gecikmeyi uçtan uca ölçmek için; sunucunun toplayıcıya giden mesajı kuyruk sınırından atmaması için |
+| 15 | 15 Ekim | Bağlantı sonrası politikalar **B0/B1/B2**; eşitleme ve boşaltma yalnızca **yeniden bağlanmada** | İlk açılış yeniden bağlanma fırtınası değildir; B0 yalnızca referans (veriyi atar) |
+| 16 | 16 Ekim | Adım 5 matrisi **baştan** koşuldu; yarım kalan/silinen 4 koşu geçersiz sayıldı | Docker Desktop kapanması + devam betiğindeki hata (günlük 06, "Koşu akışı"). Veri silinen koşular yeniden üretildi, hiçbir koşu "tamir" edilmedi |
+| 17 | 16 Ekim | `matris5.ps1`'e `-TamamlananiAtla` eklendi | Yarıda kesilen matrisi sürdürmek için; kullanılmadan önce kayıt defteri biçimine (adlar tırnaksız) göre düzeltildi |
 
 ## Açık kararlar
 
