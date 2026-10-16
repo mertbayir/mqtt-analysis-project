@@ -24,6 +24,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 18 | 16 Ekim | Adım 5b: N = 10.000, başlangıç yayılımı 20 sn **sabit** tutuldu, simülatör sınırı 4 CPU / 3 GB aynı | Yalnızca N değişsin; varış hızının iki katına çıkması ölçeğin parçası (günlük 07). B2 parametreleri (30 sn / 200 ms) N ile ölçeklenmedi, bu bir sınır olarak yazıldı |
 | 19 | 16 Ekim | Adım 5c: B2 parametreleri (pencere/aralık) deney değişkeni oldu; hücre etiketi `b2-w<pencere>i<aralık>`; B0 N = 10.000'de kontrol olarak eklendi; izleme 180 sn | 07'de B2 ölçeklenmedi ve B0 bu ölçekte yoktu; sorunun kaynağını ayırmak için (günlük 08) |
 | 20 | 16 Ekim | Kayıp araştırması için toplayıcı ham kaydı (`-HamKayit`, git dışı) ve bağlantı olaylarına mono zaman damgası eklendi; hücre: rastgeleli/B1/N = 5.000, 6 tekrar | 6/39 koşuda küçük kayıp var, nedeni bilinmiyor; ham kayıt olmadan açıklanamaz (günlük 09) |
+| 21 | 16 Ekim | Adım 6: TLS (RSA-2048, test CA, **sertifika doğrulanmaz**), 18 koşu, izleme 150 sn | Sunucuyu bağlanma aşamasında gerçekten zorlamak (Adım 4'te zorlanmadı); doğrulama maliyeti ve TLS sürümü ölçüm dışı (günlük 10) |
 
 ## Açık kararlar
 

@@ -11,6 +11,7 @@ param(
     [string[]]$Politikalar = @("sabit", "ustel", "ustel-rastgele"),
     [string]$Surum = "v5",
     [int]$SonrasiSn = 90,
+    [switch]$Tls,   # Adım 6: cihazlar TLS ile bağlanır
     [string]$Not = "Matris koşusu"
 )
 $proje = Split-Path $PSScriptRoot -Parent
@@ -30,7 +31,7 @@ for ($blok = 1; $blok -le $Tekrar; $blok++) {
         $ad = "adim3_$($h.P)_n$($h.N)_s${blok}_${Surum}"
         "{0}  BAŞLA {1}" -f (Get-Date -Format "HH:mm:ss"), $ad | Tee-Object -FilePath $gunluk -Append
         try {
-            ./scripts/adim3.ps1 -Politika $h.P -Cihaz $h.N -Tohum $blok -Surum $Surum -SonrasiSn $SonrasiSn -Not "$Not (blok $blok)" | Out-Null
+            ./scripts/adim3.ps1 -Tls:$Tls -Politika $h.P -Cihaz $h.N -Tohum $blok -Surum $Surum -SonrasiSn $SonrasiSn -Not "$Not (blok $blok)" | Out-Null
             "{0}  BİTTİ {1}" -f (Get-Date -Format "HH:mm:ss"), $ad | Tee-Object -FilePath $gunluk -Append
         } catch {
             "{0}  HATA  {1}: {2}" -f (Get-Date -Format "HH:mm:ss"), $ad, $_.Exception.Message | Tee-Object -FilePath $gunluk -Append
