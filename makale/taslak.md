@@ -108,19 +108,72 @@ Toparlanma süresi (TTR): sunucunun başlatıldığı andan bağlı cihazların 
 
 ## 5. Bulgular
 
-*Durum: 5.5-5.7 yazıldı (Adım 5, 5b, 5c; tablolar `ozet_adim5_v6/v7/v8_hucreler.csv`'den). 5.1-5.3 (bekleme kuralı karşılaştırması, `05_adim4_matris_v5.md` ve `ozet_adim4*`) ve 5.4 (TLS) henüz yazılmadı.*
+*Durum: 5.1-5.3 (Adım 4, sürüm v5) ve 5.5-5.7 (Adım 5, 5b, 5c; sürümler v6, v7, v8) yazıldı. 5.4 (TLS) yapılmadı; yapılmazsa bölüm kaldırılacak.*
 
-- `[ ]` 5.1 Üç bekleme kuralının deneme dağılımı (Şekil)
-- `[ ]` 5.2 Cihaz sayısına göre toparlanma süresi (Şekil, medyan ve aralık)
-- `[ ]` 5.3 Sunucu yükü
-- `[ ]` 5.4 TLS'li durum (pilot sonrası)
-- 5.5-5.7: aşağıda (Adım 5, 5b, 5c).
+Bölüm 5.1-5.3'te sunucu açılışında yalnızca *bağlanma* aşaması ölçülür (iş yükü yok); 5.5-5.7 bağlantı sonrası işi ekler. Hipotezler (H1-H4) koşulardan önce günlüğe yazılmıştır (`05_adim4_matris_v5.md`). Tüm koşular IP ile bağlanır (Bölüm 4.2). Tasarım: kural (sabit, üstel, rastgeleli üstel) × N (2.000, 5.000) = 6 hücre, her hücre 3 tekrar (tohum 1-3), bloklar içinde rastgele sırayla (18 koşu, sürüm v5); kesinti temiz, 60 sn.
+
+### 5.1 Üç bekleme kuralının deneme dağılımı
+
+**Tablo 1.** Kesinti sırasındaki tepe bağlantı denemesi/sn ve koşu boyunca toplam deneme sayısı (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim4_hucreler.csv`, `ozet_adim4_kosular.csv`.
+
+| N | Kural | Kesintide tepe deneme/sn | Koşu boyunca toplam deneme |
+|---|---|---|---|
+| 2.000 | sabit | 2.000 [2.000-2.000] | 22.069 [22.005-22.083] |
+| 2.000 | üstel | 2.000 [2.000-2.000] | 10.000 [10.000-10.000] |
+| 2.000 | rastgeleli üstel | 484 [475-521] | 10.060 [10.052-10.101] |
+| 5.000 | sabit | 5.000 [4.641-5.000] | 53.412 [53.119-55.167] |
+| 5.000 | üstel | 5.000 [5.000-5.000] | 25.000 [25.000-25.000] |
+| 5.000 | rastgeleli üstel | 1.263 [1.219-1.285] | 25.139 [25.087-25.149] |
+
+`[Şekil: sekil_deneme_n5000_v5.png (N = 5.000, tohum 2), sekil_matris_ozet.png]`
+
+Sabit ve üstel kuralda kesinti anında tüm cihazlar (tepe = N) aynı saniyede deneme yapar; rastgeleli üstel kural tepeyi N'nin yaklaşık dörtte birine indirir (N = 2.000'de 484, N = 5.000'de 1.263). Üstel geri çekilme koşu boyunca toplam deneme sayısını sabit kurala göre yaklaşık 2,2-2,1 kat azaltır (22.069 → 10.000; 53.412 → 25.000); rastgelelik toplamı değiştirmez, yalnızca denemeleri zamana yayar (10.060 ve 25.139). Bu, [1] ve [2]'de bilinen eğilimin yeniden üretilmesidir ve ölçüm ortamının beklenen davranışı gösterdiğinin sağlamasıdır; yeni bir bulgu değildir.
+
+### 5.2 Toparlanma süresi ve cihaz sayısı
+
+**Tablo 2.** Sunucu açıldıktan sonra bağlı cihazların %50'sine ve %100'üne ulaşma süresi (TTR, sn; çözünürlük 1 sn; medyan [en küçük-en büyük]) ve sunucu açıldıktan sonra başarısız bağlantı denemesi sayısı. Kaynak: aynı dosyalar.
+
+| N | Kural | TTR %50 | TTR %100 | Sunucu açıkken başarısız bağlantı |
+|---|---|---|---|---|
+| 2.000 | sabit | 5,3 [5,0-5,3] | 6,3 [6,0-6,3] | 2.065 [2.052-2.169] |
+| 2.000 | üstel | 24,2 [24,1-24,4] | 25,2 [25,1-25,4] | 0 [0-0] |
+| 2.000 | rastgeleli üstel | 12,3 [12,3-13,0] | 34,3 [34,3-35,0] | 243 [217-273] |
+| 5.000 | sabit | 5,1 [0,9-5,2] | 7,1 [2,9-7,2] | 5.098 [1-5.259] |
+| 5.000 | üstel | 24,1 [24,1-24,2] | 25,1 [25,1-25,2] | 0 [0-0] |
+| 5.000 | rastgeleli üstel | 12,1 [12,1-12,1] | 35,1 [32,1-35,1] | 576 [253-644] |
+
+Rastgeleli üstel kural, tepe denemeyi düşürmenin bedeli olarak toparlanmanın son kısmını uzatır: TTR %100, sabit kuralın yaklaşık 5 katı (34-35 sn'ye karşı 6-7 sn) ve üstelin yaklaşık 1,4 katıdır; buna karşılık TTR %50 daha kısadır (12 sn; üstelde 24 sn), yani uzayan yalnızca son kısımdır. N = 2.000 ile 5.000 arasında aynı kural için TTR %100 medyanları en çok 1 sn farklıdır (sabit 6,3 → 7,1; üstel 25,2 → 25,1; rastgeleli 34,3 → 35,1): bu iki N arasında bir devrilme noktası görülmemiştir. Yalnızca iki N denendiği için bu sınırlı bir kanıttır.
+
+**Üstel kuralda TTR bir takvim sonucudur.** Üstel kuralın TTR %100 değeri üç tohum ve iki N için 25,1-25,4 sn'dir ve elle hesaplanan değerle birebir uyuşur: cihazlar kopmadan sonra t = 1, 8, 17, 30, 51 ve 86. saniyelerde dener (bekleme 1, 2, 4, 8, 16 ve 30 sn artı 5 sn bağlantı zaman aşımı); sunucu t ≈ 60,9 sn'de açıldığından 51. saniyedeki deneme başarısız olur, sonraki deneme 86. saniyededir ve 86 − 60,9 = 25,1 sn eder. Dolayısıyla sonuç **kesintinin süresine bağlı bir testere dişi fonksiyondur**: örneğin 45 sn'lik bir kesintide ilk başarılı deneme t = 51 sn'de olurdu, yani TTR yaklaşık 5 sn çıkardı (bu bir hesaptır, ölçülmemiştir). "Üstel kuralın TTR'si 25 sn" ifadesi tek bir kesinti süresine özgüdür; kesinti süresi taraması yapılmamıştır (Bölüm 6).
+
+Sabit kuralda N = 5.000, tohum 1 koşusu (TTR %100 2,9 sn, başarısız bağlantı 1) diğer iki tohumdan (7,1-7,2 sn, yaklaşık 5.100) ayrılır; bu, sunucunun açıldığı anın 6 sn'lik deneme döngüsünün neresine denk geldiğiyle (faz) tutarlıdır ve aykırı olarak çıkarılmamıştır. Mekanizma doğrudan incelenmemiştir.
+
+### 5.3 Sunucu yükü
+
+**Tablo 3.** Sunucu ve simülatör CPU tepesi (Docker `stats` yüzdesi; 100 = bir çekirdek; sunucu sınırı 200, simülatör sınırı 400; örnekleme yaklaşık 0,7 Hz; medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim4_hucreler.csv`, `ozet_adim4_kosular.csv`.
+
+| N | Kural | Sunucu CPU tepe | Simülatör CPU tepe (koşular: en büyük) |
+|---|---|---|---|
+| 2.000 | sabit | 9,9 [7,7-10,8] | 91,6 |
+| 2.000 | üstel | 3,3 [2,1-11,5] | 85,0 |
+| 2.000 | rastgeleli üstel | 1,8 [1,8-2,5] | 39,8 |
+| 5.000 | sabit | 24,2 [21,0-29,8] | 244,6 |
+| 5.000 | üstel | 12,2 [7,8-18,5] | 176,3 |
+| 5.000 | rastgeleli üstel | 6,8 [3,7-22,6] | 115,6 |
+
+Bu ortamda (TLS'siz Mosquitto, 2 CPU, N ≤ 5.000) sunucu bağlanma aşamasında zorlanmamıştır: CPU tepesi en çok 29,8'dir (sınır 200). Üstel kuralda sunucu açıldığında 5.000 cihazın tamamı ilk denemede bağlanmıştır (sunucu açıkken başarısız bağlantı 0), yani saniyede yaklaşık 5.000 eşzamanlı bağlantı kurulumu sunucuyu doyurmamıştır. Sabit ve rastgeleli kurallardaki sunucu açıkken başarısız bağlantıların (Tablo 2) nedeni incelenmemiştir. Simülatörün CPU tepesi sabit kuralda N = 5.000'de 244,6'ya (sınırın yaklaşık %61'i) çıkmıştır: yük üreticisi sınıra dayanmamış ama yüksektir.
+
+Bu sonuç iki biçimde yorumlanmalıdır. Birincisi, rastgeleli kuralın faydası bu ortamda ölçülememiştir, yalnızca bedeli (TTR %100'ün 6-7 sn'den 34-35 sn'ye çıkması) ölçülmüştür; "rastgele bekleme gereksizdir" sonucu çıkarılmamalıdır, çünkü bulgu TLS'siz, tek sunuculu, sunucunun yetiştiği bir ortama özgüdür. İkincisi, bağlanma aşamasının kendisi bu ölçekte sunucuyu zorlamazken, bağlantı sonrası iş (eşitleme ve biriken mesajların boşaltılması) zorlamıştır (Bölüm 5.5-5.7); bu çalışmanın asıl sorusu budur.
+
+### 5.4 TLS'li durum
+
+`[ ]` Yapılmadı. Yapılırsa: TLS el sıkışmasının tek iş parçacıklı sunucuda kuyruklanıp kuyruklanmadığı. Yapılmazsa bu bölüm kaldırılacak ve Gelecek Çalışma'ya taşınacak.
 
 ### 5.5 Bağlantı sonrası yük, N = 5.000 (sürüm v6)
 
 A = {üstel, rastgeleli üstel} × B = {B0, B1, B2} = 6 hücre, her hücre 3 tekrar (18 koşu; tohum 1-3). Kesinti öncesi canlı alarm gecikmesi (taban) tüm koşularda 26-37 ms'dir.
 
-**Tablo 1.** N = 5.000, sunucu açıldıktan sonra canlı alarm gecikmesi (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v6_hucreler.csv`.
+**Tablo 4.** N = 5.000, sunucu açıldıktan sonra canlı alarm gecikmesi (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v6_hucreler.csv`.
 
 | A | B | Alarm p99 tepe (ms) | >100 ms süre (sn) | Boşaltma bitişi (sn) | Sunucu CPU tepe (%) |
 |---|---|---|---|---|---|
@@ -141,7 +194,7 @@ A = {üstel, rastgeleli üstel} × B = {B0, B1, B2} = 6 hücre, her hücre 3 tek
 
 Aynı düzenek N = 10.000 ile, A × {B1, B2} = 4 hücre, her hücre 3 tekrar (12 koşu). Başlangıç yayılımı 20 sn'de sabit tutulmuştur (varış hızı iki katına çıkar). Taban 51-59 ms'dir.
 
-**Tablo 2.** N = 10.000 (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v7_hucreler.csv`.
+**Tablo 5.** N = 10.000 (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v7_hucreler.csv`.
 
 | A | B | Alarm p99 tepe (ms) | >100 ms süre (sn) | Boşaltma bitişi (sn) | Sunucu CPU tepe (%) |
 |---|---|---|---|---|---|
@@ -156,7 +209,7 @@ N = 5.000'de yeterli olan çözümlerin hiçbiri N = 10.000'de yeterli kalmaz: r
 
 Bölüm 5.6'daki sorunun yeniden bağlanmadan mı, bağlantı sonrası işten mi geldiğini ayırmak için N = 10.000'de rastgeleli kuralla B0 kontrol olarak koşulmuş; ayrıca B2'nin pencere ve aralığı büyütülmüştür (toplam boşaltma hızını düşürmek için). Üç hücre, 3 tekrar (9 koşu), izleme 180 sn. Taban 51-54 ms.
 
-**Tablo 3.** N = 10.000, rastgeleli üstel kural (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v8_hucreler.csv`.
+**Tablo 6.** N = 10.000, rastgeleli üstel kural (medyan [en küçük-en büyük]). Kaynak: `results/ozet_adim5_v8_hucreler.csv`.
 
 | Politika | Alarm p99 tepe (ms) | >100 ms süre (sn) | Boşaltma bitişi (sn) | Sunucu CPU tepe (%) |
 |---|---|---|---|---|
@@ -170,9 +223,10 @@ B0'ın tepesinin 82-112 ms olması, N = 10.000'de yaklaşık 6 sn'lik tepenin ye
 
 *Kayıp ve tekrar:* tekrar 9 koşunun hepsinde 0; bir koşuda (90 sn / 500 ms, tohum 3) 2 mesaj kayıptır.
 
-*Ön gözlem (yalnızca 100 cihaz, tek koşu, günlük `03`; Bölüm 5.1 için):* rastgeleli üstel kural tepe deneme sayısını 100'den 39'a düşürdü, toparlanmayı 2,5 sn'den 16 sn'ye uzattı. Bu, [1] ve [2]'deki bilinen eğilimle uyumlu. **Nihai bulgu olarak kullanılmayacak.**
 
 ## 6. Tartışma ve Sınırlar
+
+**Bağlanma aşaması deneylerine özgü sınırlar (Bölüm 5.1-5.3).** (i) Kesinti süresi tek (60 sn); üstel kuralın TTR'si kesinti süresine bağlı testere dişi bir fonksiyon olduğundan sonuçlar bu süreye özgüdür ve kesinti süresi taraması yapılmamıştır. (ii) Yalnızca iki cihaz sayısı (2.000, 5.000) denenmiştir. (iii) Sunucu açıkken görülen başarısız bağlantıların ve sabit kuraldaki faz etkisinin mekanizması doğrudan incelenmemiştir. (iv) Simülatörün CPU tepesi sınırın yaklaşık %61'ine çıkmıştır. (v) Koşular sırasında Docker'da başka bir projeye ait iki boşta konteyner çalışmaktaydı; etkisi ölçülmemiştir.
 
 **Bağlantı sonrası yük deneylerine özgü sınırlar.** (i) Mosquitto tek iş parçacıklıdır; bulgular çok çekirdekli bir sunucuya genellenemez. (ii) Toplayıcı tek istemcidir ve onun yavaşlaması gecikmeye karışmış olabilir; toplayıcının işlem yükü ölçülmemiştir. (iii) N = 10.000'de taban gecikmenin yükselmesi simülatörün yükünü düşündürür; doğrulanmamıştır. (iv) 39 koşunun 6'sında 1 ile 132 arasında mesaj, toplayıcıya ulaşmamıştır (toplam yaklaşık 540 bin ile 1,6 milyon mesaj içinde); nedeni açıklanmamıştır. Olası ama doğrulanmamış açıklama: sunucu durdurulurken sunucunun onaylayıp toplayıcıya henüz iletmediği, bellek içi mesajların kaybı. (v) B2 yalnızca iki ek ayarla sınanmış, ayar uzayı taranmamıştır. (vi) Biriken vital ve alarm mesajları aynı sırayla boşaltılır; alarmları önceliklendirmek gelecek çalışmadır. (vii) İş yükü (mesaj boyutu, vital ve alarm sıklığı, eşitleme boyutu) varsayımsaldır, klinik gerçekliği temsil etmez.
 
