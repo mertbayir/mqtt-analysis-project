@@ -1,0 +1,20 @@
+﻿Matris5 başladı: 2026-10-16 17:20:34  tekrar=6 cihazlar=5000 A=ustel-rastgele B=b1 sürüm=k1
+--- Blok 1 (tohum 1), sıra: ustel-rastgele/b1/5000
+17:20:34  BAŞLA adim5_ustel-rastgele_b1_n5000_s1_k1
+17:24:31  BİTTİ adim5_ustel-rastgele_b1_n5000_s1_k1
+--- Blok 2 (tohum 2), sıra: ustel-rastgele/b1/5000
+17:24:31  BAŞLA adim5_ustel-rastgele_b1_n5000_s2_k1
+17:28:26  BİTTİ adim5_ustel-rastgele_b1_n5000_s2_k1
+--- Blok 3 (tohum 3), sıra: ustel-rastgele/b1/5000
+17:28:26  BAŞLA adim5_ustel-rastgele_b1_n5000_s3_k1
+17:32:22  BİTTİ adim5_ustel-rastgele_b1_n5000_s3_k1
+--- Blok 4 (tohum 4), sıra: ustel-rastgele/b1/5000
+17:32:22  BAŞLA adim5_ustel-rastgele_b1_n5000_s4_k1
+17:36:18  BİTTİ adim5_ustel-rastgele_b1_n5000_s4_k1
+--- Blok 5 (tohum 5), sıra: ustel-rastgele/b1/5000
+17:36:18  BAŞLA adim5_ustel-rastgele_b1_n5000_s5_k1
+17:40:14  BİTTİ adim5_ustel-rastgele_b1_n5000_s5_k1
+--- Blok 6 (tohum 6), sıra: ustel-rastgele/b1/5000
+17:40:14  BAŞLA adim5_ustel-rastgele_b1_n5000_s6_k1
+17:44:10  BİTTİ adim5_ustel-rastgele_b1_n5000_s6_k1
+Matris5 bitti: 2026-10-16 17:44:10
