@@ -22,6 +22,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 16 | 16 Ekim | Adım 5 matrisi **baştan** koşuldu; yarım kalan/silinen 4 koşu geçersiz sayıldı | Docker Desktop kapanması + devam betiğindeki hata (günlük 06, "Koşu akışı"). Veri silinen koşular yeniden üretildi, hiçbir koşu "tamir" edilmedi |
 | 17 | 16 Ekim | `matris5.ps1`'e `-TamamlananiAtla` eklendi | Yarıda kesilen matrisi sürdürmek için; kullanılmadan önce kayıt defteri biçimine (adlar tırnaksız) göre düzeltildi |
 | 18 | 16 Ekim | Adım 5b: N = 10.000, başlangıç yayılımı 20 sn **sabit** tutuldu, simülatör sınırı 4 CPU / 3 GB aynı | Yalnızca N değişsin; varış hızının iki katına çıkması ölçeğin parçası (günlük 07). B2 parametreleri (30 sn / 200 ms) N ile ölçeklenmedi, bu bir sınır olarak yazıldı |
+| 19 | 16 Ekim | Adım 5c: B2 parametreleri (pencere/aralık) deney değişkeni oldu; hücre etiketi `b2-w<pencere>i<aralık>`; B0 N = 10.000'de kontrol olarak eklendi; izleme 180 sn | 07'de B2 ölçeklenmedi ve B0 bu ölçekte yoktu; sorunun kaynağını ayırmak için (günlük 08) |
 
 ## Açık kararlar
 

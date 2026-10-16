@@ -1,4 +1,4 @@
-# Adım 5: bağlantı sonrası yük ve canlı alarm gecikmesi.
+﻿# Adım 5: bağlantı sonrası yük ve canlı alarm gecikmesi.
 # Cihazlar vital bulgu ve alarm üretir; kesintide biriktirir; bağlanınca politikaya (B) göre eşitler/boşaltır.
 # Toplayıcı (ayrı konteyner) tüm mesajların gecikmesini ölçer.
 # Zaman çizelgesi (simülatör başladıktan itibaren): YayilimSn sürede ilk bağlanma, OncesiSn'de sunucu durur,
@@ -32,7 +32,9 @@ Set-Location $proje
 $klasor = Join-Path $proje "results"
 New-Item -ItemType Directory -Force $klasor | Out-Null
 
-$ad = "adim5_${A}_${B}_n${Cihaz}_s${Tohum}_${Surum}"
+# B2 varsayılan dışı parametreyle koşulursa etiket parametreyi taşır (ayrı hücre olarak analiz edilir): b2-w60i1000
+$bEtiket = if ($B -eq "b2" -and ($B2PencereSn -ne 30 -or $B2AralikMs -ne 200)) { "b2-w${B2PencereSn}i${B2AralikMs}" } else { $B }
+$ad = "adim5_${A}_${bEtiket}_n${Cihaz}_s${Tohum}_${Surum}"
 $sureSn = $OncesiSn + $KesintiSn + $SonrasiSn + 5
 $colSureSn = $sureSn + 30
 $commit = (git rev-parse --short HEAD).Trim()
@@ -106,7 +108,7 @@ Stop-Job $sampler, $sampler2; Remove-Job $sampler, $sampler2
 $kayit = Join-Path $klasor "deney_kayitlari.csv"
 $kapali = ($tStart - $tStop).TotalSeconds.ToString("0.0", $ci)
 $ayrinti = "A=$A B=$B vital=${VitalSn}sn alarm=${AlarmSn}sn mesaj=${MesajBayt}B sync=${SyncBayt}B b2=U(0,${B2PencereSn})sn+${B2AralikMs}ms. $Not"
-$satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, "$A|$B", $Cihaz, $Tohum, $sureSn,
+$satir = @($ad, (Get-Date -Format "yyyy-MM-dd HH:mm"), $commit, $kirli, "$A|$bEtiket", $Cihaz, $Tohum, $sureSn,
     "temiz", $kapali, $tStop.ToString("HH:mm:ss.fff"), $tStart.ToString("HH:mm:ss.fff"), "mosquitto:2.1.2",
     '"2 CPU, 2 GB (konteyner sinirli)"', ("`"docker-konteyner (adres=${sunucuAdr}:1883), sim 4 CPU 3 GB, toplayici 2 CPU 1 GB`""), $YayilimSn,
     ('"' + $ayrinti.Replace('"', "'") + '"')) -join ","
