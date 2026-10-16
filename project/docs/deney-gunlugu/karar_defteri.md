@@ -21,6 +21,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 15 | 15 Ekim | Bağlantı sonrası politikalar **B0/B1/B2**; eşitleme ve boşaltma yalnızca **yeniden bağlanmada** | İlk açılış yeniden bağlanma fırtınası değildir; B0 yalnızca referans (veriyi atar) |
 | 16 | 16 Ekim | Adım 5 matrisi **baştan** koşuldu; yarım kalan/silinen 4 koşu geçersiz sayıldı | Docker Desktop kapanması + devam betiğindeki hata (günlük 06, "Koşu akışı"). Veri silinen koşular yeniden üretildi, hiçbir koşu "tamir" edilmedi |
 | 17 | 16 Ekim | `matris5.ps1`'e `-TamamlananiAtla` eklendi | Yarıda kesilen matrisi sürdürmek için; kullanılmadan önce kayıt defteri biçimine (adlar tırnaksız) göre düzeltildi |
+| 18 | 16 Ekim | Adım 5b: N = 10.000, başlangıç yayılımı 20 sn **sabit** tutuldu, simülatör sınırı 4 CPU / 3 GB aynı | Yalnızca N değişsin; varış hızının iki katına çıkması ölçeğin parçası (günlük 07). B2 parametreleri (30 sn / 200 ms) N ile ölçeklenmedi, bu bir sınır olarak yazıldı |
 
 ## Açık kararlar
 
