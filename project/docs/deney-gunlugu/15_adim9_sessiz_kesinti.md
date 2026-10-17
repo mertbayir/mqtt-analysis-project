@@ -1,7 +1,7 @@
 # 15 — Adım 9: Sessiz kesinti
 
 Tarih: 17 Ekim 2026
-Durum: **Matris başlıyor** (hipotezler sonuçlardan önce yazıldı; çalışma testlerinin sonuçları yazım sırasında biliniyordu, bkz. "Çalışma testleri ve bulunan sorunlar")
+Durum: **Matris tamamlandı (12/12 koşu, sürüm s9)**. (hipotezler sonuçlardan önce yazıldı; çalışma testlerinin sonuçları yazım sırasında biliniyordu, bkz. "Çalışma testleri ve bulunan sorunlar")
 Rapor bölümü: Bulgular (5.11), Sınırlar (temiz kesinti sınırının kaldırılması)
 
 ## Amaç
@@ -50,7 +50,52 @@ Cihazlar kopmayı kalp atışı zaman aşımıyla (≈ 10-15 sn) fark eder. Zama
 
 ## Sonuçlar
 
-`[ ]` Matris bitince doldurulacak.
+### Koşu akışı (kayıt)
+
+Matris `results/matris5_20261017_2255.txt` (adı zaman damgalıdır), 12 koşu, 0 betik hatası; kod temiz (`4593548`). Analiz: `scripts/analiz_adim5.py s9` (sessiz kesintide başlama anı olay zamanlarından alınır). Bu matriste iki kesinti türünde de `AckSn = 10` açıktır.
+
+**Doğrulama (sağlama):** temiz kesinti kolu, Adım 5'in (AckSn kapalı) aynı hücreleriyle uyumlu: üstel + B1 tepe 9.176 ms (Adım 5: 9.158), rastgeleli + B1 66 ms (Adım 5: 51); yani yayın onayı zaman aşımının açık olması temiz kesintide davranışı değiştirmedi (cihaz tarafı gönderim hatası 322-616).
+
+### Hücre başına sonuçlar (N = 5.000, Mosquitto, TLS'siz, B1; medyan [en küçük-en büyük])
+
+Taban 28-34 ms.
+
+| Kesinti | A | Alarm p99 tepe (ms) | >100 ms süre (sn) | Boşaltma bitişi (sn)* | Cihaz tarafı gönderim hatası | Kopmayı fark etme (kesintiden itibaren) |
+|---|---|---|---|---|---|---|
+| temiz | üstel | **9.176** [9.167-9.256] | 19 [19-20] | 41,9 [41,5-42,4] | 433 [322-569] | ≈ 1 sn |
+| sessiz | üstel | **5.858** [5.843-6.258] | 15 [14-16] | 14,6 [14,1-14,6] | **35.020** [34.705-35.024] | ≈ 11 sn |
+| temiz | rastgeleli | 66 [54-69] | 0 | 28,8 [28,1-29,2] | 423 [325-616] | ≈ 1 sn |
+| sessiz | rastgeleli | **638** [573-769] | 4 [3-4] | 33,1 [32,4-33,5] | **34.958** [34.869-35.115] | ≈ 11 sn |
+
+\* Sunucunun açıldığı andan son biriken mesaja kadar. Sessizde cihazlar kesintiyi geç fark ettiğinden yeniden bağlanma takvimi kayar; bu yüzden süreler temiz ile birebir kıyaslanamaz.
+
+Kayıp: 12 koşunun 11'inde 0, birinde 1 (rastgeleli, sessiz, tohum 2); tekrar 12 koşuda 0.
+
+### Hipotezlerin durumu
+
+| # | Sonuç | Kanıt |
+|---|---|---|
+| HS1 | **Çürüdü** | Sessizde bağlı sayısı kesintiden ≈ 11 sn sonra düşmeye başlıyor ama %95'ten %5'e **1-2 sn'de** iniyor (temiz: anında). Cihazlar kopmayı geç fakat **eşzamanlı** fark ediyor (hepsinin yayın onayı aynı anda zaman aşımına uğruyor); beklenen "dağınık fark etme" gözlenmedi |
+| HS2 | **Çürüdü** | Üstel + B1, sessiz kesinti tepe 5.858 ms, temiz 9.176 ms: %36 düşük, %50 eşiği (≤ 4.588 ms) sağlanmadı |
+| HS3 | **Çürüdü (sessizde)** | Rastgeleli + B1: temiz 66 ms (< 300), **sessiz 638 ms** [573-769] (≥ 300): sessiz kesinti rastgeleli kuralda tepeyi ≈ 10 kat artırdı |
+| HS4 | **Destekleniyor** | Cihaz tarafı gönderim hatası sessizde ≈ 35.000 / koşu, temiz kesintide 322-616 (≈ 70-100 kat) |
+| HS5 | **Destekleniyor** | Tekrar 12 koşuda 0; kayıp en çok 1 |
+
+### Gözlemler
+
+1. **Onay zaman aşımı olmayan bir istemci sessiz kesintide süresiz askıda kalıyor** (çalışma testi; yukarıdaki "Çalışma testleri" bölümü). Sürekli yayın yapan cihazda kalp atışı kontrolü de tetiklenmiyor: kopmayı yalnızca yayın onayı zaman aşımı ya da TCP yeniden iletim zaman aşımı (dakikalar) ortaya çıkarır.
+2. **Sessiz kesinti, beklenen "dağınık fark etme" etkisini yaratmadı:** tüm cihazlar kopmayı ≈ 11 sn gecikmeyle ama birlikte fark etti. İzdiham dağılmadı.
+3. **Üstel + B1'de tepe %36 düştü (9,2 → 5,9 sn), ama bu bir dağılma değil, takvim kayması gibi görünüyor:** cihazlar kesintiyi 11 sn geç fark edince geri çekilme takvimleri aynı kadar kayıyor, sunucu açıldıktan kısa süre sonra bir deneme dalgası denk geliyor ve birikmiş mesaj daha az (kesinti cihaz tarafında ≈ 50 sn). Test edilmedi.
+4. **Rastgeleli + B1'de sessiz kesinti kötüleştirdi** (66 → 638 ms) ve boşaltma tepe hızı 14,7 → 24 bin mesaj/sn çıktı: bağlantılar sunucu açıldıktan sonra daha kümelenmiş geri geliyor. Olası açıklama (test edilmedi): sessiz kesintide başarısız bağlanma denemeleri hemen reddedilmek yerine zaman aşımına (≈ 5 sn) uğruyor; ağ geri gelince bekleyen SYN yeniden iletimleri eşzamanlı tamamlanıyor.
+5. **Bedel:** her koşuda ≈ 35 bin cihaz tarafı gönderim hatası (cihaz kopmayı fark edene kadar yayınlar onaysız kalıyor, ardından birikime alınıyor); mesaj kaybı yok (en çok 1).
+
+### Sınırlar ve açık noktalar
+
+- Sessiz kesinti Docker ağından kopma ile taklit edildi (tek yönlü paket kaybı, kısmi kopma, gecikme dalgalanması yok); yalnızca B1, N = 5.000, Mosquitto, TLS'siz denendi; B2/B3, TLS ve EMQX sessiz kesintide denenmedi.
+- İstemci tarafında yayın onayı zaman aşımının açık olması bir koşuldur: kapalıyken (önceki adımlar) cihazlar sessiz kesintiyi fark etmez (sonuçlar Adım 5-8 ile doğrudan karşılaştırılmaz).
+- Hücre başına 3 tekrar; sürelerin kayması ve rastgeleli kuraldaki kötüleşmenin nedenleri test edilmedi.
+- Toplayıcı da aynı ağdan koptuğu için ölçüm kolu kesintiyi yaşar (günlük 09'daki yeniden abone olma penceresi).
+- Adım 5'in tüm sınırları geçerli.
 
 ## Sınırlar (önceden bilinen)
 

@@ -117,7 +117,7 @@ Bu bölüm, ölçüm düzeneğinin kendisinin sonuçları nasıl çarpıtabildi�
 
 ## 5. Bulgular
 
-*Not (yazım): 5.1-5.3 (sürüm v5), 5.4 (t1), 5.5-5.7 (v6, v7, v8), 5.8 (tls6), 5.9 (e1, e2) ve 5.10 (p1, p2) yazıldı. Son sürümde bu not silinecek.*
+*Not (yazım): 5.1-5.3 (sürüm v5), 5.4 (t1), 5.5-5.7 (v6, v7, v8), 5.8 (tls6), 5.9 (e1, e2), 5.10 (p1, p2) ve 5.11 (s9) yazıldı. Son sürümde bu not silinecek.*
 
 Bölüm 5.1-5.3'te sunucu açılışında yalnızca *bağlanma* aşaması ölçülür (iş yükü yok); 5.5-5.7 bağlantı sonrası işi ekler. Hipotezler (H1-H4) koşulardan önce günlüğe yazılmıştır (`05_adim4_matris_v5.md`). Tüm koşular IP ile bağlanır (Bölüm 4.2). Tasarım: kural (sabit, üstel, rastgeleli üstel) × N (2.000, 5.000) = 6 hücre, her hücre 3 tekrar (tohum 1-3), bloklar içinde rastgele sırayla (18 koşu, sürüm v5); kesinti temiz, 60 sn.
 
@@ -328,6 +328,23 @@ Bölüm 5.5'teki düzenek (N = 5.000, TLS'siz, kural × B0/B1/B2, 3 tekrar) ikin
 
 *Sınırlar:* iki koşul ve tek sunucu (EMQX'te B3 denenmemiştir); hücre başına 3 tekrar; alarm ve vital ayrımı ile alarm sıklığı varsayımsaldır; üstel + TLS'te B3 bedelinin ve P1'deki beklenmedik düşüşün mekanizması test edilmemiştir; yaş yüzdelikleri saniye başına yüzdeliklerden hesaplanmış yaklaşık değerlerdir.
 
+### 5.11 Sessiz kesinti (sürüm s9)
+
+Bölüm 5.5'ten itibaren kesinti temizdi: sunucu kapanıyor, bağlantılar anında sonlanıyordu. Gerçek kesintilerin çoğu sessizdir (ağ kopar, soket kapanmaz). Bu bölümde sunucu, kapatılmak yerine Docker ağından koparılmış (60 sn sonra aynı IP ile geri bağlanmıştır) ve iki kesinti türü aynı blokta karşılaştırılmıştır: kesinti türü (temiz, sessiz) × bekleme kuralı (üstel, rastgeleli üstel) × B1, N = 5.000, Mosquitto, TLS'siz, 3 tekrar, 12 koşu (`15_adim9_sessiz_kesinti.md`). Hipotezler (HS1-HS5) koşulardan önce yazılmış, çalışma testlerinin sonucu yazım sırasında biliniyordu. **Önemli bir koşul:** çalışma testinde, yayın onayı (PUBACK) beklerken zaman aşımı sonrası bağlantıyı kapatmayan bir istemcinin sessiz kesintiyi 40 sn boyunca hiç fark etmediği görüldü (bağlı sayısı değişmedi): sürekli yayın yapan cihazda kalp atışı kontrolü tetiklenmiyor ve MQTTnet yayın zaman aşımını hata olarak veriyor ama bağlantıyı kapatmıyor. Bu yüzden bu matriste yayın onayı zaman aşımında bağlantıyı kapatma seçeneği **her iki kesinti türünde de** açıktır; Bölüm 5.5-5.10'daki koşularda kapalıydı (temiz kesinti kolunun Bölüm 5.5 ile uyumu bir sağlama olarak görüldü: üstel + B1 tepesi 9.176 ve 9.158 ms).
+
+**Tablo 11.** Sessiz ve temiz kesinti, N = 5.000, Mosquitto, TLS'siz, B1 (medyan [en küçük-en büyük]). Kaynak: `scripts/analiz_adim5.py s9`, `results/adim5_*_s9.*`.
+
+| Kesinti | A | Alarm p99 tepe (ms) | >100 ms süre (sn) | Cihaz tarafı gönderim hatası | Kopmayı fark etme |
+|---|---|---|---|---|---|
+| temiz | üstel | 9.176 [9.167-9.256] | 19 [19-20] | 433 [322-569] | ≈ 1 sn |
+| sessiz | üstel | 5.858 [5.843-6.258] | 15 [14-16] | 35.020 [34.705-35.024] | ≈ 11 sn |
+| temiz | rastgeleli | 66 [54-69] | 0 | 423 [325-616] | ≈ 1 sn |
+| sessiz | rastgeleli | 638 [573-769] | 4 [3-4] | 34.958 [34.869-35.115] | ≈ 11 sn |
+
+**Sessiz kesinti, beklenen dağınık fark etmeyi yaratmadı.** Cihazlar kopmayı kesintiden yaklaşık 11 sn sonra fark etti ama hepsi birlikte: bağlı sayısı %95'ten %5'e 1-2 sn'de indi (temiz kesintide anında); yani izdiham dağılmadı, yalnızca 11 sn kaydı (HS1 çürüdü). Üstel + B1'de tepe %36 düştü (9,2 → 5,9 sn; HS2'deki %50 eşiği sağlanmadı); bu, bir dağılmadan çok geri çekilme takviminin kaymasına benziyor (cihazlar kesintiyi geç fark edince takvim aynı kadar kayar ve sunucu açıldıktan kısa süre sonra bir deneme dalgası denk gelir), ancak bu açıklama test edilmedi. **Rastgeleli + B1'de ise sessiz kesinti durumu kötüleştirdi:** tepe 66 ms'den 638 ms'ye çıktı (HS3 sessizde çürüdü) ve boşaltma tepe hızı 14,7 bin'den yaklaşık 24 bin mesaj/sn'ye yükseldi. Olası açıklama (test edilmedi): sessiz kesintide başarısız denemeler anında reddedilmek yerine zaman aşımına uğruyor ve ağ geri gelince bekleyen bağlantı isteklerinin yeniden iletimleri eşzamanlı tamamlanıyor. Bedel olarak cihazlar kopmayı fark edene kadar yayın yapmaya devam ediyor: koşu başına yaklaşık 35 bin cihaz tarafı gönderim hatası (temiz kesintide 322-616; HS4 desteklendi); mesaj kaybı yok (en çok 1; HS5).
+
+*Sınırlar:* sessiz kesinti Docker ağından kopma ile taklit edilmiştir (tek yönlü paket kaybı, kısmi kopma ve gecikme dalgalanması yok); yalnızca B1, N = 5.000, Mosquitto ve TLS'siz denenmiştir; B2/B3, TLS ve EMQX sessiz kesintide denenmemiştir. Yayın onayı zaman aşımının açık olması istemci davranışının bir parametresidir ve Bölüm 5.5-5.10 ile doğrudan karşılaştırmayı sınırlar. Süre kaymasının ve rastgeleli kuraldaki kötüleşmenin nedenleri test edilmemiştir; hücre başına 3 tekrar vardır.
+
 ## 6. Tartışma ve Sınırlar
 
 ### 6.1 Ana bulgular
@@ -355,7 +372,7 @@ Aşağıdakiler bu ortamdaki gözlemlerden çıkan ön önerilerdir, genel kural
 
 **Yapı geçerliliği.** Canlı alarm gecikmesi saniyelik p99 ile temsil edilmiştir; "alarm" ve "vital" ayrımı ve mesaj sıklığı varsayımsaldır. 100 ms eşiği klinik bir eşik değildir, yalnızca taban düzeyine göre bir referanstır. Gecikme, cihazın planlanan gönderim anından ölçülür (açık döngü), yani cihaz tarafı kuyruklanması da dahildir.
 
-**Dış geçerlilik.** Tek makine, sanal cihazlar, sıfır gecikmeli ağ, temiz (sessiz olmayan) tek kesinti türü, TLS sertifikası doğrulanmadan, yalnızca iki sunucu ve ikisi de tek düğüm. Sonuçlar mutlak kapasite iddiası taşımaz; yönlerin (sıralamanın) başka ortamlara taşınıp taşınmayacağı sınanmamıştır.
+**Dış geçerlilik.** Tek makine, sanal cihazlar, sıfır gecikmeli ağ, iki kesinti türü (temiz; sessiz kesinti yalnızca B1, N = 5.000, Mosquitto, TLS'siz denendi), TLS sertifikası doğrulanmadan, yalnızca iki sunucu ve ikisi de tek düğüm. Sonuçlar mutlak kapasite iddiası taşımaz; yönlerin (sıralamanın) başka ortamlara taşınıp taşınmayacağı sınanmamıştır.
 
 ### 6.4 Sınırlar (ayrıntı)
 
@@ -365,9 +382,9 @@ Aşağıdakiler bu ortamdaki gözlemlerden çıkan ön önerilerdir, genel kural
 
 ## 7. Sonuç ve Gelecek Çalışma
 
-Bu çalışma, çok cihazlı bir MQTT 5 sisteminde sunucu kesintisinden sonra toplu yeniden bağlanmayı ve cihazların bağlandıktan sonra yaptığı işi (durum eşitleme ve biriken mesajların boşaltılması) canlı alarm gecikmesi açısından, iki sunucuda, tekrarlı ve kayıtlı deneylerle ölçmüştür. Başlıca sonuçlar: (i) bağlantı sonrası iş, canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırabilir (Mosquitto, TLS'siz, 5.000 cihazda yaklaşık 30 ms'den yaklaşık 9 sn); (ii) dönüşü rastgele dağıtmak sunucu zorlandığında (TLS, çok sayıda cihaz) toparlanmayı ve gecikmeyi belirgin biçimde düzeltir, TLS'siz ve rahat ortamda ise yalnızca bedel getirir; (iii) boşaltmayı zamana yaymak (B2), uygun ayarla doymuş ortamlarda gecikmeyi yaklaşık %89-99 düşürür; ancak ayar yüke göre büyütülmelidir (N = 10.000'de varsayılan 30 sn / 200 ms üstelde yalnızca %53 düşürmüş, rastgelelide düşürmemiştir) ve bedeli boşaltmanın ve birikmiş verinin uzamasıdır; (iv) bu sıralama çok çekirdekli EMQX'te de geçerlidir, çekirdek eklemek tek başına çözüm değildir; (v) en iyi politika ortama göre değişir. (vi) Alarmları öne almak (B3), rastgeleli kuralda birikmiş alarmın yaşını B1 düzeyine (medyan yaklaşık 37 sn) indirir ve canlı alarmı B2 kadar korur; ancak üstel dönüş ve TLS'te canlı alarmı B2'ye göre 2,3 kat kötüleştirir. Bu sonuçlar bir ölçüm çalışmasının bulgularıdır: yeni bir algoritma önerilmemiştir, B3 küçük bir tasarım fikridir ve her bulgu bu tek makineli, sanal cihazlı düzeneğe göre yorumlanmalıdır.
+Bu çalışma, çok cihazlı bir MQTT 5 sisteminde sunucu kesintisinden sonra toplu yeniden bağlanmayı ve cihazların bağlandıktan sonra yaptığı işi (durum eşitleme ve biriken mesajların boşaltılması) canlı alarm gecikmesi açısından, iki sunucuda, tekrarlı ve kayıtlı deneylerle ölçmüştür. Başlıca sonuçlar: (i) bağlantı sonrası iş, canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırabilir (Mosquitto, TLS'siz, 5.000 cihazda yaklaşık 30 ms'den yaklaşık 9 sn); (ii) dönüşü rastgele dağıtmak sunucu zorlandığında (TLS, çok sayıda cihaz) toparlanmayı ve gecikmeyi belirgin biçimde düzeltir, TLS'siz ve rahat ortamda ise yalnızca bedel getirir; (iii) boşaltmayı zamana yaymak (B2), uygun ayarla doymuş ortamlarda gecikmeyi yaklaşık %89-99 düşürür; ancak ayar yüke göre büyütülmelidir (N = 10.000'de varsayılan 30 sn / 200 ms üstelde yalnızca %53 düşürmüş, rastgelelide düşürmemiştir) ve bedeli boşaltmanın ve birikmiş verinin uzamasıdır; (iv) bu sıralama çok çekirdekli EMQX'te de geçerlidir, çekirdek eklemek tek başına çözüm değildir; (v) en iyi politika ortama göre değişir. (vi) Alarmları öne almak (B3), rastgeleli kuralda birikmiş alarmın yaşını B1 düzeyine (medyan yaklaşık 37 sn) indirir ve canlı alarmı B2 kadar korur; ancak üstel dönüş ve TLS'te canlı alarmı B2'ye göre 2,3 kat kötüleştirir. (vii) Sessiz kesintide (ağdan kopma; yalnızca B1, N = 5.000) cihazlar kopmayı yaklaşık 11 sn geç ama eşzamanlı fark eder, izdiham dağılmaz; rastgeleli kuralda tepe 66 ms'den 638 ms'ye çıkar; yayın onayı zaman aşımı olmayan bir istemci sessiz kesintiyi hiç fark etmeyebilir (Bölüm 5.11). Bu sonuçlar bir ölçüm çalışmasının bulgularıdır: yeni bir algoritma önerilmemiştir, B3 küçük bir tasarım fikridir ve her bulgu bu tek makineli, sanal cihazlı düzeneğe göre yorumlanmalıdır.
 
-Gelecek çalışma adayları: sessiz kesinti (ağın sessizce kopması), TLS'te oturum devam ettirme ve toplayıcının da TLS'li olması, kenar geçidi katmanı, sunucunun "ne kadar sonra gel" bilgisi vermesi, N ve toplam yüke göre B2 parametresinin otomatik ayarı, kayıp mekanizmasının ham kayıtla incelenmesi, farklı kesinti süreleri.
+Gelecek çalışma adayları: sessiz kesintinin B2/B3, TLS ve EMQX ile de denenmesi, TLS'te oturum devam ettirme ve toplayıcının da TLS'li olması, kenar geçidi katmanı, sunucunun "ne kadar sonra gel" bilgisi vermesi, N ve toplam yüke göre B2 parametresinin otomatik ayarı, kayıp mekanizmasının ham kayıtla incelenmesi, farklı kesinti süreleri.
 
 ## Kaynakça
 

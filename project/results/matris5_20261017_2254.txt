@@ -1,0 +1,29 @@
+﻿Matris5 başladı: 2026-10-17 22:54:40  tekrar=3 cihazlar=5000 A=ustel,ustel-rastgele B=b1 sürüm=s9
+--- Blok 1 (tohum 1), sıra: ustel/b1/5000  ustel/b1/5000  ustel-rastgele/b1/5000  ustel-rastgele/b1/5000
+22:54:40  BAŞLA adim5_ustel_b1-sessiz_n5000_s1_s9
+22:58:45  BİTTİ adim5_ustel_b1-sessiz_n5000_s1_s9
+22:58:45  BAŞLA adim5_ustel_b1_n5000_s1_s9
+23:02:50  BİTTİ adim5_ustel_b1_n5000_s1_s9
+23:02:50  BAŞLA adim5_ustel-rastgele_b1_n5000_s1_s9
+23:06:55  BİTTİ adim5_ustel-rastgele_b1_n5000_s1_s9
+23:06:55  BAŞLA adim5_ustel-rastgele_b1-sessiz_n5000_s1_s9
+23:11:01  BİTTİ adim5_ustel-rastgele_b1-sessiz_n5000_s1_s9
+--- Blok 2 (tohum 2), sıra: ustel/b1/5000  ustel-rastgele/b1/5000  ustel-rastgele/b1/5000  ustel/b1/5000
+23:11:01  BAŞLA adim5_ustel_b1_n5000_s2_s9
+23:15:06  BİTTİ adim5_ustel_b1_n5000_s2_s9
+23:15:06  BAŞLA adim5_ustel-rastgele_b1_n5000_s2_s9
+23:19:11  BİTTİ adim5_ustel-rastgele_b1_n5000_s2_s9
+23:19:11  BAŞLA adim5_ustel-rastgele_b1-sessiz_n5000_s2_s9
+23:23:17  BİTTİ adim5_ustel-rastgele_b1-sessiz_n5000_s2_s9
+23:23:17  BAŞLA adim5_ustel_b1-sessiz_n5000_s2_s9
+23:27:22  BİTTİ adim5_ustel_b1-sessiz_n5000_s2_s9
+--- Blok 3 (tohum 3), sıra: ustel/b1/5000  ustel-rastgele/b1/5000  ustel/b1/5000  ustel-rastgele/b1/5000
+23:27:22  BAŞLA adim5_ustel_b1-sessiz_n5000_s3_s9
+23:31:26  BİTTİ adim5_ustel_b1-sessiz_n5000_s3_s9
+23:31:26  BAŞLA adim5_ustel-rastgele_b1-sessiz_n5000_s3_s9
+23:35:32  BİTTİ adim5_ustel-rastgele_b1-sessiz_n5000_s3_s9
+23:35:32  BAŞLA adim5_ustel_b1_n5000_s3_s9
+23:39:38  BİTTİ adim5_ustel_b1_n5000_s3_s9
+23:39:38  BAŞLA adim5_ustel-rastgele_b1_n5000_s3_s9
+23:43:43  BİTTİ adim5_ustel-rastgele_b1_n5000_s3_s9
+Matris5 bitti: 2026-10-17 23:43:43
