@@ -1,0 +1,229 @@
+cihaz=1000 sunucu=172.21.0.2:1883 süre=225sn tohum=1 politika=RastgeleliUstelGeriCekilme(ilkAralik=0-5sn, ilk=1sn, tavan=30sn, sonraki=U(0.5W,W))
+t=  1sn  bağlı=  51  deneme/sn=  52  hata/sn=   0
+t=  2sn  bağlı= 103  deneme/sn=  51  hata/sn=   0
+t=  3sn  bağlı= 153  deneme/sn=  50  hata/sn=   0
+t=  4sn  bağlı= 203  deneme/sn=  50  hata/sn=   0
+t=  5sn  bağlı= 253  deneme/sn=  50  hata/sn=   0
+t=  6sn  bağlı= 301  deneme/sn=  48  hata/sn=   0
+t=  7sn  bağlı= 352  deneme/sn=  52  hata/sn=   0
+t=  8sn  bağlı= 402  deneme/sn=  49  hata/sn=   0
+t=  9sn  bağlı= 452  deneme/sn=  50  hata/sn=   0
+t= 10sn  bağlı= 504  deneme/sn=  52  hata/sn=   0
+t= 11sn  bağlı= 553  deneme/sn=  50  hata/sn=   0
+t= 12sn  bağlı= 602  deneme/sn=  49  hata/sn=   0
+t= 13sn  bağlı= 654  deneme/sn=  52  hata/sn=   0
+t= 14sn  bağlı= 704  deneme/sn=  49  hata/sn=   0
+t= 15sn  bağlı= 754  deneme/sn=  50  hata/sn=   0
+t= 16sn  bağlı= 805  deneme/sn=  51  hata/sn=   0
+t= 17sn  bağlı= 854  deneme/sn=  50  hata/sn=   0
+t= 18sn  bağlı= 905  deneme/sn=  51  hata/sn=   0
+t= 19sn  bağlı= 955  deneme/sn=  50  hata/sn=   0
+t= 20sn  bağlı=1000  deneme/sn=  44  hata/sn=   0
+t= 21sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 22sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 23sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 24sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 25sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 26sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 27sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 28sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 29sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 30sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 31sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 32sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 33sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 34sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 35sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 36sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 37sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 38sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 39sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t= 40sn  bağlı=   0  deneme/sn=  17  hata/sn=  13
+t= 41sn  bağlı=   0  deneme/sn= 198  hata/sn=  29
+t= 42sn  bağlı=   0  deneme/sn= 242  hata/sn=   0
+t= 43sn  bağlı=   0  deneme/sn= 197  hata/sn=   0
+t= 44sn  bağlı=   0  deneme/sn= 202  hata/sn=   0
+t= 45sn  bağlı=   0  deneme/sn= 186  hata/sn=   0
+t= 46sn  bağlı=   0  deneme/sn=   0  hata/sn= 177
+t= 47sn  bağlı=   0  deneme/sn=  76  hata/sn= 243
+t= 48sn  bağlı=   0  deneme/sn= 205  hata/sn= 202
+t= 49sn  bağlı=   0  deneme/sn= 215  hata/sn= 201
+t= 50sn  bağlı=   0  deneme/sn= 223  hata/sn= 177
+t= 51sn  bağlı=   0  deneme/sn= 204  hata/sn=   0
+t= 52sn  bağlı=   0  deneme/sn=  77  hata/sn=  83
+t= 53sn  bağlı=   0  deneme/sn=   0  hata/sn= 201
+t= 54sn  bağlı=   0  deneme/sn=  12  hata/sn= 218
+t= 55sn  bağlı=   0  deneme/sn=  94  hata/sn= 222
+t= 56sn  bağlı=   0  deneme/sn= 181  hata/sn= 203
+t= 57sn  bağlı=   0  deneme/sn= 202  hata/sn=  73
+t= 58sn  bağlı=   0  deneme/sn= 204  hata/sn=   0
+t= 59sn  bağlı=   0  deneme/sn= 181  hata/sn=  12
+t= 60sn  bağlı=   0  deneme/sn=  90  hata/sn=  94
+t= 61sn  bağlı=   0  deneme/sn=  22  hata/sn= 182
+t= 62sn  bağlı=   0  deneme/sn=   9  hata/sn= 204
+t= 63sn  bağlı=   0  deneme/sn=   5  hata/sn= 205
+t= 64sn  bağlı=   0  deneme/sn=  13  hata/sn= 180
+t= 65sn  bağlı=   0  deneme/sn=  54  hata/sn=  88
+t= 66sn  bağlı=   0  deneme/sn=  95  hata/sn=  21
+t= 67sn  bağlı=   0  deneme/sn= 153  hata/sn=   9
+t= 68sn  bağlı=   0  deneme/sn= 182  hata/sn=   5
+t= 69sn  bağlı=   0  deneme/sn= 179  hata/sn=  13
+t= 70sn  bağlı=   0  deneme/sn= 137  hata/sn=  54
+t= 71sn  bağlı=   0  deneme/sn=  93  hata/sn=  95
+t= 72sn  bağlı=   0  deneme/sn=  43  hata/sn= 153
+t= 73sn  bağlı=   0  deneme/sn=  10  hata/sn= 186
+t= 74sn  bağlı=   0  deneme/sn=   2  hata/sn= 176
+t= 75sn  bağlı=   0  deneme/sn=   8  hata/sn= 136
+t= 76sn  bağlı=   0  deneme/sn=   7  hata/sn=  96
+t= 77sn  bağlı=   0  deneme/sn=   4  hata/sn=  40
+t= 78sn  bağlı=   0  deneme/sn=   5  hata/sn=  10
+t= 79sn  bağlı=   0  deneme/sn=  15  hata/sn=   2
+t= 80sn  bağlı=   0  deneme/sn=  62  hata/sn=  40
+t= 81sn  bağlı=   0  deneme/sn=  44  hata/sn=   0
+t= 82sn  bağlı=   0  deneme/sn=  50  hata/sn=   0
+t= 83sn  bağlı=   0  deneme/sn= 126  hata/sn=  42
+t= 84sn  bağlı=   0  deneme/sn= 120  hata/sn=   0
+t= 85sn  bağlı=   0  deneme/sn=  85  hata/sn=  20
+t= 86sn  bağlı=   0  deneme/sn= 120  hata/sn=  44
+t= 87sn  bağlı=   0  deneme/sn= 138  hata/sn=  51
+t= 88sn  bağlı=   0  deneme/sn=  67  hata/sn= 126
+t= 89sn  bağlı=   0  deneme/sn=  48  hata/sn= 120
+t= 90sn  bağlı=   0  deneme/sn=  65  hata/sn=  85
+t= 91sn  bağlı=   0  deneme/sn=  23  hata/sn= 123
+t= 92sn  bağlı=   0  deneme/sn=   3  hata/sn= 170
+t= 93sn  bağlı=   0  deneme/sn=   6  hata/sn=  54
+t= 94sn  bağlı=   0  deneme/sn=   1  hata/sn=  45
+t= 95sn  bağlı=   0  deneme/sn=   3  hata/sn=  56
+t= 96sn  bağlı=   0  deneme/sn=   5  hata/sn=  12
+t= 97sn  bağlı=   0  deneme/sn=   2  hata/sn=   2
+t= 98sn  bağlı=   0  deneme/sn=   4  hata/sn=  21
+t= 99sn  bağlı=   0  deneme/sn=   7  hata/sn=   0
+t=100sn  bağlı=   0  deneme/sn=   6  hata/sn=   0
+t=101sn  bağlı=   5  deneme/sn=  10  hata/sn=  18
+t=102sn  bağlı=  13  deneme/sn=   8  hata/sn=   0
+t=103sn  bağlı=  34  deneme/sn=  22  hata/sn=   0
+t=104sn  bağlı=  65  deneme/sn=  30  hata/sn=   0
+t=105sn  bağlı=  95  deneme/sn=  30  hata/sn=   0
+t=106sn  bağlı= 133  deneme/sn=  38  hata/sn=   0
+t=107sn  bağlı= 187  deneme/sn=  54  hata/sn=   0
+t=108sn  bağlı= 241  deneme/sn=  54  hata/sn=   0
+t=109sn  bağlı= 300  deneme/sn=  59  hata/sn=   0
+t=110sn  bağlı= 357  deneme/sn=  57  hata/sn=   0
+t=111sn  bağlı= 412  deneme/sn=  55  hata/sn=   0
+t=112sn  bağlı= 478  deneme/sn=  66  hata/sn=   0
+t=113sn  bağlı= 547  deneme/sn=  69  hata/sn=   0
+t=114sn  bağlı= 614  deneme/sn=  68  hata/sn=   0
+t=115sn  bağlı= 677  deneme/sn=  62  hata/sn=   0
+t=116sn  bağlı= 739  deneme/sn=  63  hata/sn=   0
+t=117sn  bağlı= 799  deneme/sn=  59  hata/sn=   0
+t=118sn  bağlı= 838  deneme/sn=  40  hata/sn=   0
+t=119sn  bağlı= 879  deneme/sn=  41  hata/sn=   0
+t=120sn  bağlı= 915  deneme/sn=  35  hata/sn=   0
+t=121sn  bağlı= 944  deneme/sn=  31  hata/sn=   0
+t=122sn  bağlı= 961  deneme/sn=  15  hata/sn=   0
+t=123sn  bağlı= 970  deneme/sn=   9  hata/sn=   0
+t=124sn  bağlı= 982  deneme/sn=  12  hata/sn=   0
+t=125sn  bağlı= 988  deneme/sn=   6  hata/sn=   0
+t=126sn  bağlı= 994  deneme/sn=   6  hata/sn=   0
+t=127sn  bağlı= 996  deneme/sn=   2  hata/sn=   0
+t=128sn  bağlı= 997  deneme/sn=   1  hata/sn=   0
+t=129sn  bağlı= 998  deneme/sn=   1  hata/sn=   0
+t=130sn  bağlı= 999  deneme/sn=   1  hata/sn=   0
+t=131sn  bağlı=1000  deneme/sn=   1  hata/sn=   0
+t=132sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=133sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=134sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=135sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=136sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=137sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=138sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=139sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=140sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=141sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=142sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=143sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=144sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=145sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=146sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=147sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=148sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=149sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=150sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=151sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=152sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=153sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=154sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=155sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=156sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=157sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=158sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=159sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=160sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=161sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=162sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=163sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=164sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=165sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=166sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=167sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=168sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=169sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=170sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=171sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=172sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=173sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=174sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=175sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=176sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=177sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=178sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=179sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=180sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=181sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=182sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=183sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=184sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=185sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=186sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=187sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=188sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=189sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=190sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=191sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=192sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=193sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=194sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=195sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=196sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=197sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=198sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=199sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=200sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=201sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=202sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=203sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=204sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=205sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=206sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=207sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=208sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=209sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=210sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=211sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=212sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=213sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=214sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=215sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=216sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=217sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=218sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=219sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=220sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=221sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=222sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+t=223sn  bağlı=1000  deneme/sn=   0  hata/sn=   0
+Toplamlar: {"uretilen_vital":104962,"uretilen_alarm":20991,"canli_gonderilen":82236,"biriken_eklenen":43717,"atilan_biriken":0,"bosaltilan":43717,"gonderim_hatasi":14,"erken_uyanma_sayisi":23738,"en_buyuk_erken_uyanma_ms":15,"sync_tamam":1000,"sync_hata":0}
+Hata türleri:
+  BaglantiZamanAsimi: 4824
+  MqttCommunicationException: 208
+Bitti.

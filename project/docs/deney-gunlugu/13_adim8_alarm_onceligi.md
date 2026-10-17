@@ -1,7 +1,7 @@
 # 13 — Adım 8: Alarm önceliği (B3) ve birikmiş alarmın yaşı
 
 Tarih: 17 Ekim 2026
-Durum: **Tasarım** (kod henüz yazılmadı: EMQX matrisleri (günlük 12) çalışırken `src/` ve `scripts/` değiştirilmez, çünkü her koşu imajı o anki koddan derler). Hipotezler sonuçlardan önce yazıldı.
+Durum: **Kod yazıldı (`c54fe16`), çalışma testi geçti, matrisler başlıyor.** Hipotezler sonuçlardan önce yazıldı; çalışma testi yazım sırasında biliniyordu, bkz. "Çalışma testi". (Kod, EMQX matrisleri bittikten sonra yazıldı: koşular sırasında `src/` ve `scripts/` değiştirilmez, çünkü her koşu imajı o anki koddan derler.)
 Rapor bölümü: Bulgular (5.10 birikmiş alarmın yaşı, 5.11 B3), Tartışma
 Önceki adımlar: 06-08 (B0/B1/B2), 11 (TLS)
 
@@ -41,7 +41,11 @@ Okuma: B2 canlı alarmı korurken birikmiş alarmı yaklaşık 20-50 sn (p50) ge
 | Politika | B3 = bağlanır bağlanmaz birikmiş **alarmlar peş peşe** gönderilir (gecikme yok, eşitlemeden önce); sonra B2 gibi: U(0, pencere) gecikme, eşitleme, kalan (vital) mesajlar aralıklı |
 | Parametre | Pencere ve aralık B2 ile aynı (`B2_WINDOW_SEC`, `B2_INTERVAL_MS`); etiket `b3` (varsayılan 30/200) ya da `b3-w90i500` |
 | Yeni ölçüt | Biriken alarmın yaşı (p50, p95, en büyük); `biriken_alarm` sınıfından, `analiz_adim5.py`'ye eklenecek |
-| Değişecek dosyalar (matrisler bitince) | `src/Simulator/PostConnectPolicy.cs` (B3Alarm), `Device.cs` (alarm önce boşaltma), `Program.cs` (`POLICY_B=b3`), `adim5.ps1` (ValidateSet, etiket), `matris5.ps1`, `analiz_adim5.py`, `web_uret.py`, `sablon.html` (etiketler) |
+| Değişen dosyalar | `src/Simulator/PostConnectPolicy.cs` (`B3AlarmOnce`, arayüze `AlarmOnce`), `Device.cs` (`BaglantiSonrasiAsync` başında alarm-önce boşaltma; olay `alarm_flush_bitti`), `Program.cs` (`POLICY_B=b3`), `adim5.ps1` / `matris5.ps1` (b3 ve `b3-w..i..` etiketi), `analiz_adim5.py` (birikmiş alarmın yaşı, `alarm_flush_bitis_max_sn`). Web arayüzü (`web_uret.py`, `sablon.html`) koşular bitince güncellenir |
+
+## Çalışma testi (nihai veri değil)
+
+`adim5_ustel-rastgele_b3_n1000_s1_b3test` (N = 1.000, rastgeleli A, B3 30 sn / 200 ms, tek koşu, TLS'siz, izleme 120 sn): B3 tasarlandığı gibi çalıştı. Tüm cihazlar `alarm_flush_bitti` (1.000) ve `flush_bitti` (1.000) olayı yazdı; biriken alarm 7.281 adet; **alarm boşaltması en geç sunucu açılışından 30,1 sn sonra bitti** (yeniden bağlanma süresiyle sınırlı), vital boşaltma 62,3 sn'de; biriken alarmın yaşı p50 36,9 / p95 77,8 / en büyük 85,4 sn; canlı alarm tepe p99 24 ms; kayıp 0, tekrar 0. Analiz betiğindeki yeni ölçütler v6 verisinde önceki hesapla birebir aynı çıktı.
 
 ## Hipotezler (matris öncesi yazıldı)
 
