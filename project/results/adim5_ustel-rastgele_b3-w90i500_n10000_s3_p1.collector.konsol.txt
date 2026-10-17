@@ -1,0 +1,4 @@
+toplayıcı: sunucu=172.21.0.2:1883 süre=315sn sync=4096B çıktı=/results/adim5_ustel-rastgele_b3-w90i500_n10000_s3_p1.collector.csv
+15:23:02.757 toplayıcı bağlandı ve abone oldu
+15:24:45.785 toplayıcı bağlandı ve abone oldu
+toplayıcı bitti.

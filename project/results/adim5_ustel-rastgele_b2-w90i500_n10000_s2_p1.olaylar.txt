@@ -1,0 +1,5 @@
+﻿17:55:45.582  simulator basladi
+17:56:25.593  docker stop
+17:56:26.979  docker stop bitti
+17:57:26.993  docker start
+17:57:27.810  sunucu portu acik (docker start'tan sonra 0.82 sn)

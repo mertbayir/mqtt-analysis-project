@@ -4,17 +4,17 @@
 
 **Yazar:** Mert Bayır  
 **Ders:** Bilimsel Araştırma, Proje Hazırlama ve Seminer, Sakarya Üniversitesi  
-**Durum:** TASLAK. Deneyler Bölüm 5.1-5.9 için tamamlandı; alarm önceliği deneyi (Bölüm 5.10) sürüyor. `[ ]` işaretli yerler doldurulacak.
+**Durum:** TASLAK. Tüm deneyler (Bölüm 5.1-5.10) tamamlandı. `[ ]` işaretli yerler (ilgili çalışmalar, kaynak künyeleri) doldurulacak.
 
 ---
 
 ## Özet
 
-`[ ]` Sonuçlar belli olunca yazılacak. Yapı: problem (1 cümle), yöntem (2 cümle), bulgular (2-3 cümle, sayılar `ozet.ps1` çıktısından), sınır ve sonuç (1 cümle). Yaklaşık 150-200 sözcük.
+Çok sayıda cihazın tek bir MQTT 5 sunucusuna bağlandığı sistemlerde, sunucu kesintisinden sonra cihazların aynı anda yeniden bağlanması ve bağlandıktan sonra yaptıkları işler (durum eşitleme, kesintide biriken mesajların gönderilmesi) canlı mesajların gecikmesini artırabilir. Bu çalışma, üç yeniden bağlanma bekleme kuralını (sabit, üstel, rastgeleli üstel) ve dört bağlantı sonrası politikayı (biriken atılır, hemen boşalt, zamana yay, alarmı öne al), iki açık kaynaklı sunucuda (Mosquitto 2.1.2, EMQX 5.8.6), 10.000 cihaza kadar simüle edilen bir ortamda, TLS'li ve TLS'siz, tekrarlı ve kayıtlı koşularla karşılaştırır; canlı alarm gecikmesi, birikmiş alarmın yaşı ve sunucu yükü ölçülür. Bulgular: bağlantı sonrası iş, canlı alarm gecikmesini 5.000 cihazda yaklaşık 30 ms'den yaklaşık 9 sn'ye çıkarabilir (üstel kural, Mosquitto, TLS'siz); dönüşü rastgele dağıtmak sunucu zorlandığında (TLS ya da çok sayıda cihaz) belirgin fayda sağlar, rahat ortamda yalnızca bedel getirir; boşaltmayı zamana yaymak uygun ayarla gecikmeyi %89-99 düşürür, ama ayarı yüke bağlıdır ve birikmiş veriyi geciktirir; alarmı öne almak, denenen üç hücrede birikmiş alarmın yaş medyanını %24-60 azaltır; sıralama çok çekirdekli EMQX'te de geçerlidir ve çekirdek eklemek tek başına yetmez. Sonuçlar tek makine, sanal cihaz ve temiz kesinti ile sınırlıdır.
 
 ## Abstract
 
-`[ ]` Özetin İngilizcesi.
+In systems where many devices connect to a single MQTT 5 broker, a broker outage makes devices reconnect at the same time, and the work they do after reconnecting (state synchronisation and sending the messages buffered during the outage) can delay live messages. This study compares three reconnection back-off rules (fixed, exponential, randomised exponential) and four post-connect policies (drop the backlog, flush at once, spread the flush, send alarms first) on two open-source brokers (Mosquitto 2.1.2 and EMQX 5.8.6), with up to 10,000 simulated devices, with and without TLS, using repeated and fully recorded runs. Live alarm latency, the age of buffered alarms and broker load are measured. Post-connect work can raise live alarm latency from about 30 ms to about 9 s with 5,000 devices (exponential rule, Mosquitto, no TLS). Randomising the reconnection helps clearly when the broker is under stress (TLS or many devices) and only costs time when it is not. Spreading the flush cuts the latency by 89-99% with a suitable setting, but the setting depends on the load and delays the buffered data. Sending alarms first reduces the median age of buffered alarms by 24-60% in the three cells tested. The ranking of policies holds on the multi-core EMQX broker, and adding cores alone is not enough. The results are limited to a single machine, simulated devices and a clean outage.
 
 **Anahtar kelimeler:** MQTT 5, toplu yeniden bağlanma, üstel geri çekilme, bağlantı sonrası yük, nesnelerin interneti, hasta izleme
 
@@ -68,13 +68,14 @@ Her sanal cihaz, MQTTnet 5.2 ile MQTT 5 üzerinden sunucuya bağlanan bir asenkr
 
 Rastgeleli üstel kural, [1] ve [2]'nin birleşimidir; iki standardın birebir uygulaması değildir.
 
-**İş yükü ve bağlantı sonrası politikalar (Bölüm 5.5 ve sonrası).** Her cihaz 2 sn'de bir 128 baytlık bir vital bulgu mesajı ve 10 sn'de bir 128 baytlık bir alarm mesajı üretir (QoS 1; mesajın planlanan gönderim anı önceden belirlidir). Bağlantı yokken üretilen mesajlar cihazda bellek içi kuyrukta birikir. Cihaz **yeniden bağlandığında** (ilk açılışta değil) bir *bağlantı sonrası politika* uygular: sunucudan 4.096 baytlık güncel durumu ister (eşitleme, MQTT istek/yanıt) ve birikenleri gönderir. Üç politika karşılaştırılmıştır:
+**İş yükü ve bağlantı sonrası politikalar (Bölüm 5.5 ve sonrası).** Her cihaz 2 sn'de bir 128 baytlık bir vital bulgu mesajı ve 10 sn'de bir 128 baytlık bir alarm mesajı üretir (QoS 1; mesajın planlanan gönderim anı önceden belirlidir). Bağlantı yokken üretilen mesajlar cihazda bellek içi kuyrukta birikir. Cihaz **yeniden bağlandığında** (ilk açılışta değil) bir *bağlantı sonrası politika* uygular: sunucudan 4.096 baytlık güncel durumu ister (eşitleme, MQTT istek/yanıt) ve birikenleri gönderir. Dört politika karşılaştırılmıştır (B3, Bölüm 5.10'da):
 
 | Politika | Tanım |
 |---|---|
 | B0 (referans) | Biriken atılır, eşitleme yok. Yalnızca referans olarak kullanılır; veriyi attığı için pratik bir politika değildir |
 | B1 (hemen) | Bağlanır bağlanmaz eşitleme, ardından birikenin tamamı peş peşe |
 | B2 (ayrık) | Bağlandıktan sonra U(0, W) sn bekle, eşitle, birikeni *a* ms aralıkla gönder. W = 30 sn ve a = 200 ms (varsayılan); Bölüm 5.7'de (W, a) = (60 sn, 1 sn) ve (90 sn, 500 ms) de denenmiştir |
+| B3 (alarm öncelikli) | Bağlanır bağlanmaz, eşitlemeden önce, kesintide biriken **alarmlar** peş peşe gönderilir (cihaz başına yaklaşık 6-7 mesaj); kalan (vital) mesajlar B2 gibi (U(0, W) gecikme, eşitleme, *a* ms aralık) boşaltılır |
 
 ### 3.3 Kesinti senaryosu
 
@@ -82,7 +83,7 @@ Cihazlar 20 sn içinde yayılarak bağlanır (başlangıç fırtınası olmasın
 
 ### 3.4 Ölçütler
 
-Toparlanma süresi (TTR): sunucunun başlatıldığı andan bağlı cihazların %50, %95 ve %100'üne ulaşılana kadar geçen süre (çözünürlük 1 sn). Kesintideki ve sonrasındaki tepe bağlantı denemesi/sn. Sunucu açıkken başarısız bağlantı sayısı. Sunucu ve simülatör CPU'su (~0,7 Hz örnekleme). Bağlantı sonrası yük deneylerinde: (i) **canlı alarm gecikmesi**: toplayıcının mesajı aldığı an eksi mesajın *planlanan* gönderim anı (açık döngü, saniyelik p99); *taban* kesinti öncesi saniyelik p99'ların medyanı, *tepe* sunucu açıldıktan sonraki saniyelik p99'un en büyüğü, ayrıca p99'un 100 ms'yi aştığı saniye sayısı; (ii) **boşaltma bitişi**: sunucunun açıldığı andan son biriken mesajın toplayıcıya ulaşmasına kadar geçen süre; (iii) **eşitleme süresi** (istek-yanıt, p50 ve p99); (iv) sunucu CPU tepesi; (v) kayıp ve tekrar sayısı (mesaj numaralarıyla). Gecikme, iki konteynerin ortak çekirdek saati (CLOCK_MONOTONIC) ile ölçülür (Bölüm 4.3). Her hücre 3 tekrarla koşulmuş, **medyan ve en küçük-en büyük aralık** raporlanmıştır; güven aralığı iddiası yoktur.
+Toparlanma süresi (TTR): sunucunun başlatıldığı andan bağlı cihazların %50, %95 ve %100'üne ulaşılana kadar geçen süre (çözünürlük 1 sn). Kesintideki ve sonrasındaki tepe bağlantı denemesi/sn. Sunucu açıkken başarısız bağlantı sayısı. Sunucu ve simülatör CPU'su (~0,7 Hz örnekleme). Bağlantı sonrası yük deneylerinde: (i) **canlı alarm gecikmesi**: toplayıcının mesajı aldığı an eksi mesajın *planlanan* gönderim anı (açık döngü, saniyelik p99); *taban* kesinti öncesi saniyelik p99'ların medyanı, *tepe* sunucu açıldıktan sonraki saniyelik p99'un en büyüğü, ayrıca p99'un 100 ms'yi aştığı saniye sayısı; (ii) **boşaltma bitişi**: sunucunun açıldığı andan son biriken mesajın toplayıcıya ulaşmasına kadar geçen süre; (iii) **eşitleme süresi** (istek-yanıt, p50 ve p99); (iv) sunucu CPU tepesi; (v) kayıp ve tekrar sayısı (mesaj numaralarıyla); (vi) **birikmiş alarmın yaşı**: kesintide biriken bir alarmın toplayıcıya ulaştığı an eksi planlanan üretim anı (p50, p95 ve en büyük; saniye başına yüzdeliklerin adet ağırlıklı hesabı, yaklaşık). Gecikme, iki konteynerin ortak çekirdek saati (CLOCK_MONOTONIC) ile ölçülür (Bölüm 4.3). Her hücre 3 tekrarla koşulmuş, **medyan ve en küçük-en büyük aralık** raporlanmıştır; güven aralığı iddiası yoktur.
 
 ### 3.5 Deney ortamı
 
@@ -116,7 +117,7 @@ Bu bölüm, ölçüm düzeneğinin kendisinin sonuçları nasıl çarpıtabildi�
 
 ## 5. Bulgular
 
-*Not (yazım): 5.1-5.3 (sürüm v5), 5.4 (t1), 5.5-5.7 (v6, v7, v8), 5.8 (tls6) ve 5.9 (e1, e2) yazıldı; 5.10 (alarm önceliği, p1, p2) sürüyor. Son sürümde bu not silinecek.*
+*Not (yazım): 5.1-5.3 (sürüm v5), 5.4 (t1), 5.5-5.7 (v6, v7, v8), 5.8 (tls6), 5.9 (e1, e2) ve 5.10 (p1, p2) yazıldı. Son sürümde bu not silinecek.*
 
 Bölüm 5.1-5.3'te sunucu açılışında yalnızca *bağlanma* aşaması ölçülür (iş yükü yok); 5.5-5.7 bağlantı sonrası işi ekler. Hipotezler (H1-H4) koşulardan önce günlüğe yazılmıştır (`05_adim4_matris_v5.md`). Tüm koşular IP ile bağlanır (Bölüm 4.2). Tasarım: kural (sabit, üstel, rastgeleli üstel) × N (2.000, 5.000) = 6 hücre, her hücre 3 tekrar (tohum 1-3), bloklar içinde rastgele sırayla (18 koşu, sürüm v5); kesinti temiz, 60 sn.
 
@@ -299,6 +300,34 @@ Bölüm 5.5'teki düzenek (N = 5.000, TLS'siz, kural × B0/B1/B2, 3 tekrar) ikin
 
 *Sınırlar:* iki sunucu, tek makine; EMQX tek düğüm ve varsayılandan farklı yapılandırılmıştır (`force_shutdown` kapalı, kuyruk sınırsız), diğer varsayılan ayarlar incelenmemiştir. Aynı CPU payı sunucular arasında adil bir karşılaştırma değildir (çekirdek başına verim farklıdır); 4 CPU matrisi bunun için eklenmiştir, ancak EMQX 4 CPU, simülatör 4 CPU ve toplayıcı 2 CPU, host'un 12 çekirdeğinin 10'unu kullandığından host doymuş olabilir. Mosquitto değerleri aynı blokta koşulmamıştır. E2'de iki aykırı koşu (üstel/B1 tohum 2: 22,8 sn; rastgeleli/B2 tohum 2: 6,6 sn) çıkarılmamış, nedenleri incelenmemiştir. TLS ve N = 10.000 EMQX'te denenmemiştir. EMQX'in kapanışı (2,4 sn) ve açılışı (0,7-0,95 sn) Mosquitto'dan (yaklaşık 0,5 sn) farklıdır; sunucu açılış anının ±2,4 sn kaydırılması sonuçları değiştirmemiştir.
 
+### 5.10 Alarm önceliği ve birikmiş alarmın yaşı (sürümler p1, p2)
+
+Şimdiye kadar yalnızca *canlı* alarmın gecikmesine bakıldı. Klinik açıdan ikinci bir soru da vardır: kesintide üretilmiş (biriken) bir alarm sunucuya ne kadar geç ulaşıyor? B2 gibi boşaltmayı zamana yayan politikalar canlı alarmı korurken birikmiş alarmı da bekletir. Önceki matrislerin verisinden hesaplanan **birikmiş alarmın yaşı** (Bölüm 3.4) rastgeleli kuralda B1'de medyan 37-42 sn, B2'de 56-94 sn çıkmıştır (üstel kuralda 56-72 ve 64-74 sn; en büyük değer: N = 10.000'de uzun pencereli B2'de yaklaşık 174 sn, kesintinin kendisi 60 sn). B3 (Bölüm 3.2) bu bedeli düşürmek için tasarlanmıştır. Hipotezler (HP1-HP5) koşulardan önce yazılmıştır (`13_adim8_alarm_onceligi.md`). İki koşul koşulmuş, her matriste B2 ve B3 aynı blokta yinelenmiştir: **P1** (Mosquitto, TLS'siz, N = 10.000, rastgeleli kural, B1 / B2 / B3 pencere 90 sn, aralık 500 ms; 9 koşu) ve **P2** (Mosquitto, TLS, N = 5.000, üstel ve rastgeleli kural, B2 / B3 30 sn / 200 ms; 12 koşu).
+
+**Tablo 10.** Canlı alarm tepesi ve birikmiş alarmın yaşı, medyan [en küçük-en büyük] (yaş: p50 / en büyük, sn). Kaynak: `results/ozet_adim5_p1_hucreler.csv`, `ozet_adim5_p2_hucreler.csv`.
+
+| Koşul | A | B | Alarm p99 tepe (ms) | Boşaltma bitişi (sn) | Birikmiş alarmın yaşı (p50 / en büyük) |
+|---|---|---|---|---|---|
+| P1, N = 10.000, TLS'siz | rastgeleli | B1 | 6.851 [6.293-8.047] | 34,5 | 41,8 / 96,4 |
+| | rastgeleli | B2 90/500 | 517 [354-1.442] | 140,4 | 93,7 / 174,1 |
+| | rastgeleli | B3 90/500 | 210 [112-280] | 135,9 | 37,3 / 90,3 |
+| P2, N = 5.000, TLS | üstel | B2 | 673 [557-1.177] | 108,0 | 71,0 / 153,1 |
+| | üstel | B3 | 1.524 [1.341-2.184] | 105,7 | 53,9 / 125,6 |
+| | rastgeleli | B2 | 80 [77-94] | 68,0 | 56,0 / 117,6 |
+| | rastgeleli | B3 | 87 [60-623] | 64,5 | 36,7 / 89,8 |
+
+`[Şekil: sekil_b3_denge.png]`
+
+**Alarmı öne almak, birikmiş alarmın yaşını B1 düzeyine indirir ve canlı alarmı B2 kadar korur.** Rastgeleli kuralda B3, birikmiş alarmın yaş medyanını B2'ye göre %60 (N = 10.000; 93,7 → 37,3 sn) ve %34 (TLS; 56,0 → 36,7 sn), en büyük yaşı %48 ve %24 azaltır; bu değerler B1'in yaşıyla (≈ 38-42 sn) aynı düzeydedir. Canlı alarm tepesi B2'den kötüleşmez (210 vs 517 ms; 87 vs 80 ms), vital mesajların boşaltma bitişi de aynı kalır (%2-5 fark). Birikmiş alarmın yaşının alt sınırı yeniden bağlanma süresidir (alarm, cihaz dönmeden gönderilemez); B3'te alarm boşaltması dönüş penceresinin sonunda (yaklaşık 29 sn) biter.
+
+**Üstel dönüş ve TLS'te B3'ün bedeli vardır.** Senkron dönüşte yaklaşık 30 bin birikmiş alarm aynı anda gönderilir ve el sıkışma yükünün üstüne biner: canlı alarm tepesi B2'ye göre 2,3 kat yükselir (1.524 vs 673 ms) ve kazanç küçük kalır (yaş medyanı %24, en büyük yaş %18 azalır). P1'de B3'ün canlı alarm tepesinin B2'den de düşük çıkması beklenmedikti (3 tekrarda aralıklar örtüşmüyor) ve nedeni incelenmemiştir. Hipotezlerin yalnızca HP4 (boşaltma bitişi farkı ≤ %10) tam desteklenmiştir; HP1 (yaş medyanı ≥ %25 düşük), HP2 (en büyük yaş ≥ %25 düşük) ve HP3 (canlı alarm tepesi ≤ 2 kat) kısmen, HP5 (kayıp ≤ 1) kısmen desteklenmiştir.
+
+**Bloklar arası değişkenlik büyüktür.** Aynı hücre (rastgeleli + B2 90 sn / 500 ms, N = 10.000, TLS'siz) Bölüm 5.7'de 169 ms [154-198], burada 517 ms [354-1.442] çıkmıştır; B1 6.157 ve 6.851 ms. Bu nedenle bu bölümde karşılaştırılan hücreler aynı blokta koşulmuş, farklı sürümler arası karşılaştırma yalnızca yön göstergesi sayılmıştır.
+
+*Kayıp ve tekrar:* tekrar 21 koşunun hepsinde 0; kayıp bir koşuda (P1, B3, tohum 3) 42 mesajdır, diğerlerinde 0.
+
+*Sınırlar:* iki koşul ve tek sunucu (EMQX'te B3 denenmemiştir); hücre başına 3 tekrar; alarm ve vital ayrımı ile alarm sıklığı varsayımsaldır; üstel + TLS'te B3 bedelinin ve P1'deki beklenmedik düşüşün mekanizması test edilmemiştir; yaş yüzdelikleri saniye başına yüzdeliklerden hesaplanmış yaklaşık değerlerdir.
+
 ## 6. Tartışma ve Sınırlar
 
 ### 6.1 Ana bulgular
@@ -316,12 +345,13 @@ Aşağıdakiler bu ortamdaki gözlemlerden çıkan ön önerilerdir, genel kural
 - Sunucunun zorlandığı yük bölgesine yaklaşılıyorsa (TLS, çok sayıda cihaz), dönüşü rastgele dağıtmak (rastgeleli geri çekilme) en ucuz ve çoğu zaman yeterli ilk önlemdir.
 - Bu yetmiyorsa bağlantı sonrası işi de zamana yaymak (cihaz başına rastgele gecikme ve aralıklı boşaltma) gerekir; parametre (pencere, aralık) cihaz sayısıyla ve toplam yükle büyütülmelidir. Sabit bir ayar ölçek büyüyünce yetmeyebilir (Bölüm 5.6-5.7).
 - Çekirdek eklemek tek başına çözüm değildir (Bölüm 5.9).
+- Biriken alarmlar azsa ve ayrıştırılabiliyorsa, boşaltmayı yayarken alarmları öne almak (B3) birikmiş alarmın yaşını düşürür ve canlı alarmı korur; ancak senkron dönüşte (üstel kural, TLS) bu alarm yığını canlı alarmı kötüleştirebilir (Bölüm 5.10).
 - Boşaltmayı geciktirmek kesintide biriken verinin (ve alarmların) ulaşmasını geciktirir; bu bedel ayrıca değerlendirilmelidir (Bölüm 5.10).
 - Test ederken toplam bağlı sayısı yetmez; deneme sayısı, kayıp, canlı trafik gecikmesi ve ölçümün saat kaynağı doğrulanmalı; sunucunun varsayılan koruma ayarları (ör. EMQX `force_shutdown`) kontrol edilmelidir.
 
 ### 6.3 Geçerlilik tehditleri
 
-**İç geçerlilik.** (i) Hücre başına 3 tekrar vardır; medyan ve aralık verilmiş, güven aralığı iddia edilmemiştir; aykırı koşular çıkarılmamıştır. (ii) Karşılaştırılan sürümler (ör. TLS'siz ve TLS'li, Mosquitto ve EMQX) aynı blokta koşulmamıştır; zamanla değişen etkiler (ısınma, arka plan) tam kontrol edilmemiştir. (iii) Ölçüm düzeneği (toplayıcı, simülatör) aynı makinedeki kaynağı paylaşır; simülatör ve host CPU doygunluğu bazı koşullarda gecikmeye karışmış olabilir (Bölüm 5.3, 5.6, 5.9). (iv) Sunucu CPU'su yaklaşık 0,7 Hz örneklenmiştir; kısa tepeler kaçmış olabilir. (v) Bazı mekanizmalar (ikinci dalga, kayıp, sabit kuralın faz etkisi) doğrudan gözlenmemiş, hesapla ya da dolaylı kanıtla tutarlı bulunmuştur.
+**İç geçerlilik.** (i) Hücre başına 3 tekrar vardır; medyan ve aralık verilmiş, güven aralığı iddia edilmemiştir; aykırı koşular çıkarılmamıştır. (ii) Karşılaştırılan sürümler (ör. TLS'siz ve TLS'li, Mosquitto ve EMQX) aynı blokta koşulmamıştır; zamanla değişen etkiler (ısınma, arka plan) tam kontrol edilmemiş, bloklar arası değişkenliğin büyük olabildiği görülmüştür (aynı hücre iki blokta 169 ve 517 ms; Bölüm 5.10). Bu yüzden sürümler arası karşılaştırmalar yön göstergesi olarak okunmalıdır. (iii) Ölçüm düzeneği (toplayıcı, simülatör) aynı makinedeki kaynağı paylaşır; simülatör ve host CPU doygunluğu bazı koşullarda gecikmeye karışmış olabilir (Bölüm 5.3, 5.6, 5.9). (iv) Sunucu CPU'su yaklaşık 0,7 Hz örneklenmiştir; kısa tepeler kaçmış olabilir. (v) Bazı mekanizmalar (ikinci dalga, kayıp, sabit kuralın faz etkisi) doğrudan gözlenmemiş, hesapla ya da dolaylı kanıtla tutarlı bulunmuştur.
 
 **Yapı geçerliliği.** Canlı alarm gecikmesi saniyelik p99 ile temsil edilmiştir; "alarm" ve "vital" ayrımı ve mesaj sıklığı varsayımsaldır. 100 ms eşiği klinik bir eşik değildir, yalnızca taban düzeyine göre bir referanstır. Gecikme, cihazın planlanan gönderim anından ölçülür (açık döngü), yani cihaz tarafı kuyruklanması da dahildir.
 
@@ -335,7 +365,7 @@ Aşağıdakiler bu ortamdaki gözlemlerden çıkan ön önerilerdir, genel kural
 
 ## 7. Sonuç ve Gelecek Çalışma
 
-Bu çalışma, çok cihazlı bir MQTT 5 sisteminde sunucu kesintisinden sonra toplu yeniden bağlanmayı ve cihazların bağlandıktan sonra yaptığı işi (durum eşitleme ve biriken mesajların boşaltılması) canlı alarm gecikmesi açısından, iki sunucuda, tekrarlı ve kayıtlı deneylerle ölçmüştür. Başlıca sonuçlar: (i) bağlantı sonrası iş, canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırabilir (Mosquitto, TLS'siz, 5.000 cihazda yaklaşık 30 ms'den yaklaşık 9 sn); (ii) dönüşü rastgele dağıtmak sunucu zorlandığında (TLS, çok sayıda cihaz) toparlanmayı ve gecikmeyi belirgin biçimde düzeltir, TLS'siz ve rahat ortamda ise yalnızca bedel getirir; (iii) boşaltmayı zamana yaymak (B2), uygun ayarla doymuş ortamlarda gecikmeyi yaklaşık %89-99 düşürür; ancak ayar yüke göre büyütülmelidir (N = 10.000'de varsayılan 30 sn / 200 ms üstelde yalnızca %53 düşürmüş, rastgelelide düşürmemiştir) ve bedeli boşaltmanın ve birikmiş verinin uzamasıdır; (iv) bu sıralama çok çekirdekli EMQX'te de geçerlidir, çekirdek eklemek tek başına çözüm değildir; (v) en iyi politika ortama göre değişir. `[ ]` (vi) Alarm önceliği (B3) sonucu (Bölüm 5.10) eklenecek.
+Bu çalışma, çok cihazlı bir MQTT 5 sisteminde sunucu kesintisinden sonra toplu yeniden bağlanmayı ve cihazların bağlandıktan sonra yaptığı işi (durum eşitleme ve biriken mesajların boşaltılması) canlı alarm gecikmesi açısından, iki sunucuda, tekrarlı ve kayıtlı deneylerle ölçmüştür. Başlıca sonuçlar: (i) bağlantı sonrası iş, canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırabilir (Mosquitto, TLS'siz, 5.000 cihazda yaklaşık 30 ms'den yaklaşık 9 sn); (ii) dönüşü rastgele dağıtmak sunucu zorlandığında (TLS, çok sayıda cihaz) toparlanmayı ve gecikmeyi belirgin biçimde düzeltir, TLS'siz ve rahat ortamda ise yalnızca bedel getirir; (iii) boşaltmayı zamana yaymak (B2), uygun ayarla doymuş ortamlarda gecikmeyi yaklaşık %89-99 düşürür; ancak ayar yüke göre büyütülmelidir (N = 10.000'de varsayılan 30 sn / 200 ms üstelde yalnızca %53 düşürmüş, rastgelelide düşürmemiştir) ve bedeli boşaltmanın ve birikmiş verinin uzamasıdır; (iv) bu sıralama çok çekirdekli EMQX'te de geçerlidir, çekirdek eklemek tek başına çözüm değildir; (v) en iyi politika ortama göre değişir. (vi) Alarmları öne almak (B3), rastgeleli kuralda birikmiş alarmın yaşını B1 düzeyine (medyan yaklaşık 37 sn) indirir ve canlı alarmı B2 kadar korur; ancak üstel dönüş ve TLS'te canlı alarmı B2'ye göre 2,3 kat kötüleştirir.
 
 Gelecek çalışma adayları: sessiz kesinti (ağın sessizce kopması), TLS'te oturum devam ettirme ve toplayıcının da TLS'li olması, kenar geçidi katmanı, sunucunun "ne kadar sonra gel" bilgisi vermesi, N ve toplam yüke göre B2 parametresinin otomatik ayarı, kayıp mekanizmasının ham kayıtla incelenmesi, farklı kesinti süreleri.
 

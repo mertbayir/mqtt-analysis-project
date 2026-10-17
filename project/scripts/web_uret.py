@@ -29,6 +29,8 @@ SURUMLER = [
     ("tls6", "adim5", "ozet_adim5_tls6_kosular.csv"),
     ("e1", "adim5", "ozet_adim5_e1_kosular.csv"),
     ("e2", "adim5", "ozet_adim5_e2_kosular.csv"),
+    ("p1", "adim5", "ozet_adim5_p1_kosular.csv"),
+    ("p2", "adim5", "ozet_adim5_p2_kosular.csv"),
 ]
 
 kayit = pd.read_csv(SONUC / "deney_kayitlari.csv", encoding="utf-8-sig")
@@ -91,6 +93,7 @@ for surum, aile, ozet_dosyasi in SURUMLER:
                         "esik": int(o["esik_ustu_sn"]), "bosaltma": sayi(o["bosaltma_bitis_sn"], 1),
                         "sync_p99": sayi(o["sync_p99_ms"], 0), "cpu": sayi(o["srv_cpu_tepe"], 0),
                         "kayip": int(o["kayip"]), "tekrar": int(o["tekrar"]),
+                        "yas_p50": sayi(o.get("bir_alarm_yas_p50_s"), 1), "yas_max": sayi(o.get("bir_alarm_yas_max_s"), 1),
                     }
                 else:
                     run["ozet"] = {
@@ -143,6 +146,13 @@ hipotezler = [
     ("Adım 7 (EMQX)", "HE4", "EMQX'te B0 tepesi < 100 ms", C, "üstelde 112 ms"),
     ("Adım 7 (EMQX)", "HE5", "EMQX 4 CPU, üstel + B1: tepe 2 CPU'nun ≥ %50 altında", C, "11.527 vs 16.188 ms (%29); CPU 389/400"),
     ("Adım 7 (EMQX)", "HE6", "Tekrar 0, kayıp ≤ 1", K, "tekrar 0; kayıp 17/30 koşuda > 1 (en çok 69)"),
+]
+hipotezler += [
+    ("Adım 8 (B3)", "HP1", "B3'te biriken alarmın yaş medyanı B2'den ≥ %25 düşük", K, "N = 10.000: %60; TLS rastgeleli %34; TLS üstel %24"),
+    ("Adım 8 (B3)", "HP2", "B3'te biriken alarmın en büyük yaşı B2'den ≥ %25 düşük", K, "N = 10.000: %48; TLS: %24 ve %18"),
+    ("Adım 8 (B3)", "HP3", "B3'te canlı alarm tepesi B2'nin ≤ 2 katı", K, "üç hücrede evet; TLS üstelde 2,3 kat"),
+    ("Adım 8 (B3)", "HP4", "B3'te boşaltma bitişi B2'den ≤ %10 farklı", D, "%2-5"),
+    ("Adım 8 (B3)", "HP5", "Tekrar 0, kayıp ≤ 1", K, "21 koşuda 1 koşu 42 kayıp"),
 ]
 hip = [{"adim": a, "id": i, "metin": m, "durum": d, "kanit": k} for a, i, m, d, k in hipotezler]
 

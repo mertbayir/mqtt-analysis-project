@@ -30,6 +30,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 24 | 17 Ekim | Adım 6b tamamlandı (tls6, 18 koşu; ilk deneme yarım kalıp devam ettirildi, yarım koşu iptal klasöründe). Sonuç: TLS'te en iyi politika B2, TLS'siz N = 5.000'de B1; en iyi politika ortama bağlı | Günlük 11 |
 | 25 | 17 Ekim | Adım 7: EMQX 5.8.6 (imza sabit), 2 CPU / 2 GB (Mosquitto ile aynı pay) ve ayrı 4 CPU matrisi; `force_shutdown` kapalı; hata düzeltmeleri: istemci TLS'siz modda TLS seçeneğini açık bırakıyordu (düzeltildi, geçmiş koşular etkilenmedi), hazır olma probu 127.0.0.1'e bakıyor | Günlük 12 |
 | 26 | 17 Ekim | Adım 7 tamamlandı (E1 18 + E2 12 koşu). Sonuç: ikinci izdiham EMQX'te de var, sıralama aynı, çekirdek eklemek yetmiyor; EMQX aynı CPU payında daha yavaş. Sonraki: alarm önceliği B3 (günlük 13), makale cilası, web arayüzü | Günlük 12 |
+| 27 | 17 Ekim | Adım 8 tamamlandı (P1 9 + P2 12 koşu): B3 alarm önceliği birikmiş alarmın yaşını B1 düzeyine indiriyor, canlı alarmı B2 kadar koruyor; üstel + TLS'te canlı alarm bedeli var. Bloklar arası değişkenlik büyük: karşılaştırmalar aynı blokta. Sonraki: makale cilası son tur (ilgili çalışmalar sizde), web arayüzü, Şekil 1 | Günlük 13 |
 
 ## Açık kararlar
 

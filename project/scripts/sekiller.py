@@ -290,3 +290,29 @@ ax.set_title("N = 5.000, TLS'siz: Mosquitto ve EMQX'te canlı alarm gecikmesi te
 h_, l_ = ax.get_legend_handles_labels()
 ax.legend(dict(zip(l_, h_)).values(), dict(zip(l_, h_)).keys(), fontsize=8, loc="upper right")
 kaydet(fig, "sekil_emqx_alarm_tepe_n5000")
+
+
+# Şekil L: B3 (alarm öncelikli): canlı alarm tepesi ve birikmiş alarmın yaşı (p50), P1 (N=10.000) ve P2 (TLS, N=5.000)
+al = topla("p1", "p2")
+al["tls"] = al["kosu"].str.endswith("_p2")
+renk_b = {"b1": "#c0392b", "b2": "#2c7fb8", "b2-w90i500": "#2c7fb8", "b3": "#27ae60", "b3-w90i500": "#27ae60"}
+ad_b = {"b1": "B1 hemen", "b2": "B2 ayrık", "b2-w90i500": "B2 ayrık", "b3": "B3 alarm önce", "b3-w90i500": "B3 alarm önce"}
+fig, eksenler = plt.subplots(1, 2, figsize=(7.5, 3.5), sharey=True)
+for ax, (flag, baslik) in zip(eksenler, [(False, "TLS'siz, N = 10.000 (90 sn / 500 ms)"), (True, "TLS, N = 5.000 (30 sn / 200 ms)")]):
+    d = al[al["tls"] == flag]
+    gorulen = set()
+    for (a, b), g in d.groupby(["A", "B"]):
+        mk = "o" if a == "ustel-rastgele" else "s"
+        lab = ad_b[b] if ad_b[b] not in gorulen else None
+        gorulen.add(ad_b[b])
+        ax.scatter(g["bir_alarm_yas_p50_s"], g["tepe_p99_ms"], color=renk_b[b], marker=mk, s=16, alpha=.45, zorder=2)
+        ax.scatter(g["bir_alarm_yas_p50_s"].median(), g["tepe_p99_ms"].median(), color=renk_b[b], marker=mk, s=70, edgecolor="black", lw=.6, zorder=3, label=lab)
+    ax.set_yscale("log")
+    ax.axhline(100, color="gray", lw=0.8, ls=":")
+    ax.set_xlabel("Birikmiş alarmın yaşı, medyan (sn)")
+    ax.set_title(baslik, fontsize=9)
+eksenler[0].set_ylabel("Tepe canlı alarm p99 (ms)")
+eksenler[0].legend(fontsize=8, loc="upper right")
+fig.suptitle("Alarm önceliği (B3): canlı alarm gecikmesi ve birikmiş alarmın yaşı (büyük: medyan; ○ rastgeleli, □ üstel)", fontsize=8.5)
+fig.tight_layout()
+kaydet(fig, "sekil_b3_denge")
