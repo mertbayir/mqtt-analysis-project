@@ -179,6 +179,14 @@ if sablon.exists():
     par = WEB / "model_param.json"
     art = WEB / "model_artik.json"
     param_js = ("window.MODEL_PARAM = " + par.read_text(encoding="utf-8") + ";\nwindow.MODEL_ARTIK = " + (art.read_text(encoding="utf-8") if art.exists() else "[]") + ";") if par.exists() else ""
+    import base64 as _b64
+    fontcss = ""
+    for agirlik in (400, 500, 700):
+        yol = WEB / "fonts" / f"Satoshi-{agirlik}.woff2"
+        if yol.exists():
+            fontcss += ('@font-face{font-family:"Satoshi";font-style:normal;font-weight:' + str(agirlik) +
+                        ';font-display:swap;src:url(data:font/woff2;base64,' + _b64.b64encode(yol.read_bytes()).decode("ascii") + ') format("woff2");}\n')
+    html = html.replace("/*__FONTS__*/", fontcss)
     html = html.replace("/*__MODEL__*/", model_js).replace("/*__PARAM__*/", param_js)
     (WEB / "sonuc_gezgini.html").write_text(html, encoding="utf-8")
     print("yazıldı: web/sonuc_gezgini.html")

@@ -1,0 +1,3 @@
+Satoshi (Indian Type Foundry), Fontshare üzerinden ücretsiz yazı tipi: https://www.fontshare.com/fonts/satoshi
+Dosyalar: Satoshi-400.woff2, Satoshi-500.woff2, Satoshi-700.woff2 (Fontshare CSS API'sinden 17 Ekim 2026'da indirildi).
+Lisans metni için kaynağa bakınız (Fontshare / ITF Free Font License). Sayfaya base64 olarak gömülür (scripts/web_uret.py).

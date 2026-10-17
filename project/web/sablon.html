@@ -5,166 +5,231 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MQTT Toplu Yeniden Bağlanma: Sonuç Gezgini</title>
 <style>
+/*__FONTS__*/
 :root {
-  --bg: #f7f8fa; --panel: #ffffff; --ink: #1c2330; --muted: #5d6879; --line: #dde2ea;
-  --accent: #2c6fbb; --ok: #2a9d5c; --warn: #d79a00; --bad: #c0392b; --blue2: #2c7fb8; --off: #b9c0cc;
-  --chip: #eef1f6; --shadow: 0 1px 3px rgba(20,30,50,.08);
+  --bg: #f6f7fb; --panel: #ffffff; --ink: #0f172a; --muted: #5b6577; --line: #e3e7ef; --chip: #eef1f7;
+  --accent: #3550d4; --accent-ink: #ffffff; --ok: #12935a; --warn: #c97a00; --bad: #d1352b; --blue2: #2563eb; --off: #c9d0dd;
+  --shadow: 0 1px 2px rgba(15,23,42,.05), 0 6px 24px -12px rgba(15,23,42,.18);
+  --font: "Satoshi", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #11151c; --panel: #1a202a; --ink: #e6eaf0; --muted: #9aa5b6; --line: #2b3441;
-    --accent: #6aa8f0; --ok: #46c27b; --warn: #f0b429; --bad: #ef6a5b; --blue2: #5aa9dd; --off: #3a4454;
-    --chip: #232b38; --shadow: 0 1px 3px rgba(0,0,0,.4);
+    --bg: #0a0f1e; --panel: #121a30; --ink: #e9edf8; --muted: #95a0b8; --line: #243050; --chip: #1a2442;
+    --accent: #8499ff; --accent-ink: #0a0f1e; --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --blue2: #60a5fa; --off: #334162;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -12px rgba(0,0,0,.6);
   }
 }
 :root[data-theme="dark"] {
-  --bg: #11151c; --panel: #1a202a; --ink: #e6eaf0; --muted: #9aa5b6; --line: #2b3441;
-  --accent: #6aa8f0; --ok: #46c27b; --warn: #f0b429; --bad: #ef6a5b; --blue2: #5aa9dd; --off: #3a4454;
-  --chip: #232b38; --shadow: 0 1px 3px rgba(0,0,0,.4);
+  --bg: #0a0f1e; --panel: #121a30; --ink: #e9edf8; --muted: #95a0b8; --line: #243050; --chip: #1a2442;
+  --accent: #8499ff; --accent-ink: #0a0f1e; --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --blue2: #60a5fa; --off: #334162;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -12px rgba(0,0,0,.6);
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-header { padding: 28px 0 8px; }
-h1 { font-size: clamp(22px, 3.4vw, 32px); line-height: 1.2; margin: 0 0 6px; }
-.sub { color: var(--muted); margin: 0; }
-nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); margin-top: 14px; }
-nav .wrap { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding-top: 8px; padding-bottom: 8px; }
-nav a { color: var(--ink); text-decoration: none; padding: 5px 11px; border-radius: 999px; background: var(--chip); font-size: 13px; }
-nav a:hover { background: var(--accent); color: #fff; }
-nav button { margin-left: auto; }
-section { padding: 26px 0 6px; }
-h2 { font-size: 21px; margin: 0 0 4px; }
-.lead { color: var(--muted); margin: 0 0 14px; max-width: 70ch; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 18px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
-.card .big { font-size: 28px; font-weight: 700; letter-spacing: -.5px; }
-.card .lbl { color: var(--muted); font-size: 13px; }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
-.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; counter-reset: s; }
-.step { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 12px 46px; position: relative; }
-.step::before { counter-increment: s; content: counter(s); position: absolute; left: 12px; top: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; }
-.step b { display: block; }
-.controls { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; margin-bottom: 12px; }
-.controls label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 3px; }
-select, button { font: inherit; font-size: 14px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; }
-button { cursor: pointer; }
-button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; min-width: 92px; }
-button:focus-visible, select:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.stage { display: grid; grid-template-columns: minmax(280px, 520px) 1fr; gap: 14px; align-items: start; }
-@media (max-width: 860px) { .stage { grid-template-columns: 1fr; } }
-canvas#dots { width: 100%; height: auto; background: var(--chip); border-radius: 10px; display: block; image-rendering: pixelated; }
-.status { display: flex; justify-content: space-between; align-items: center; margin: 8px 2px 0; font-size: 13px; color: var(--muted); gap: 8px; flex-wrap: wrap; }
-.badge { padding: 2px 9px; border-radius: 999px; font-weight: 600; font-size: 12px; background: var(--chip); color: var(--ink); }
-.badge.off { background: var(--bad); color: #fff; }
-.badge.on { background: var(--ok); color: #fff; }
-.badge.try { background: var(--warn); color: #111; }
-.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-.kpi { background: var(--chip); border-radius: 10px; padding: 8px 10px; }
-.kpi .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.kpi .l { font-size: 11.5px; color: var(--muted); }
-.chartbox h3 { font-size: 13px; margin: 0 0 2px; color: var(--muted); font-weight: 600; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15.5px/1.65 var(--font); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+b, strong { font-weight: 700; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+a { color: var(--accent); }
+
+/* üst şerit */
+.topbar { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+.topbar .wrap { display: flex; align-items: center; gap: 4px; height: 52px; }
+.brand { font-weight: 700; letter-spacing: -.01em; margin-right: auto; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.brand i { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); display: inline-block; }
+.topbar a { color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 8px; font-weight: 500; font-size: 14px; }
+.topbar a:hover { color: var(--ink); background: var(--chip); }
+#tema { padding: 6px 9px; line-height: 0; border-radius: 8px; }
+#tema svg { width: 18px; height: 18px; }
+
+/* kahraman alan */
+.hero { padding: 56px 0 28px; }
+.eyebrow { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: .02em; margin-bottom: 14px; }
+.hero h1 { font-size: clamp(28px, 4.4vw, 46px); line-height: 1.1; letter-spacing: -.03em; font-weight: 700; margin: 0 0 18px; max-width: 22ch; }
+.hero .lead { font-size: 18px; line-height: 1.6; color: var(--muted); max-width: 62ch; margin: 0 0 8px; }
+.byline { font-size: 14px; color: var(--muted); font-weight: 500; margin-top: 14px; }
+.kpis4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-top: 30px; }
+.kpis4 .card { padding: 18px 20px; }
+.kpis4 .big { font-size: 32px; font-weight: 700; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpis4 .lbl { color: var(--muted); font-size: 13.5px; margin-top: 6px; line-height: 1.45; }
+
+/* bölümler */
+section { padding: 46px 0 6px; }
+.sec-eyebrow { font-size: 12.5px; font-weight: 700; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+h2 { font-size: clamp(22px, 2.6vw, 30px); letter-spacing: -.025em; font-weight: 700; margin: 0 0 8px; line-height: 1.2; }
+.lead { color: var(--muted); max-width: 66ch; margin: 0 0 20px; }
+.card, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+.panel { padding: 20px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; counter-reset: s; }
+.step { padding: 18px 18px 16px; position: relative; }
+.step::before { counter-increment: s; content: "0" counter(s); font-size: 12.5px; font-weight: 700; color: var(--accent); letter-spacing: .06em; display: block; margin-bottom: 8px; }
+.step b { display: block; font-size: 16px; margin-bottom: 4px; letter-spacing: -.01em; }
+.step span { color: var(--muted); font-size: 14px; line-height: 1.5; display: block; }
+
+/* kontroller */
+select, button, input { font: inherit; font-size: 14px; color: var(--ink); }
+select { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+button { cursor: pointer; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-weight: 500; transition: background .15s, border-color .15s; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; min-width: 104px; }
+button.primary:hover { filter: brightness(1.06); }
+button.kes { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+button.kes:hover { background: color-mix(in srgb, var(--bad) 10%, var(--panel)); border-color: var(--bad); }
+button.ac { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+button.ac:hover { background: color-mix(in srgb, var(--ok) 10%, var(--panel)); border-color: var(--ok); }
+button:focus-visible, select:focus-visible, a:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ctl { display: flex; flex-wrap: wrap; gap: 12px 14px; align-items: flex-end; margin-bottom: 14px; }
+.ctl label { display: flex; flex-direction: column; font-size: 12px; font-weight: 500; color: var(--muted); gap: 5px; min-width: 130px; }
+.ctl label.chk { flex-direction: row; align-items: center; gap: 8px; min-width: 0; font-size: 14px; color: var(--ink); padding-bottom: 8px; }
+.ctl input[type=range], .slider { accent-color: var(--accent); width: 100%; }
+.ctl input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 18px; }
+details.adv { margin: 0 0 14px; }
+details.adv > summary, details.acc > summary { cursor: pointer; font-weight: 500; font-size: 14px; color: var(--muted); list-style: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0; }
+details > summary::-webkit-details-marker { display: none; }
+details.adv > summary::before, details.acc > summary::before { content: "›"; display: inline-block; transition: transform .15s; font-size: 18px; line-height: 1; }
+details[open].adv > summary::before, details[open].acc > summary::before { transform: rotate(90deg); }
+details.adv .ctl { margin: 10px 0 0; padding: 14px; background: var(--chip); border-radius: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--panel); }
+.chip:hover { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
+.simhead { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.modelband { background: var(--ink); color: var(--panel); font-weight: 700; font-size: 11.5px; letter-spacing: .08em; padding: 4px 10px; border-radius: 6px; }
+.rozet { font-size: 12.5px; font-weight: 500; padding: 4px 11px; border-radius: 999px; background: var(--chip); color: var(--ink); }
+.rozet.ok { background: color-mix(in srgb, var(--ok) 16%, var(--panel)); color: var(--ok); }
+.rozet.tah { background: color-mix(in srgb, var(--warn) 18%, var(--panel)); color: var(--warn); }
+.rozet.sap { background: color-mix(in srgb, var(--bad) 15%, var(--panel)); color: var(--bad); }
+
+/* sahne */
+.simstage, .stage { display: grid; grid-template-columns: minmax(300px, 540px) 1fr; gap: 22px; align-items: start; }
+@media (max-width: 900px) { .simstage, .stage { grid-template-columns: 1fr; } }
+canvas#simCanvas, canvas#dots { width: 100%; height: auto; border-radius: 14px; display: block; background: var(--chip); }
+canvas#dots { image-rendering: pixelated; }
+.status { display: flex; justify-content: space-between; align-items: center; margin: 10px 2px 0; font-size: 13px; color: var(--muted); gap: 8px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.badge { padding: 3px 11px; border-radius: 999px; font-weight: 700; font-size: 11.5px; letter-spacing: .04em; background: var(--chip); color: var(--ink); }
+.badge.off { background: var(--bad); color: #fff; } .badge.on { background: var(--ok); color: #fff; } .badge.try { background: var(--warn); color: #fff; }
+.gauge { display: flex; align-items: center; gap: 16px; margin: 0 0 14px; }
+.gauge .disk { width: 100px; height: 100px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 20px; color: #fff; background: var(--ok); transition: background .25s; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.gauge .disk small { display: block; font-size: 10px; font-weight: 500; opacity: .92; letter-spacing: 0; margin-top: 2px; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex: 1; }
+.kpi { background: var(--chip); border-radius: 12px; padding: 10px 12px; }
+.kpi .v { font-size: 21px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kpi .l { font-size: 12px; color: var(--muted); }
+.chartbox { margin-top: 10px; }
+.chartbox h3 { font-size: 12.5px; margin: 0 0 4px; color: var(--muted); font-weight: 500; }
 svg { display: block; width: 100%; height: auto; }
-svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
-.slider { width: 100%; margin: 12px 0 2px; accent-color: var(--accent); }
-.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap; margin-top: 4px; }
-.legend i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
-.sumline { font-size: 13px; color: var(--muted); margin-top: 8px; }
+svg text { fill: var(--muted); font-size: 11px; font-family: var(--font); }
+.slider { margin: 16px 0 4px; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); flex-wrap: wrap; margin-top: 6px; }
+.legend i { display: inline-block; width: 16px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+.mvo { background: var(--chip); border-radius: 12px; padding: 10px 14px; font-size: 13.5px; margin-top: 12px; line-height: 1.55; }
+.mvo b { font-variant-numeric: tabular-nums; }
+.sumline { font-size: 13.5px; color: var(--muted); margin-top: 10px; line-height: 1.55; }
 .sumline b { color: var(--ink); }
-table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; font-size: 12.5px; }
-table.heat th { font-weight: 600; color: var(--muted); text-align: center; padding: 4px 4px; font-size: 12px; }
-table.heat th.row { text-align: left; max-width: 230px; color: var(--ink); font-weight: 500; }
-table.heat td { text-align: center; padding: 9px 4px; border-radius: 7px; cursor: pointer; font-variant-numeric: tabular-nums; font-weight: 600; min-width: 62px; color: #111; }
-table.heat td.empty { background: var(--chip); cursor: default; color: var(--muted); font-weight: 400; }
-table.heat td:not(.empty):hover { outline: 2px solid var(--accent); }
+.hint { font-size: 13px; color: var(--muted); margin: 14px 0 0; max-width: 78ch; }
+
+/* sekmeler */
+.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--chip); border-radius: 12px; margin-bottom: 16px; }
+.tabs button { border: 0; background: transparent; padding: 7px 16px; border-radius: 9px; color: var(--muted); font-weight: 500; }
+.tabs button[aria-selected="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(15,23,42,.12); font-weight: 700; }
+.tabpanel[hidden] { display: none; }
+
+/* ısı haritası */
 .scroll { overflow-x: auto; }
-.hint { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
-.hg { margin-bottom: 14px; }
-.hg h3 { font-size: 14px; margin: 0 0 6px; }
-.hl { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
-.h { background: var(--panel); border: 1px solid var(--line); border-left-width: 5px; border-radius: 9px; padding: 8px 11px; font-size: 13px; }
+table.heat { border-collapse: separate; border-spacing: 4px; width: 100%; font-size: 13px; }
+table.heat th { font-weight: 500; color: var(--muted); text-align: center; padding: 4px; font-size: 12px; line-height: 1.3; }
+table.heat th.row { text-align: left; max-width: 240px; color: var(--ink); font-weight: 500; padding-right: 10px; }
+table.heat td { text-align: center; padding: 10px 6px; border-radius: 9px; cursor: pointer; font-variant-numeric: tabular-nums; font-weight: 700; min-width: 66px; color: #101828; transition: transform .1s; }
+table.heat td.empty { background: var(--chip); cursor: default; color: var(--muted); font-weight: 400; }
+table.heat td:not(.empty):hover { outline: 2px solid var(--accent); transform: scale(1.04); }
+.scale { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); margin-top: 12px; }
+.scale i { display: block; width: 160px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, hsl(135 60% 62%), hsl(68 60% 58%), hsl(0 60% 54%)); }
+
+/* hipotez */
+details.acc { margin-top: 18px; }
+details.acc > summary { font-size: 15px; color: var(--ink); font-weight: 700; }
+#hipOzet { font-weight: 400; color: var(--muted); font-size: 13.5px; margin-left: 4px; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.pill { padding: 5px 12px; border-radius: 999px; font-size: 13px; background: var(--panel); }
+.pill[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.hg { margin-bottom: 16px; }
+.hg h3 { font-size: 13px; margin: 0 0 8px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.hl { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+.h { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--off); border-radius: 12px; padding: 10px 13px; font-size: 13.5px; line-height: 1.5; }
 .h.destek { border-left-color: var(--ok); } .h.curudu { border-left-color: var(--bad); } .h.kismen { border-left-color: var(--warn); }
-.h.bekliyor, .h.sinanamadi { border-left-color: var(--off); }
-.h b { margin-right: 6px; } .h .k { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
-.pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.pill { cursor: pointer; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-size: 13px; }
-.pill[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
-.method { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
-.method .card { font-size: 13.5px; }
-footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
-.tip { position: fixed; pointer-events: none; background: #1c2330; color: #fff; padding: 6px 9px; border-radius: 7px; font-size: 12px; z-index: 20; display: none; max-width: 260px; }
-.simhead { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
-.modelband { background: #7a3e00; color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .6px; padding: 3px 10px; border-radius: 6px; }
-.rozet { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--chip); color: var(--ink); }
-.rozet.ok { background: var(--ok); color: #fff; } .rozet.tah { background: var(--warn); color: #111; } .rozet.sap { background: var(--bad); color: #fff; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.chip { cursor: pointer; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-size: 12.5px; color: var(--ink); }
-.chip:hover { border-color: var(--accent); }
-.simstage { display: grid; grid-template-columns: minmax(300px, 560px) 1fr; gap: 14px; align-items: start; }
-@media (max-width: 900px) { .simstage { grid-template-columns: 1fr; } }
-canvas#simCanvas { width: 100%; height: auto; background: radial-gradient(circle at 50% 50%, var(--chip), transparent 80%); border-radius: 12px; display: block; }
-.gauge { display: flex; align-items: center; gap: 14px; margin: 4px 0 10px; }
-.gauge .disk { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 17px; color: #fff; background: var(--ok); transition: background .25s; line-height: 1.1; }
-.gauge .disk small { display: block; font-size: 10.5px; font-weight: 500; opacity: .9; }
-.mvo { background: var(--chip); border-radius: 10px; padding: 8px 12px; font-size: 13px; margin-top: 8px; }
-.mvo b { color: var(--ink); }
-.ctlrow { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; margin-bottom: 10px; }
-.ctlrow label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 3px; min-width: 120px; }
-.ctlrow input[type=range] { accent-color: var(--accent); }
-.ctlrow .chk { flex-direction: row; align-items: center; gap: 6px; min-width: 0; }
-button.kes { background: var(--bad); color: #fff; border-color: var(--bad); font-weight: 600; }
-button.ac { background: var(--ok); color: #fff; border-color: var(--ok); font-weight: 600; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.h b { margin-right: 6px; } .h .k { display: block; color: var(--muted); font-size: 12.5px; margin-top: 3px; }
+
+/* çıkarımlar ve yöntem */
+.cards3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+.cards3 .card { padding: 20px; font-size: 14.5px; line-height: 1.6; }
+.cards3 .card b { display: block; font-size: 16px; margin-bottom: 6px; letter-spacing: -.01em; }
+.cards3 .card span { color: var(--muted); }
+.limits { margin-top: 14px; padding: 18px 20px; font-size: 14px; color: var(--muted); line-height: 1.65; }
+.limits b { color: var(--ink); }
+.fig { margin-top: 12px; }
+.fig img { width: 100%; height: auto; background: #fff; border-radius: 12px; padding: 8px; border: 1px solid var(--line); }
+footer { padding: 40px 0 56px; color: var(--muted); font-size: 13.5px; line-height: 1.7; border-top: 1px solid var(--line); margin-top: 56px; }
+.tip { position: fixed; pointer-events: none; background: #0f172a; color: #fff; padding: 7px 10px; border-radius: 8px; font-size: 12px; z-index: 30; display: none; max-width: 260px; }
+@media (max-width: 640px) { .hero { padding-top: 36px; } .topbar a.nl { display: none; } .gauge { flex-direction: column; align-items: flex-start; } .kpis { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+@media print { .topbar, .actions, .ctl, .chips { display: none; } body { background: #fff; } }
 </style>
 </head>
 <body>
-<header class="wrap">
-  <h1>Çok cihazlı MQTT 5 sistemlerinde toplu yeniden bağlanma ve bağlantı sonrası yük</h1>
-  <p class="sub">Hasta izleme senaryosuyla bir ölçüm çalışması · Mert Bayır · Sakarya Üniversitesi · Bilimsel Araştırma, Proje Hazırlama ve Seminer</p>
-  <div class="cards" id="kpis"></div>
-</header>
-<nav><div class="wrap">
-  <a href="#ne">Ne oluyor?</a><a href="#simulasyon">Simülasyon</a><a href="#canlandirma">Gerçek koşular</a><a href="#harita">Tepe haritası</a><a href="#cikarim">Çıkarımlar</a><a href="#hipotez">Hipotez karnesi</a><a href="#yontem">Nasıl ölçtük?</a>
-  <button id="tema" aria-label="Açık ya da koyu tema">Tema</button>
-</div></nav>
+<div class="topbar"><div class="wrap">
+  <div class="brand"><i></i>MQTT Yeniden Bağlanma</div>
+  <a class="nl" href="#problem">Problem</a><a class="nl" href="#simulasyon">Simülasyon</a><a class="nl" href="#sonuclar">Sonuçlar</a><a class="nl" href="#cikarim">Çıkarımlar</a><a class="nl" href="#yontem">Yöntem</a>
+  <button id="tema" aria-label="Açık ya da koyu tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Bilimsel Araştırma, Proje Hazırlama ve Seminer · Sakarya Üniversitesi</div>
+  <h1>Çok cihazlı MQTT 5 sistemlerinde toplu yeniden bağlanma ve bağlantı sonrası yükün canlı mesaj gecikmesine etkisi</h1>
+  <p class="lead">Sunucu bir süre kapanıp açılınca binlerce cihaz aynı anda geri döner ve bu, anlık mesajları geciktirebilir. Bu çalışma, cihazların geri dönüş ve biriken veriyi gönderme stratejilerini iki MQTT sunucusunda (Mosquitto ve EMQX), 10.000 cihaza kadar deneysel olarak karşılaştırır.</p>
+  <div class="byline">Mert Bayır · Ekim 2026</div>
+  <div class="kpis4" id="kpis"></div>
+</div></header>
 
 <main class="wrap">
-<section id="ne">
-  <h2>Ne oluyor?</h2>
-  <p class="lead">Binlerce hasta başı cihazı tek bir sunucuya bağlı. Sunucu bir dakika kapanıp açılırsa ne olur? Hepsi aynı anda geri dönmeye çalışır ve dönünce de yapacak işleri vardır. Bu iş, o sırada akmaya devam eden <b>canlı alarmları</b> geciktirebilir.</p>
+<section id="problem">
+  <div class="sec-eyebrow">Problem</div>
+  <h2>Sunucu kapanıp açılınca ne olur?</h2>
+  <p class="lead">Cihazların geri dönüşü tek başına değil, döndükten sonra yaptıkları iş de sunucuyu yorar. Aynı sunucu canlı mesajları da taşıdığı için gecikme oraya yansır.</p>
   <div class="steps">
-    <div class="step"><b>Sunucu kapanır</b>Bütün bağlantılar kopar. Cihazlar kesintide ölçümleri biriktirir.</div>
-    <div class="step"><b>Cihazlar geri döner</b>Bekleme kuralı (sabit, üstel, rastgeleli) dönüşün ne kadar dağılacağını belirler. TLS varsa her dönüş pahalı bir el sıkışmadır.</div>
-    <div class="step"><b>Bağlantı sonrası iş</b>Cihaz durumu eşitler ve biriken mesajları boşaltır. B0: atar, B1: hemen boşaltır, B2: rastgele zamana yayar.</div>
-    <div class="step"><b>Canlı alarm gecikmesi</b>Aynı sunucu hem birikeni hem canlı alarmı taşır. Ölçtüğümüz şey: alarmların gecikmesi (saniyelik p99).</div>
+    <div class="card step"><b>Sunucu kapanır</b><span>Bağlantılar kopar, cihazlar kesinti boyunca ölçümleri biriktirir.</span></div>
+    <div class="card step"><b>Cihazlar geri döner</b><span>Bekleme kuralı (sabit, üstel, rastgeleli) dönüşün ne kadar dağılacağını belirler.</span></div>
+    <div class="card step"><b>Bağlantı sonrası iş</b><span>Durum eşitlenir, biriken mesajlar gönderilir: atılır (B0), hemen (B1), zamana yayılarak (B2) ya da alarm önce (B3).</span></div>
+    <div class="card step"><b>Canlı mesajlar gecikir</b><span>Ölçtüğümüz şey, canlı alarm mesajlarının gecikmesi (saniyelik p99).</span></div>
   </div>
-  <div class="panel" style="margin-top:14px"><img alt="Sistem mimarisi ve deney zaman çizelgesi" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:6px" src="data:image/png;base64,/*__MIMARI__*/"></div>
 </section>
 
 <section id="simulasyon">
-  <h2>Canlı simülasyon</h2>
-  <p class="lead">Ortada MQTT sunucusu, etrafında cihazlar. Sunucuyu aniden kes, aç, ayarları değiştir ve ne olduğunu izle. <b>Bu bir modeldir, ölçüm değildir:</b> parametreleri deney sonuçlarımıza göre ayarlandı; ölçtüğümüz senaryolarda ölçümle yan yana gösterilir, ölçmediklerimizde "tahmin" yazar.</p>
+  <div class="sec-eyebrow">Canlı simülasyon</div>
+  <h2>Sunucuyu kes, aç, ayarları değiştir</h2>
+  <p class="lead">Ortada MQTT sunucusu, etrafında cihazlar. Bir senaryo seç ve izle; istediğin an sunucuyu kesip açabilirsin. Sonuçlar deney ölçümlerimize göre ayarlanmış bir modelden gelir.</p>
   <div class="panel">
     <div class="simhead"><span class="modelband">MODEL, ÖLÇÜM DEĞİL</span><span class="rozet" id="simRozet">–</span><span class="rozet" id="simSapma" style="display:none"></span></div>
     <div class="chips" id="simChips"></div>
-    <div class="ctlrow">
+    <div class="ctl">
       <label>Sunucu<select id="cSunucu"><option value="mosquitto">Mosquitto (1 çekirdek)</option><option value="emqx2">EMQX (2 CPU)</option><option value="emqx4">EMQX (4 CPU)</option></select></label>
-      <label class="chk"><input type="checkbox" id="cTls"> TLS</label>
       <label>Cihaz sayısı: <b id="oN">5.000</b><input type="range" id="cN" min="1000" max="10000" step="500" value="5000"></label>
       <label>Bekleme kuralı<select id="cA"><option value="sabit">Sabit (1 sn)</option><option value="ustel" selected>Üstel</option><option value="ustel-rastgele">Rastgeleli üstel</option></select></label>
-      <label>Bağlantı sonrası politika<select id="cB"><option value="b0">B0: biriken atılır</option><option value="b1" selected>B1: hemen boşalt</option><option value="b2">B2: ayrık</option><option value="b3">B3: alarm önce, vital ayrık</option></select></label>
-      <label id="lW">Pencere W: <b id="oW">30 sn</b><input type="range" id="cW" min="10" max="120" step="10" value="30"></label>
-      <label id="lI">Aralık: <b id="oI">200 ms</b><input type="range" id="cI" min="100" max="1000" step="50" value="200"></label>
-      <label>Kesinti süresi: <b id="oK">60 sn</b><input type="range" id="cK" min="10" max="120" step="10" value="60"></label>
-      <label class="chk"><input type="checkbox" id="cOto" checked> Otomatik senaryo (40. sn'de kes)</label>
-      <label>Hız<select id="cS"><option value="3">3×</option><option value="6" selected>6×</option><option value="12">12×</option><option value="24">24×</option></select></label>
+      <label>Bağlantı sonrası politika<select id="cB"><option value="b0">B0: biriken atılır</option><option value="b1" selected>B1: hemen boşalt</option><option value="b2">B2: zamana yay</option><option value="b3">B3: alarm önce</option></select></label>
+      <label class="chk"><input type="checkbox" id="cTls"> TLS</label>
     </div>
-    <div class="ctlrow">
-      <button class="primary" id="bBaslat">▶ Başlat</button>
-      <button class="kes" id="bKes">⚡ Sunucuyu kes</button>
-      <button class="ac" id="bAc">⏻ Sunucuyu aç</button>
-      <button id="bSifirla">↺ Sıfırla</button>
+    <details class="adv"><summary>Gelişmiş ayarlar</summary>
+      <div class="ctl">
+        <label id="lW">Pencere: <b id="oW">30 sn</b><input type="range" id="cW" min="10" max="120" step="10" value="30"></label>
+        <label id="lI">Aralık: <b id="oI">200 ms</b><input type="range" id="cI" min="100" max="1000" step="50" value="200"></label>
+        <label>Kesinti süresi: <b id="oK">60 sn</b><input type="range" id="cK" min="10" max="120" step="10" value="60"></label>
+        <label>Hız<select id="cS"><option value="3">3×</option><option value="6">6×</option><option value="12" selected>12×</option><option value="24">24×</option></select></label>
+        <label class="chk"><input type="checkbox" id="cOto" checked> Otomatik senaryo (40. sn'de kes)</label>
+      </div>
+    </details>
+    <div class="actions">
+      <button class="primary" id="bBaslat">Başlat</button>
+      <button class="kes" id="bKes">Sunucuyu kes</button>
+      <button class="ac" id="bAc">Sunucuyu aç</button>
+      <button id="bSifirla">Sıfırla</button>
     </div>
     <div class="simstage">
       <div>
@@ -173,94 +238,105 @@ button.ac { background: var(--ok); color: #fff; border-color: var(--ok); font-we
       </div>
       <div>
         <div class="gauge"><div class="disk" id="simDisk"><div><span id="simAlarm">–</span><small>canlı alarm p99 (ms)</small></div></div>
-          <div class="kpis" style="flex:1;margin-top:0">
+          <div class="kpis">
             <div class="kpi"><div class="v" id="sBagli">–</div><div class="l">bağlı cihaz</div></div>
             <div class="kpi"><div class="v" id="sDeneme">–</div><div class="l">deneme / sn</div></div>
-            <div class="kpi"><div class="v" id="sKuyruk">–</div><div class="l">sunucu kuyruğu (sn)</div></div>
+            <div class="kpi"><div class="v" id="sKuyruk">–</div><div class="l">kuyruk (sn)</div></div>
           </div></div>
         <div class="chartbox"><h3>Bağlı cihaz sayısı</h3><svg id="sBagliCh" viewBox="0 0 640 150" role="img" aria-label="Bağlı cihaz sayısı"></svg></div>
-        <div class="chartbox"><h3>Canlı alarm gecikmesi, p99 (ms, log ölçek; kesikli mavi: gerçek ölçüm)</h3><svg id="sAlarmCh" viewBox="0 0 640 190" role="img" aria-label="Canlı alarm gecikmesi"></svg></div>
+        <div class="chartbox"><h3>Canlı alarm gecikmesi, p99 (ms, log ölçek; mavi kesikli: gerçek ölçüm)</h3><svg id="sAlarmCh" viewBox="0 0 640 190" role="img" aria-label="Canlı alarm gecikmesi"></svg></div>
         <div class="mvo" id="simMvo">–</div>
       </div>
     </div>
   </div>
-  <p class="hint">Model, tek bir sunucu kuyruğu ve cihaz bekleme kurallarından oluşan basit bir yapıdır; mesaj kaybı, rastgele aykırı koşular, ağ gecikmesi ve bloklar arası değişkenlik yoktur. Parametreler <code>scripts/model_kalibrasyon.mjs</code> ile ölçümlere uydurulmuştur.</p>
+  <p class="hint">Model, tek bir sunucu kuyruğu ve cihaz bekleme kurallarından oluşan basit bir yapıdır; mesaj kaybı, rastgele aykırı koşular ve ağ gecikmesi içermez. Parametreler deney ölçümlerine uydurulmuştur; ölçülmemiş kombinasyonlar "tahmin" olarak etiketlenir.</p>
 </section>
 
-<section id="canlandirma">
-  <h2>Gerçek koşular (tekrar oynat)</h2>
-  <p class="lead">Bir koşu seç ve oynat. Noktalar cihazlardır: yeşil bağlı, gri bağlantısız, turuncu yeniden deniyor. Altındaki grafikte canlı alarm gecikmesini görürsün. İstersen aynı koşulda başka bir politikayı üst üste çizdir.</p>
-  <div class="panel">
-    <div class="controls">
-      <label>Koşul<select id="selCond"></select></label>
-      <label>Bekleme kuralı<select id="selA"></select></label>
-      <label id="lblB">Bağlantı sonrası politika<select id="selB"></select></label>
-      <label>Tekrar (tohum)<select id="selT"></select></label>
-      <label id="lblC">Karşılaştır (aynı koşulda)<select id="selC"></select></label>
-      <label>Hız<select id="selS"><option value="3">3×</option><option value="6">6×</option><option value="12" selected>12×</option><option value="24">24×</option></select></label>
-      <button class="primary" id="btnPlay">▶ Oynat</button>
+<section id="sonuclar">
+  <div class="sec-eyebrow">Sonuçlar</div>
+  <h2>Deneylerin özeti</h2>
+  <p class="lead">Tüm koşular kayıtlıdır; her hücre en az üç tekrarın medyanıdır.</p>
+  <div class="tabs" role="tablist" aria-label="Sonuç görünümleri">
+    <button role="tab" aria-selected="true" aria-controls="tab-harita" data-tab="harita">Tepe haritası</button>
+    <button role="tab" aria-selected="false" aria-controls="tab-canlandirma" data-tab="canlandirma">Gerçek koşuları oynat</button>
+  </div>
+
+  <div class="tabpanel" id="tab-harita" role="tabpanel">
+    <div class="panel scroll"><table class="heat" id="heat"></table>
+      <div class="scale"><span>40 ms</span><i></i><span>20 sn</span><span style="margin-left:10px">Kutu: sunucu açıldıktan sonra canlı alarm gecikmesinin tepesi (medyan). Tıklayınca koşu açılır.</span></div>
     </div>
-    <div class="stage">
-      <div>
-        <canvas id="dots" width="500" height="250" aria-label="Cihazların bağlantı durumu"></canvas>
-        <div class="status"><span id="clock">t = 0 sn</span><span id="state" class="badge">–</span></div>
-        <div class="kpis">
-          <div class="kpi"><div class="v" id="kBagli">–</div><div class="l">bağlı cihaz</div></div>
-          <div class="kpi"><div class="v" id="kDeneme">–</div><div class="l">deneme / sn</div></div>
-          <div class="kpi"><div class="v" id="kAlarm">–</div><div class="l">canlı alarm p99 (ms)</div></div>
+    <p class="hint">Kesinti öncesi taban gecikme yaklaşık 30-55 ms'dir. Koşu sayısı ve aralık için kutunun üzerine gel.</p>
+  </div>
+
+  <div class="tabpanel" id="tab-canlandirma" role="tabpanel" hidden>
+    <div class="panel" id="canlandirma">
+      <div class="ctl">
+        <label>Koşul<select id="selCond"></select></label>
+        <label>Bekleme kuralı<select id="selA"></select></label>
+        <label id="lblB">Bağlantı sonrası politika<select id="selB"></select></label>
+        <label>Tekrar<select id="selT"></select></label>
+        <label id="lblC">Karşılaştır<select id="selC"></select></label>
+        <label>Hız<select id="selS"><option value="3">3×</option><option value="6">6×</option><option value="12" selected>12×</option><option value="24">24×</option></select></label>
+        <button class="primary" id="btnPlay">Oynat</button>
+      </div>
+      <div class="stage">
+        <div>
+          <canvas id="dots" width="500" height="250" aria-label="Cihazların bağlantı durumu"></canvas>
+          <div class="status"><span id="clock">t = 0 sn</span><span id="state" class="badge">–</span></div>
+          <div class="kpis" style="margin-top:10px">
+            <div class="kpi"><div class="v" id="kBagli">–</div><div class="l">bağlı cihaz</div></div>
+            <div class="kpi"><div class="v" id="kDeneme">–</div><div class="l">deneme / sn</div></div>
+            <div class="kpi"><div class="v" id="kAlarm">–</div><div class="l">alarm p99 (ms)</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="chartbox"><h3>Bağlı cihaz sayısı</h3><svg id="chBagli" viewBox="0 0 640 170" role="img" aria-label="Bağlı cihaz sayısı grafiği"></svg></div>
+          <div class="chartbox" id="boxAlarm"><h3>Canlı alarm gecikmesi, p99 (ms, log ölçek; noktalı çizgi 100 ms)</h3><svg id="chAlarm" viewBox="0 0 640 200" role="img" aria-label="Canlı alarm gecikmesi grafiği"></svg></div>
+          <div class="legend" id="legend"></div>
         </div>
       </div>
-      <div>
-        <div class="chartbox"><h3>Bağlı cihaz sayısı</h3><svg id="chBagli" viewBox="0 0 640 170" role="img" aria-label="Bağlı cihaz sayısı grafiği"></svg></div>
-        <div class="chartbox" id="boxAlarm"><h3>Canlı alarm gecikmesi, p99 (ms, log ölçek; noktalı çizgi 100 ms)</h3><svg id="chAlarm" viewBox="0 0 640 200" role="img" aria-label="Canlı alarm gecikmesi grafiği"></svg></div>
-        <div class="legend" id="legend"></div>
-      </div>
+      <input id="slider" class="slider" type="range" min="0" max="100" value="0" aria-label="Zaman">
+      <div class="sumline" id="sum"></div>
     </div>
-    <input id="slider" class="slider" type="range" min="0" max="100" value="0" aria-label="Zaman">
-    <div class="sumline" id="sum"></div>
   </div>
-</section>
 
-<section id="harita">
-  <h2>Tepe haritası</h2>
-  <p class="lead">Her kutu, aynı koşuldaki tüm tekrarların (3 ya da farklı bloklardan 6) <b>medyan</b> tepe canlı alarm gecikmesidir (ms; sunucu açıldıktan sonraki saniyelik p99'un en büyüğü). Yeşil: taban düzeyi, kırmızı: saniyeler. Bir kutuya tıklayınca koşu canlandırmada açılır.</p>
-  <div class="panel scroll"><table class="heat" id="heat"></table></div>
-  <p class="hint">Kesinti öncesi taban yaklaşık 30-55 ms'dir. 100 ms'nin üstü "gecikme var" sayılır. Aralık ve koşu sayısı için kutunun üzerine gel.</p>
+  <details class="acc"><summary>Hipotez karnesi <span id="hipOzet"></span></summary>
+    <p class="lead" style="margin-top:8px">Her deneyden önce hipotezleri yazdık, sonuçlardan sonra kontrol ettik. Çürüyenler de burada.</p>
+    <div class="pills" id="pills"></div>
+    <div id="hips"></div>
+  </details>
 </section>
 
 <section id="cikarim">
-  <h2>Çıkarımlar</h2>
-  <p class="lead">Bu ortamdaki gözlemlerden çıkan ön öneriler (genel kural değil; sınırlar için "Nasıl ölçtük?" bölümüne bak).</p>
-  <div class="method">
-    <div class="card"><b>1. Önce dönüşü dağıt</b><br>Sunucu zorlanmaya başlıyorsa (TLS, çok cihaz) rastgele bekleme en ucuz ilk önlemdir. Rahat ortamda yalnızca toparlanmayı uzatır.</div>
-    <div class="card"><b>2. Yetmezse boşaltmayı da yay</b><br>Cihaz başına rastgele gecikme ve aralıklı gönderme gecikmeyi %89-99 düşürebilir. Ayarı yük arttıkça büyütmek gerekir.</div>
-    <div class="card"><b>3. Çekirdek eklemek yetmez</b><br>EMQX'te çekirdeği 2'den 4'e çıkarmak üstel + B1 gecikmesini yalnızca %29 azalttı.</div>
-    <div class="card"><b>4. Yaymanın bedeli var</b><br>Boşaltma 1,5-4 kat uzar; kesintide biriken alarm daha geç ulaşır (en eski ≈ 3 dakika).</div>
-    <div class="card"><b>5. Alarmı öne al</b><br>Az sayıdaki birikmiş alarmı hemen göndermek yaşını %24-60 düşürdü. Senkron dönüş + TLS'te canlı alarmı kötüleştirebilir.</div>
-    <div class="card"><b>6. Ölçerken dikkat</b><br>Toplam bağlı sayısı yetmez; deneme sayısı, kayıp, doğru saat ve sunucunun koruma ayarları kontrol edilmeli.</div>
+  <div class="sec-eyebrow">Çıkarımlar</div>
+  <h2>Ne yapmalı?</h2>
+  <p class="lead">Bu ortamdaki gözlemlerden çıkan ön öneriler; genel kural değildir.</p>
+  <div class="cards3">
+    <div class="card"><b>Önce dönüşü dağıt</b><span>Sunucu zorlanmaya başlıyorsa (TLS, çok cihaz) rastgele bekleme en ucuz ilk önlemdir. Rahat ortamda yalnızca toparlanmayı uzatır.</span></div>
+    <div class="card"><b>Yetmezse boşaltmayı da yay</b><span>Cihaz başına rastgele gecikme ve aralıklı gönderme gecikmeyi %89-99 düşürebilir; ayar yük arttıkça büyütülmelidir.</span></div>
+    <div class="card"><b>Çekirdek eklemek yetmez</b><span>EMQX'te çekirdeği 2'den 4'e çıkarmak üstel + hemen boşaltma gecikmesini yalnızca %29 azalttı.</span></div>
+    <div class="card"><b>Yaymanın bedeli var</b><span>Boşaltma 1,5-4 kat uzar; kesintide biriken alarm daha geç ulaşır (en eskisi yaklaşık 3 dakika).</span></div>
+    <div class="card"><b>Alarmı öne al</b><span>Az sayıdaki birikmiş alarmı hemen göndermek yaşını %24-60 düşürdü; senkron dönüş ve TLS'te canlı alarmı kötüleştirebilir.</span></div>
+    <div class="card"><b>Ölçerken dikkat</b><span>Toplam bağlı sayısı yetmez: deneme sayısı, kayıp, doğru saat ve sunucunun koruma ayarları da kontrol edilmeli.</span></div>
   </div>
-</section>
-
-<section id="hipotez">
-  <h2>Hipotez karnesi</h2>
-  <p class="lead">Her deneyden önce hipotezleri yazdık, sonuçlardan sonra kontrol ettik. Çürüyen hipotezler de burada.</p>
-  <div class="pills" id="pills"></div>
-  <div id="hips"></div>
 </section>
 
 <section id="yontem">
+  <div class="sec-eyebrow">Yöntem</div>
   <h2>Nasıl ölçtük?</h2>
-  <div class="method">
-    <div class="card"><b>Ortam</b><br>Tek bilgisayar, Docker. Sunucu: Mosquitto 2.1.2 (tek çekirdek) ve EMQX 5.8.6, her biri 2 CPU / 2 GB. Cihazlar bir simülatörde (MQTTnet, MQTT 5), 5.000 ve 10.000'e kadar.</div>
-    <div class="card"><b>Senaryo</b><br>Cihazlar 20 sn'de bağlanır; 40. saniyede sunucu durur, 60 sn kapalı kalır, sonra açılır. Her cihaz 2 sn'de bir vital, 10 sn'de bir alarm gönderir (128 bayt, QoS 1).</div>
-    <div class="card"><b>Ölçüm</b><br>Gecikme = toplayıcının aldığı an − mesajın planlanan gönderim anı, tek yönlü saatle. WSL2 duvar saati ~30 sn'de bir sıçradığı için duvar saati kullanılmadı.</div>
-    <div class="card"><b>Tekrar</b><br>Her hücre 3 tekrar, bloklar içinde rastgele sıra. Medyan ve aralık verilir; güven aralığı iddiası yok.</div>
-    <div class="card"><b>Sınırlar</b><br>Tek makine, sanal cihaz, temiz kesinti. TLS sertifikası doğrulanmadı. İş yükü varsayımsal; klinik güvenlik iddiası yoktur.</div>
-    <div class="card"><b>Kayıt</b><br>Her koşunun girdisi, çıktısı ve kod sürümü kayıtlı. Hatalı koşular silinmedi, işaretlendi. Kod ve veri: github.com/mertbayir/mqtt-analysis-project</div>
+  <div class="cards3">
+    <div class="card"><b>Ortam</b><span>Tek bilgisayar, Docker. Sunucular: Mosquitto 2.1.2 ve EMQX 5.8.6 (her biri 2 CPU / 2 GB). Cihazlar bir simülatörde (MQTTnet, MQTT 5), 10.000'e kadar.</span></div>
+    <div class="card"><b>Senaryo</b><span>Cihazlar 20 sn'de bağlanır; 40. saniyede sunucu durur, 60 sn kapalı kalır, sonra açılır. Her cihaz 2 sn'de bir vital, 10 sn'de bir alarm gönderir.</span></div>
+    <div class="card"><b>Ölçüm</b><span>Gecikme, mesajın alındığı an ile planlanan gönderim anı arasındaki fark; tek yönlü saatle ölçülür. Her hücre en az 3 tekrar, medyan ve aralık verilir.</span></div>
   </div>
+  <div class="card limits"><b>Sınırlar.</b> Tek makine, sanal cihazlar, temiz kesinti; TLS sertifikası doğrulanmadı; iş yükü varsayımsaldır. Sonuçlar bu ortama göre yorumlanmalı, mutlak kapasite iddiası taşımaz. Canlı simülasyon bir modeldir, ölçüm değildir. Kayıt: her koşunun girdisi, çıktısı ve kod sürümü saklanmıştır; hatalı koşular silinmemiş, işaretlenmiştir.</div>
+  <details class="acc"><summary>Sistem şeması ve zaman çizelgesi</summary>
+    <div class="fig"><img alt="Sistem mimarisi ve deney zaman çizelgesi" src="data:image/png;base64,/*__MIMARI__*/"></div>
+  </details>
 </section>
 </main>
-<footer class="wrap">Bu sayfa deney verisinden <code>scripts/web_uret.py</code> ile üretilir; internet bağlantısı gerekmez.</footer>
+
+<footer><div class="wrap">Veri ve kod: <a href="https://github.com/mertbayir/mqtt-analysis-project">github.com/mertbayir/mqtt-analysis-project</a><br>Bu sayfa deney kayıtlarından otomatik üretilir (<code>scripts/web_uret.py</code>) ve internet bağlantısı gerektirmez. Yazı tipi: Satoshi (Fontshare).</div></footer>
 <div class="tip" id="tip"></div>
 
 <script>/*__VERI__*/</script>
@@ -284,7 +360,7 @@ function condLabel(k) {
 }
 const conds = [...new Set(RUNS.map(condKey))].sort((a, b) => {
   const pa = a.split("|"), pb = b.split("|");
-  return (pa[0] === pb[0] ? 0 : pa[0] === "adim5" ? -1 : 1) || pa[1].localeCompare(pb[1]) || +pa[2] - +pb[2] || +pa[3] - +pb[3] || +pa[4] - +pb[4];
+  return (pa[0] === pb[0] ? 0 : pa[0] === "adim5" ? -1 : 1) || ((pa[1] === 'mosquitto' ? 0 : 1) - (pb[1] === 'mosquitto' ? 0 : 1)) || +pa[2] - +pb[2] || +pa[3] - +pb[3] || +pa[4] - +pb[4];
 });
 const BORDER = ["b0", "b1", "b2", "b3", "b2-w60i1000", "b2-w90i500", "b3-w90i500"], AORDER = ["sabit", "ustel", "ustel-rastgele"];
 
@@ -296,10 +372,10 @@ const m5 = (A, B, extra) => medTepe((r) => r.aile === "adim5" && r.surum === "v6
   const t1 = med(RUNS.filter((r) => r.surum === "t1" && r.A === "ustel" && r.N === 5000).map((r) => r.ozet.ttr100));
   const t2 = med(RUNS.filter((r) => r.surum === "t1" && r.A === "ustel-rastgele" && r.N === 5000).map((r) => r.ozet.ttr100));
   const kartlar = [
-    [fmt(a / 1000, 1) + " sn", `canlı alarm gecikmesi: üstel kural + B1 (hemen boşalt), 5.000 cihaz. Referans B0'da ${fmt(b0)} ms.`],
-    [`%${fmt((1 - c / a) * 100)}`, `azalma: B2 (boşaltmayı zamana yay) aynı hücrede ${fmt(c)} ms'ye indirir. Bedeli: boşaltma daha geç biter.`],
-    [fmt(r1) + " ms", "rastgeleli dönüş + B1: dönüşü dağıtmak bağlantı sonrası yükü de dağıtır (TLS'siz, 5.000 cihaz)."],
-    [`${fmt(t1)} → ${fmt(t2)} sn`, "TLS ile toparlanma süresi: üstelden rastgeleli kurala. TLS'siz ortamda yön tersiydi."],
+    [fmt(a / 1000, 1) + " sn", "Üstel dönüş + hemen boşaltma: canlı alarm gecikmesi (5.000 cihaz)"],
+    [`%${fmt((1 - c / a) * 100)}`, "Boşaltmayı zamana yaymak aynı gecikmeyi bu kadar düşürür"],
+    [fmt(r1) + " ms", "Dönüşü rastgele dağıtınca aynı hücrede gecikme (TLS'siz)"],
+    [`${fmt(t1)} → ${fmt(t2)} sn`, "TLS'te toparlanma süresi: üstel → rastgeleli kural"],
   ];
   $("kpis").innerHTML = kartlar.map(([b, l]) => `<div class="card"><div class="big">${b}</div><div class="lbl">${l}</div></div>`).join("");
 })();
@@ -436,8 +512,8 @@ function tick(ts) {
   while (S.acc >= 1) { S.acc -= 1; S.idx++; if (S.idx >= run.bagli.length) { S.idx = run.bagli.length - 1; stop(); break; } }
   draw(); if (S.playing) requestAnimationFrame(tick);
 }
-function play() { if (S.idx >= run.bagli.length - 1) S.idx = 0; S.playing = true; S.last = 0; $("btnPlay").textContent = "⏸ Duraklat"; requestAnimationFrame(tick); }
-function stop() { S.playing = false; $("btnPlay").textContent = "▶ Oynat"; }
+function play() { if (S.idx >= run.bagli.length - 1) S.idx = 0; S.playing = true; S.last = 0; $("btnPlay").textContent = "Duraklat"; requestAnimationFrame(tick); }
+function stop() { S.playing = false; $("btnPlay").textContent = "Oynat"; }
 $("btnPlay").onclick = () => (S.playing ? stop() : play());
 $("slider").oninput = (e) => { stop(); S.idx = +e.target.value; draw(); };
 $("selCond").onchange = (e) => { stop(); S.cond = e.target.value; S.cmp = ""; refreshControls(); load(); };
@@ -472,17 +548,18 @@ fillSelect($("selCond"), conds.map((c) => [c, condLabel(c)]), S.cond);
     const t = e.target.closest("td[data-c]"); if (!t) return;
     stop(); S.cond = t.dataset.c; S.A = t.dataset.a; S.B = t.dataset.b; S.tohum = "1"; S.cmp = ""; S.idx = 0;
     fillSelect($("selCond"), conds.map((c) => [c, condLabel(c)]), S.cond); refreshControls(); load();
-    $("canlandirma").scrollIntoView({ behavior: "smooth" });
+    sekmeGoster("canlandirma"); $("sonuclar").scrollIntoView({ behavior: "smooth" });
   };
 })();
 
 /* ---------- hipotez karnesi ---------- */
 (function hip() {
   const AD = { destek: "Destekleniyor", curudu: "Çürüdü", kismen: "Kısmen", bekliyor: "Bekliyor", sinanamadi: "Sınanamadı" };
-  const filt = { hepsi: "Hepsi", destek: "Destekleniyor", curudu: "Çürüdü", kismen: "Kısmen", bekliyor: "Bekliyor" };
+  const filt = { hepsi: "Hepsi", destek: "Destekleniyor", kismen: "Kısmen", curudu: "Çürüdü" };
   let cur = "hepsi";
   function render() {
     const H = V.hipotezler, sayac = (d) => H.filter((h) => h.durum === d).length;
+    $("hipOzet").textContent = `· ${H.length} hipotez: ${sayac("destek")} desteklendi, ${sayac("kismen")} kısmen, ${sayac("curudu")} çürüdü`;
     $("pills").innerHTML = Object.entries(filt).map(([k, t]) => `<button class="pill" data-k="${k}" aria-pressed="${cur === k}">${t} (${k === "hepsi" ? H.length : sayac(k)})</button>`).join("");
     const gr = {}; H.filter((h) => cur === "hepsi" || h.durum === cur || (cur === "bekliyor" && h.durum === "sinanamadi")).forEach((h) => (gr[h.adim] = gr[h.adim] || []).push(h));
     $("hips").innerHTML = Object.entries(gr).map(([a, l]) => `<div class="hg"><h3>${a}</h3><div class="hl">${l.map((h) => `<div class="h ${h.durum}"><b>${h.id}</b>${h.metin}<span class="k">${AD[h.durum]}${h.kanit ? " · " + h.kanit : ""}</span></div>`).join("")}</div></div>`).join("");
@@ -584,8 +661,8 @@ fillSelect($("selCond"), conds.map((c) => [c, condLabel(c)]), S.cond);
     const kg = sim.W / sim._mu(), kq = Math.min(1, kg / 10);
     cx.fillStyle = "rgba(255,255,255,.2)"; cx.fillRect(280 - 40, 280 + 30, 80, 8);
     cx.fillStyle = kq > 0.5 ? "#ef6a5b" : kq > 0.1 ? "#f0b429" : "#46c27b"; cx.fillRect(280 - 40, 280 + 30, 80 * kq, 8);
-    cx.fillStyle = "#fff"; cx.font = "bold 12px system-ui"; cx.textAlign = "center";
-    cx.fillText(kes ? "KAPALI" : "MQTT", 280, 273); cx.font = "10px system-ui"; cx.fillText(kes ? "sunucu" : "sunucusu", 280, 288);
+    cx.fillStyle = "#fff"; cx.font = "700 12px Satoshi, system-ui"; cx.textAlign = "center";
+    cx.fillText(kes ? "KAPALI" : "MQTT", 280, 273); cx.font = "500 10px Satoshi, system-ui"; cx.fillText(kes ? "sunucu" : "sunucusu", 280, 288);
   }
 
   function grafik() {
@@ -651,8 +728,8 @@ fillSelect($("selCond"), conds.map((c) => [c, condLabel(c)]), S.cond);
     if (sim.t >= 40 + SIM.cfg.kesinti + 150 && SIM.cfg.oto) { durdur(); grafik(); gostergeler(); return; }
     requestAnimationFrame(tik);
   }
-  function baslat() { SIM.playing = true; SIM.last = 0; $("bBaslat").textContent = "⏸ Duraklat"; requestAnimationFrame(tik); }
-  function durdur() { SIM.playing = false; $("bBaslat").textContent = "▶ Başlat"; }
+  function baslat() { SIM.playing = true; SIM.last = 0; $("bBaslat").textContent = "Duraklat"; requestAnimationFrame(tik); }
+  function durdur() { SIM.playing = false; $("bBaslat").textContent = "Başlat"; }
 
   $("bBaslat").onclick = () => { if (SIM.playing) { durdur(); return; } if (SIM.cfg.oto && SIM.sim.t >= 40 + SIM.cfg.kesinti + 150) kur(); baslat(); };
   $("bSifirla").onclick = () => { durdur(); kur(); };
@@ -662,17 +739,14 @@ fillSelect($("selCond"), conds.map((c) => [c, condLabel(c)]), S.cond);
 
   // hazır senaryolar
   const HAZIR = [
-    ["Mosquitto · 5.000 · üstel · B1 (ikinci izdiham)", { s: "mosquitto", N: 5000, A: "ustel", B: "b1" }],
-    ["… B2 ile düzelir", { s: "mosquitto", N: 5000, A: "ustel", B: "b2" }],
-    ["… rastgeleli dönüş + B1", { s: "mosquitto", N: 5000, A: "ustel-rastgele", B: "b1" }],
-    ["10.000 · rastgeleli · B1 (doyma)", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b1" }],
-    ["10.000 · rastgeleli · B2 90/500", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b2", W: 90, I: 500 }],
-    ["10.000 · rastgeleli · B3 90/500", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b3", W: 90, I: 500 }],
-    ["TLS · 5.000 · üstel · B0", { s: "mosquitto", N: 5000, A: "ustel", B: "b0", tls: true }],
-    ["TLS · 5.000 · rastgeleli · B1", { s: "mosquitto", N: 5000, A: "ustel-rastgele", B: "b1", tls: true }],
-    ["TLS · 5.000 · rastgeleli · B3", { s: "mosquitto", N: 5000, A: "ustel-rastgele", B: "b3", tls: true }],
-    ["EMQX 2 CPU · 5.000 · üstel · B1", { s: "emqx2", N: 5000, A: "ustel", B: "b1" }],
-    ["EMQX 4 CPU · 5.000 · üstel · B1", { s: "emqx4", N: 5000, A: "ustel", B: "b1" }],
+    ["İkinci izdiham: üstel + hemen boşalt", { s: "mosquitto", N: 5000, A: "ustel", B: "b1" }],
+    ["Çözüm: boşaltmayı zamana yay (B2)", { s: "mosquitto", N: 5000, A: "ustel", B: "b2" }],
+    ["Rastgele dönüş: sorun yok denecek kadar az", { s: "mosquitto", N: 5000, A: "ustel-rastgele", B: "b1" }],
+    ["10.000 cihaz: doyma (B1)", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b1" }],
+    ["10.000 cihaz: ayarlı B2", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b2", W: 90, I: 500 }],
+    ["10.000 cihaz: alarm önce (B3)", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b3", W: 90, I: 500 }],
+    ["TLS: el sıkışma yükü", { s: "mosquitto", N: 5000, A: "ustel", B: "b0", tls: true }],
+    ["EMQX: aynı senaryo", { s: "emqx2", N: 5000, A: "ustel", B: "b1" }],
   ];
   $("simChips").innerHTML = HAZIR.map((h, i) => `<button class="chip" data-i="${i}">${h[0]}</button>`).join("");
   $("simChips").onclick = (e) => {
@@ -684,6 +758,15 @@ fillSelect($("selCond"), conds.map((c) => [c, condLabel(c)]), S.cond);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { ciz(); grafik(); });
   window.__simTema = () => { ciz(); grafik(); };
 })();
+
+
+/* ---------- sekmeler ---------- */
+function sekmeGoster(ad) {
+  document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === ad ? "true" : "false"));
+  document.querySelectorAll(".tabpanel").forEach((p) => (p.hidden = p.id !== "tab-" + ad));
+  if (ad === "canlandirma" && typeof load === "function") load();
+}
+document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => sekmeGoster(b.dataset.tab)));
 
 /* ---------- tema ---------- */
 $("tema").onclick = () => {
