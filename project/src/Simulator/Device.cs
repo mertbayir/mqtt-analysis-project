@@ -78,21 +78,24 @@ public class Device
             return Task.CompletedTask;
         };
 
-        var options = new MqttClientOptionsBuilder()
+        var optionsBuilder = new MqttClientOptionsBuilder()
             .WithTcpServer(_host, _port)
-            .WithTlsOptions(o =>
-            {
-                if (!TlsAcik) return;
-                // Yük testi: test sertifikası (kendi imzalı CA) doğrulanmaz; el sıkışma maliyeti (asimetrik işlem) aynıdır.
-                o.UseTls();
-                o.WithCertificateValidationHandler(_ => true);
-            })
             .WithClientId($"cihaz-{_id:D5}")
             .WithProtocolVersion(MqttProtocolVersion.V500)
             .WithKeepAlivePeriod(TimeSpan.FromSeconds(KalpAtisiSn))
             .WithTimeout(TimeSpan.FromSeconds(BaglantiZamanAsimiSn))      // bağlantı zaman aşımı (planda 5 sn)
-            .WithCleanStart(true)
-            .Build();
+            .WithCleanStart(true);
+        // TLS seçeneği YALNIZCA TLS açıkken eklenir (kapalıyken WithTlsOptions çağrısı bile düz TCP bağlantısını bozar: günlük 12).
+        if (TlsAcik)
+        {
+            // Yük testi: test sertifikası (kendi imzalı CA) doğrulanmaz; el sıkışma maliyeti (asimetrik işlem) aynıdır.
+            optionsBuilder.WithTlsOptions(o =>
+            {
+                o.UseTls();
+                o.WithCertificateValidationHandler(_ => true);
+            });
+        }
+        var options = optionsBuilder.Build();
 
         int beklemeNo = 0;   // bu kesintide şimdiye kadar kaç kez bekledik (bağlanınca sıfırlanır)
         Task? uretici = null;

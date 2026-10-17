@@ -1,0 +1,28 @@
+# Adım 7: ikinci sunucu (EMQX 5.8.6, çok çekirdekli). Kullanım: Mosquitto yerine bu sunucu için
+#   $env:COMPOSE_FILE = "docker-compose.yml;docker-compose.emqx.yml"   (PowerShell)
+# Betikler -Sunucu emqx ile bunu kendileri ayarlar. Servis adı ve konteyner adı (broker / mqtt-broker) aynı kalır,
+# böylece simülatör, toplayıcı ve betikler değişmeden çalışır.
+# Adil karşılaştırma: aynı kaynak payı (2 CPU / 2 GB), aynı sabit MAC, TLS'siz 1883 ve TLS'li 8883, anonim erişim.
+services:
+  broker:
+    image: emqx/emqx@sha256:a1e3d10fa1dcc8c94325b815a93b5b5974253a97cb36470b44e47d5d3ef9cd13   # emqx/emqx:5.8 = 5.8.6
+    cpus: ${BROKER_CPUS:-2}   # varsayılan 2 (Mosquitto ile aynı pay); -SunucuCpu ile değiştirilir
+    volumes: !override
+      - ./mosquitto/certs:/certs:ro
+    environment:
+      # Kuyruk ve uçuştaki mesaj sınırları Mosquitto ayarıyla eşdeğer (max_queued_messages 0 = sınırsız, max_inflight 100):
+      EMQX_MQTT__MAX_MQUEUE_LEN: "infinity"
+      EMQX_MQTT__MAX_INFLIGHT: "100"
+      # TLS dinleyicisi: aynı test sertifikası (kendi imzalı CA), istemci sertifikası istenmez
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE: "/certs/server.crt"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE: "/certs/server.key"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE: "/certs/ca.crt"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__VERIFY: "verify_none"
+      # Gereksiz dinleyiciler ve panel kapalı (ölçüm gürültüsü olmasın)
+      EMQX_LISTENERS__WS__DEFAULT__ENABLE: "false"
+      EMQX_LISTENERS__WSS__DEFAULT__ENABLE: "false"
+      EMQX_DASHBOARD__LISTENERS__HTTP__BIND: "0"
+      EMQX_LOG__CONSOLE__LEVEL: "warning"
+      # EMQX'in varsayılan koruması (force_shutdown: istemci işleminin posta kutusu 1000 mesajı aşarsa bağlantıyı kes) tek toplayıcı
+      # aboneyi boşaltma sırasında atıyordu (günlük 12). Mosquitto'da kuyruk sınırının kaldırılmasına eşdeğer ölçüm ayarı:
+      EMQX_FORCE_SHUTDOWN__ENABLE: "false"

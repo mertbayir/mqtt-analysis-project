@@ -1,0 +1,4 @@
+toplayıcı: sunucu=172.21.0.2:1883 süre=255sn sync=4096B çıktı=/results/adim5_ustel_b1_n5000_s1_emqxpilot3.collector.csv
+12:09:29.322 toplayıcı bağlandı ve abone oldu
+12:11:16.436 toplayıcı bağlandı ve abone oldu
+toplayıcı bitti.

@@ -28,6 +28,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 22 | 16 Ekim | TLS matrisi tamamlandı (t1); sonuç: TLS ile sunucu zorlanıyor, rastgeleli kuralın yönü tersine döndü. Sonraki: bağlantı sonrası iş TLS'te (F1b) ve EMQX (F5) | Günlük 10 |
 | 23 | 17 Ekim | Adım 6b: TLS + bağlantı sonrası iş; toplayıcı TLS'siz kalır; N = 5.000, 6 hücre, 18 koşu, izleme 180 sn | İki yükü birlikte ölçmek (günlük 11) |
 | 24 | 17 Ekim | Adım 6b tamamlandı (tls6, 18 koşu; ilk deneme yarım kalıp devam ettirildi, yarım koşu iptal klasöründe). Sonuç: TLS'te en iyi politika B2, TLS'siz N = 5.000'de B1; en iyi politika ortama bağlı | Günlük 11 |
+| 25 | 17 Ekim | Adım 7: EMQX 5.8.6 (imza sabit), 2 CPU / 2 GB (Mosquitto ile aynı pay) ve ayrı 4 CPU matrisi; `force_shutdown` kapalı; hata düzeltmeleri: istemci TLS'siz modda TLS seçeneğini açık bırakıyordu (düzeltildi, geçmiş koşular etkilenmedi), hazır olma probu 127.0.0.1'e bakıyor | Günlük 12 |
 
 ## Açık kararlar
 
