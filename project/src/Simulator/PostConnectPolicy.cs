@@ -9,6 +9,7 @@ public interface IPostConnectPolicy
     bool BirikeniGonder { get; }             // biriken mesajlar sunucuya gönderilsin mi (false: atılır)?
     double BaslangicGecikmeSn(Random r);     // bağlandıktan sonra eşitleme/boşaltmadan önce bekleme
     int MesajAraligiMs { get; }              // biriken mesajlar arasında bekleme (0 = peş peşe, en hızlı)
+    bool AlarmOnce => false;                 // true: birikmiş ALARMLAR önce, hemen ve peş peşe gönderilir (B3)
 }
 
 // B0 (referans): bağlantı sonrası hiçbir iş yok. Biriken mesajlar atılır, eşitleme yapılmaz.
@@ -43,6 +44,22 @@ public class B2Ayrik : IPostConnectPolicy
     public string Aciklama => $"B2Ayrik(gecikme=U(0,{_pencereSn})sn, aralik={_aralikMs}ms)";
     public bool SyncYap => true;
     public bool BirikeniGonder => true;
+    public double BaslangicGecikmeSn(Random r) => r.NextDouble() * _pencereSn;
+    public int MesajAraligiMs => _aralikMs;
+}
+
+// B3 (alarm öncelikli, ayrık): bağlanır bağlanmaz birikmiş ALARMLAR hemen (eşitlemeden önce, peş peşe) gönderilir;
+// kalan (vital) mesajlar B2 gibi: [0, pencere] sn rastgele bekle, eşitle, aralıklı boşalt.
+public class B3AlarmOnce : IPostConnectPolicy
+{
+    private readonly double _pencereSn;
+    private readonly int _aralikMs;
+    public B3AlarmOnce(double pencereSn, int aralikMs) { _pencereSn = pencereSn; _aralikMs = aralikMs; }
+
+    public string Aciklama => $"B3AlarmOnce(alarm=hemen, vital: gecikme=U(0,{_pencereSn})sn, aralik={_aralikMs}ms)";
+    public bool SyncYap => true;
+    public bool BirikeniGonder => true;
+    public bool AlarmOnce => true;
     public double BaslangicGecikmeSn(Random r) => r.NextDouble() * _pencereSn;
     public int MesajAraligiMs => _aralikMs;
 }

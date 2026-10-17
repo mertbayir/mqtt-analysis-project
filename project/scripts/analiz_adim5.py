@@ -19,6 +19,9 @@ Zaman ekseni: simülatör başlangıcından beri geçen saniye, TEK YÖNLÜ saat
   flush_bitis_p50/p95/max_sn : cihazların boşaltmayı bitirdiği an (basla'dan itibaren)
   kayip               : üretilen - (alınan canlı + alınan biriken) - atılan; 0 olmalı (B0'da atılan sayılır)
   saat_sicramasi      : duvar saati sıçrama olayı sayısı (gecikmeyi etkilemez, bilgi)
+  bir_alarm_yas_*     : KESİNTİDE BİRİKEN alarmın yaşı (toplayıcıya ulaştığı an - planlanan üretim anı, sn): p50, p95 (adet
+                        ağırlıklı, saniye başına yüzdeliklerden yaklaşık), en büyük. Günlük 13.
+  alarm_flush_bitis_max_sn : B3'te cihazların birikmiş alarmları bitirdiği son an (basla'dan, sn); diğer politikalarda boş
 """
 import json
 import math
@@ -78,6 +81,16 @@ def analiz(k):
     uretilen = toplam["uretilen_vital"] + toplam["uretilen_alarm"]
     atilan = toplam["atilan_biriken"]
 
+    ba = seri("biriken_alarm")
+
+    def yas(kol, q):
+        if ba.empty:
+            return float("nan")
+        d = ba.sort_values(kol)
+        c = d["adet"].cumsum()
+        return float(d.loc[c >= q * c.iloc[-1], kol].iloc[0]) / 1000.0
+    af = olay[olay["tur"] == "alarm_flush_bitti"]
+
     bro = SONUC / f"{ad}.broker.csv"
     cpu = float("nan")
     if bro.exists():
@@ -102,6 +115,11 @@ def analiz(k):
         "tekrar": ctop["tekrar_alinan"], "negatif_gecikme": ctop["negatif_gecikmeli_mesaj_20ms_alti"],
         "saat_sicramasi": int((olay["tur"] == "saat_sicramasi").sum()),
         "srv_cpu_tepe": cpu,
+        "bir_alarm_adet": int(ba["adet"].sum()) if len(ba) else 0,
+        "bir_alarm_yas_p50_s": round(yas("p50_ms", 0.5), 1),
+        "bir_alarm_yas_p95_s": round(yas("p95_ms", 0.95), 1),
+        "bir_alarm_yas_max_s": round(float(ba["max_ms"].max()) / 1000.0, 1) if len(ba) else float("nan"),
+        "alarm_flush_bitis_max_sn": round(float((af["t_sn"] - basla).max()), 1) if len(af) else float("nan"),
     }
 
 
@@ -119,7 +137,8 @@ print(df.drop(columns=["kosu"]).to_string(index=False))
 
 if len(df) > 1 and TEK is None:
     olcutler = ["taban_p99_ms", "tepe_p99_ms", "esik_ustu_sn", "vital_tepe_p99_ms", "bosaltma_bitis_sn",
-                "bosaltma_tepe_mesaj", "sync_p99_ms", "flush_bitis_max_sn", "srv_cpu_tepe"]
+                "bosaltma_tepe_mesaj", "sync_p99_ms", "flush_bitis_max_sn", "srv_cpu_tepe",
+                "bir_alarm_yas_p50_s", "bir_alarm_yas_p95_s", "bir_alarm_yas_max_s"]
     hucre = []
     for (n, a, b), g in df.groupby(["cihaz", "A", "B"]):
         s = {"cihaz": n, "A": a, "B": b, "tekrar": len(g)}

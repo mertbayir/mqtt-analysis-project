@@ -8,7 +8,7 @@
 #   <ad>.konsol.txt, <ad>.olaylar.txt, <ad>.broker.csv, <ad>.sim.csv ve deney_kayitlari.csv satırı.
 param(
     [ValidateSet("sabit", "ustel", "ustel-rastgele")] [string]$A = "ustel",
-    [ValidateSet("b0", "b1", "b2")] [string]$B = "b1",
+    [ValidateSet("b0", "b1", "b2", "b3")] [string]$B = "b1",
     [int]$Cihaz = 500,
     [int]$Tohum = 1,
     [int]$YayilimSn = 20,
@@ -40,7 +40,7 @@ $klasor = Join-Path $proje "results"
 New-Item -ItemType Directory -Force $klasor | Out-Null
 
 # B2 varsayılan dışı parametreyle koşulursa etiket parametreyi taşır (ayrı hücre olarak analiz edilir): b2-w60i1000
-$bEtiket = if ($B -eq "b2" -and ($B2PencereSn -ne 30 -or $B2AralikMs -ne 200)) { "b2-w${B2PencereSn}i${B2AralikMs}" } else { $B }
+$bEtiket = if (($B -eq "b2" -or $B -eq "b3") -and ($B2PencereSn -ne 30 -or $B2AralikMs -ne 200)) { "${B}-w${B2PencereSn}i${B2AralikMs}" } else { $B }
 $ad = "adim5_${A}_${bEtiket}_n${Cihaz}_s${Tohum}_${Surum}"
 $sureSn = $OncesiSn + $KesintiSn + $SonrasiSn + 5
 $colSureSn = $sureSn + 30

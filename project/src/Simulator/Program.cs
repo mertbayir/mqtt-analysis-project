@@ -33,6 +33,7 @@ IPostConnectPolicy bPolitika = (Environment.GetEnvironmentVariable("POLICY_B") ?
     "b0" => new B0Referans(),
     "b1" => new B1Hemen(),
     "b2" => new B2Ayrik(pencereSn: Ortam("B2_WINDOW_SEC", 30), aralikMs: Ortam("B2_INTERVAL_MS", 200)),
+    "b3" => new B3AlarmOnce(pencereSn: Ortam("B2_WINDOW_SEC", 30), aralikMs: Ortam("B2_INTERVAL_MS", 200)),
     var bilinmeyen => throw new ArgumentException($"Bilinmeyen B politikası: {bilinmeyen}")
 };
 var isYuku = new IsYuku(VitalSn: Ortam("VITAL_SEC", 0), AlarmSn: Ortam("ALARM_SEC", 10),

@@ -244,6 +244,26 @@ public class Device
         var b = _is.B;
         try
         {
+            // B3: birikmiş alarmlar ÖNCE, gecikmesiz ve peş peşe gönderilir (az sayıdadır); vital mesajlar kuyrukta kalır.
+            if (b.AlarmOnce && b.BirikeniGonder)
+            {
+                var swA = Stopwatch.StartNew();
+                var alarmlar = new List<Mesaj>();
+                var digerleri = new List<Mesaj>();
+                while (_biriken.TryDequeue(out var q)) (q.Alarm ? alarmlar : digerleri).Add(q);
+                foreach (var d in digerleri) _biriken.Enqueue(d);   // vital mesajlar sırayla geri konur, B2 gibi sonra boşalır
+                for (int i = 0; i < alarmlar.Count; i++)
+                {
+                    if (Volatile.Read(ref _bagli) != 1 || iptal.IsCancellationRequested || !await GonderAsync(alarmlar[i], true, iptal))
+                    {
+                        for (int j = i; j < alarmlar.Count; j++) _biriken.Enqueue(alarmlar[j]);   // bağlantı koptu: sonra yine denenir
+                        return;
+                    }
+                    Stats.Bosaltildi();
+                }
+                Stats.Olay(_id, "alarm_flush_bitti", swA.Elapsed.TotalMilliseconds, alarmlar.Count);
+            }
+
             var gecikme = b.BaslangicGecikmeSn(_isRastgele);
             if (gecikme > 0) await Task.Delay(TimeSpan.FromSeconds(gecikme), iptal);
 

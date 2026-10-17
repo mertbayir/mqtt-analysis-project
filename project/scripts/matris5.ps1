@@ -22,7 +22,7 @@ $gunluk = Join-Path (Join-Path $proje "results") ("matris5_{0}.txt" -f (Get-Date
 $rastgele = New-Object System.Random
 
 $hucreler = foreach ($a in $Politikalar) { foreach ($b in $BPolitikalari) { foreach ($n in $Cihazlar) {
-    if ($b -eq "b2" -and $B2Varyantlari.Count -gt 0) {
+    if (($b -eq "b2" -or $b -eq "b3") -and $B2Varyantlari.Count -gt 0) {
         foreach ($v in $B2Varyantlari) { $pa = $v.Split(":"); [pscustomobject]@{ A = $a; B = $b; N = $n; W = [int]$pa[0]; I = [int]$pa[1] } }
     } else { [pscustomobject]@{ A = $a; B = $b; N = $n; W = 30; I = 200 } }
 } } }
@@ -31,9 +31,9 @@ $hucreler = foreach ($a in $Politikalar) { foreach ($b in $BPolitikalari) { fore
 
 for ($blok = 1; $blok -le $Tekrar; $blok++) {
     $sirali = $hucreler | Sort-Object { $rastgele.Next() }
-    "--- Blok $blok (tohum $blok), sıra: " + (($sirali | ForEach-Object { "$($_.A)/$($_.B)$(if($_.B -eq 'b2' -and ($_.W -ne 30 -or $_.I -ne 200)){"-w$($_.W)i$($_.I)"})/$($_.N)" }) -join "  ") | Tee-Object -FilePath $gunluk -Append
+    "--- Blok $blok (tohum $blok), sıra: " + (($sirali | ForEach-Object { "$($_.A)/$($_.B)$(if(($_.B -eq 'b2' -or $_.B -eq 'b3') -and ($_.W -ne 30 -or $_.I -ne 200)){"-w$($_.W)i$($_.I)"})/$($_.N)" }) -join "  ") | Tee-Object -FilePath $gunluk -Append
     foreach ($h in $sirali) {
-        $be = if ($h.B -eq "b2" -and ($h.W -ne 30 -or $h.I -ne 200)) { "b2-w$($h.W)i$($h.I)" } else { $h.B }
+        $be = if (($h.B -eq "b2" -or $h.B -eq "b3") -and ($h.W -ne 30 -or $h.I -ne 200)) { "$($h.B)-w$($h.W)i$($h.I)" } else { $h.B }
         $ad = "adim5_$($h.A)_${be}_n$($h.N)_s${blok}_${Surum}"
         if ($TamamlananiAtla -and (Select-String -Path (Join-Path $proje "results\deney_kayitlari.csv") -Pattern ("^" + [regex]::Escape($ad) + ",") -Quiet)) {
             "{0}  ATLANDI (zaten tamam) {1}" -f (Get-Date -Format "HH:mm:ss"), $ad | Tee-Object -FilePath $gunluk -Append
