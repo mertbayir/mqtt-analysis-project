@@ -31,6 +31,7 @@ SURUMLER = [
     ("e2", "adim5", "ozet_adim5_e2_kosular.csv"),
     ("p1", "adim5", "ozet_adim5_p1_kosular.csv"),
     ("p2", "adim5", "ozet_adim5_p2_kosular.csv"),
+    ("s9", "adim5", "ozet_adim5_s9_kosular.csv"),
 ]
 
 kayit = pd.read_csv(SONUC / "deney_kayitlari.csv", encoding="utf-8-sig")
@@ -153,6 +154,13 @@ hipotezler += [
     ("Adım 8 (B3)", "HP3", "B3'te canlı alarm tepesi B2'nin ≤ 2 katı", K, "üç hücrede evet; TLS üstelde 2,3 kat"),
     ("Adım 8 (B3)", "HP4", "B3'te boşaltma bitişi B2'den ≤ %10 farklı", D, "%2-5"),
     ("Adım 8 (B3)", "HP5", "Tekrar 0, kayıp ≤ 1", K, "21 koşuda 1 koşu 42 kayıp"),
+]
+hipotezler += [
+    ("Adım 9 (sessiz kesinti)", "HS1", "Sessizde bağlı sayısı ≥ 8 sn'ye yayılarak düşer", C, "kopmayı ≈ 11 sn geç ama 1-2 sn'de birlikte fark ediyor"),
+    ("Adım 9 (sessiz kesinti)", "HS2", "Üstel + B1: sessizde tepe temizin ≤ %50'si", C, "5.858 vs 9.176 ms (%36)"),
+    ("Adım 9 (sessiz kesinti)", "HS3", "Rastgeleli + B1: iki kesintide de tepe < 300 ms", C, "sessizde 638 ms"),
+    ("Adım 9 (sessiz kesinti)", "HS4", "Sessizde cihaz tarafı gönderim hatası daha fazla", D, "≈ 35.000 vs 322-616"),
+    ("Adım 9 (sessiz kesinti)", "HS5", "Tekrar 0, kayıp ≤ 1", D, "12 koşuda en çok 1"),
 ]
 hip = [{"adim": a, "id": i, "metin": m, "durum": d, "kanit": k} for a, i, m, d, k in hipotezler]
 
