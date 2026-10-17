@@ -316,3 +316,48 @@ eksenler[0].legend(fontsize=8, loc="upper right")
 fig.suptitle("Alarm önceliği (B3): canlı alarm gecikmesi ve birikmiş alarmın yaşı (büyük: medyan; ○ rastgeleli, □ üstel)", fontsize=8.5)
 fig.tight_layout()
 kaydet(fig, "sekil_b3_denge")
+
+
+# Şekil 1: Sistem mimarisi ve deney zaman çizelgesi
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+
+fig = plt.figure(figsize=(7.5, 4.7))
+ax = fig.add_axes([0.0, 0.34, 1.0, 0.66])
+ax.set_xlim(0, 10); ax.set_ylim(0, 4.2); ax.axis("off")
+
+
+def kutu(x0, y0, w, h, metin, renk, fs=8.5):
+    ax.add_patch(FancyBboxPatch((x0, y0), w, h, boxstyle="round,pad=0.03,rounding_size=0.12", fc=renk, ec="#333333", lw=1.0))
+    ax.text(x0 + w / 2, y0 + h / 2, metin, ha="center", va="center", fontsize=fs, linespacing=1.35)
+
+
+def ok(x0, y0, x1, y1, metin, dy=0.16, renk="#333333"):
+    ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=11, lw=1.3, color=renk))
+    ax.text((x0 + x1) / 2, (y0 + y1) / 2 + dy, metin, ha="center", va="bottom", fontsize=7.3, color="#222222", linespacing=1.2)
+
+
+kutu(0.1, 0.7, 2.5, 2.5, "Simülatör\n(N sanal cihaz)\n4 CPU / 3 GB\n\nvital 2 sn, alarm 10 sn\nbekleme kuralı A\nbağlantı sonrası politika B", "#dbe8f7")
+kutu(4.1, 0.7, 1.8, 2.5, "MQTT 5 sunucusu\n\nMosquitto 2.1.2\nveya EMQX 5.8.6\n\n2 CPU / 2 GB", "#fbe7c6")
+kutu(7.4, 0.7, 2.5, 2.5, "Toplayıcı\n\ngecikme ölçümü\n(tek yönlü saat)\neşitleme yanıtı\n\n2 CPU / 1 GB", "#d9efdc")
+ok(2.6, 2.55, 4.1, 2.55, "yayın (QoS 1)\n1883 ya da TLS 8883", 0.05)
+ok(4.1, 1.35, 2.6, 1.35, "eşitleme yanıtı", 0.05)
+ok(5.9, 2.55, 7.4, 2.55, "abonelik:\ntüm mesajlar", 0.05)
+ok(7.4, 1.35, 5.9, 1.35, "eşitleme\nyanıtı", 0.05)
+kutu(4.1, 3.55, 1.8, 0.6, "Betik (ana makine)\ndocker stop / start", "#ececec", fs=7.6)
+ok(5.0, 3.55, 5.0, 3.2, "", 0.0)
+ax.text(0.1, 4.12, "(a) Bileşenler", fontsize=8.5, fontweight="bold", va="top")
+ax.text(0.1, 3.82, "ayrı Docker konteynerleri,\naynı makine", fontsize=7.3, va="top", color="#444444")
+
+ax2 = fig.add_axes([0.06, 0.07, 0.9, 0.2])
+ax2.set_xlim(0, 200); ax2.set_ylim(0, 1); ax2.set_yticks([])
+for sp in ("top", "right", "left"):
+    ax2.spines[sp].set_visible(False)
+seg = [(0, 20, "#dbe8f7", "ilk bağlanma\n(20 sn'ye yayılı)"), (20, 40, "#d9efdc", "normal\niş yükü"),
+       (40, 100, "#f4c7c3", "sunucu kapalı (60 sn): cihazlar\nyeniden dener, mesaj biriktirir"), (100, 200, "#fbe7c6", "sunucu açılır (t = 0): yeniden bağlanma,\neşitleme, boşaltma; 90-180 sn izlenir")]
+for a0, a1, renk, ad in seg:
+    ax2.add_patch(plt.Rectangle((a0, 0.25), a1 - a0, 0.55, fc=renk, ec="#333333", lw=0.8))
+    ax2.text((a0 + a1) / 2, 0.52, ad, ha="center", va="center", fontsize=7.2, linespacing=1.2)
+ax2.set_xticks([0, 20, 40, 100, 200]); ax2.set_xticklabels(["0", "20", "40", "100", "190-280"], fontsize=8)
+ax2.set_xlabel("Koşu süresi (sn)", fontsize=8, labelpad=1)
+fig.text(0.015, 0.31, "(b) Deney zaman çizelgesi", fontsize=8.5, fontweight="bold")
+kaydet(fig, "sekil_mimari")

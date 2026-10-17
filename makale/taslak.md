@@ -54,7 +54,7 @@ Katkılarımız: (i) tekrarlanabilir bir ölçüm ortamı ve kayıt düzeni; (ii
 
 Ortam üç bileşenden oluşur: uç cihazları temsil eden bir simülatör, merkezi bir MQTT 5 sunucusu ve (Bölüm 5.5 ve sonrasında) gecikmeyi ölçen bir toplayıcı. Hepsi aynı bilgisayarda, ayrı Docker konteynerlerinde, aynı Docker ağı içinde çalışır. **Sunucular:** Eclipse Mosquitto 2.1.2 (tek iş parçacıklı) ve EMQX 5.8.6 (çok iş parçacıklı, Erlang); her ikisi de 2 CPU ve 2 GB bellekle sınırlanmıştır (EMQX ayrıca 4 CPU ile denenmiştir), aynı sabit MAC adresi ve aynı IP adresiyle; anonim erişim. **Simülatör:** 4 CPU ve 3 GB. **Toplayıcı:** tüm cihaz mesajlarına abone olur, gecikmeyi ölçer ve cihazların durum eşitleme isteklerine yanıt verir (2 CPU, 1 GB). TLS yalnızca Bölüm 5.4 ve 5.8'de açıktır (cihazlar 8883 numaralı portta TLS ile bağlanır; toplayıcı TLS'siz kalır), diğer deneyler TLS'sizdir. Kimlik doğrulama kullanılmamıştır. Aradaki bir kenar geçidi (edge gateway) katmanı kapsam dışıdır.
 
-`[Şekil 1: mimari şema]`
+`[Şekil 1: sekil_mimari.png (a: bileşenler, b: deney zaman çizelgesi)]`
 
 ### 3.2 Sanal cihaz ve yeniden bağlanma kuralları
 

@@ -104,7 +104,7 @@ footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
   <div class="cards" id="kpis"></div>
 </header>
 <nav><div class="wrap">
-  <a href="#ne">Ne oluyor?</a><a href="#canlandirma">Canlandırma</a><a href="#harita">Tepe haritası</a><a href="#hipotez">Hipotez karnesi</a><a href="#yontem">Nasıl ölçtük?</a>
+  <a href="#ne">Ne oluyor?</a><a href="#canlandirma">Canlandırma</a><a href="#harita">Tepe haritası</a><a href="#cikarim">Çıkarımlar</a><a href="#hipotez">Hipotez karnesi</a><a href="#yontem">Nasıl ölçtük?</a>
   <button id="tema" aria-label="Açık ya da koyu tema">Tema</button>
 </div></nav>
 
@@ -118,6 +118,7 @@ footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
     <div class="step"><b>Bağlantı sonrası iş</b>Cihaz durumu eşitler ve biriken mesajları boşaltır. B0: atar, B1: hemen boşaltır, B2: rastgele zamana yayar.</div>
     <div class="step"><b>Canlı alarm gecikmesi</b>Aynı sunucu hem birikeni hem canlı alarmı taşır. Ölçtüğümüz şey: alarmların gecikmesi (saniyelik p99).</div>
   </div>
+  <div class="panel" style="margin-top:14px"><img alt="Sistem mimarisi ve deney zaman çizelgesi" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:6px" src="data:image/png;base64,/*__MIMARI__*/"></div>
 </section>
 
 <section id="canlandirma">
@@ -159,6 +160,19 @@ footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
   <p class="lead">Her kutu, aynı koşuldaki tüm tekrarların (3 ya da farklı bloklardan 6) <b>medyan</b> tepe canlı alarm gecikmesidir (ms; sunucu açıldıktan sonraki saniyelik p99'un en büyüğü). Yeşil: taban düzeyi, kırmızı: saniyeler. Bir kutuya tıklayınca koşu canlandırmada açılır.</p>
   <div class="panel scroll"><table class="heat" id="heat"></table></div>
   <p class="hint">Kesinti öncesi taban yaklaşık 30-55 ms'dir. 100 ms'nin üstü "gecikme var" sayılır. Aralık ve koşu sayısı için kutunun üzerine gel.</p>
+</section>
+
+<section id="cikarim">
+  <h2>Çıkarımlar</h2>
+  <p class="lead">Bu ortamdaki gözlemlerden çıkan ön öneriler (genel kural değil; sınırlar için "Nasıl ölçtük?" bölümüne bak).</p>
+  <div class="method">
+    <div class="card"><b>1. Önce dönüşü dağıt</b><br>Sunucu zorlanmaya başlıyorsa (TLS, çok cihaz) rastgele bekleme en ucuz ilk önlemdir. Rahat ortamda yalnızca toparlanmayı uzatır.</div>
+    <div class="card"><b>2. Yetmezse boşaltmayı da yay</b><br>Cihaz başına rastgele gecikme ve aralıklı gönderme gecikmeyi %89-99 düşürebilir. Ayarı yük arttıkça büyütmek gerekir.</div>
+    <div class="card"><b>3. Çekirdek eklemek yetmez</b><br>EMQX'te çekirdeği 2'den 4'e çıkarmak üstel + B1 gecikmesini yalnızca %29 azalttı.</div>
+    <div class="card"><b>4. Yaymanın bedeli var</b><br>Boşaltma 1,5-4 kat uzar; kesintide biriken alarm daha geç ulaşır (en eski ≈ 3 dakika).</div>
+    <div class="card"><b>5. Alarmı öne al</b><br>Az sayıdaki birikmiş alarmı hemen göndermek yaşını %24-60 düşürdü. Senkron dönüş + TLS'te canlı alarmı kötüleştirebilir.</div>
+    <div class="card"><b>6. Ölçerken dikkat</b><br>Toplam bağlı sayısı yetmez; deneme sayısı, kayıp, doğru saat ve sunucunun koruma ayarları kontrol edilmeli.</div>
+  </div>
 </section>
 
 <section id="hipotez">

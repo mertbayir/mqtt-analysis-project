@@ -161,7 +161,20 @@ js = json.dumps(veri, ensure_ascii=False, separators=(",", ":"))
 (WEB / "veri.js").write_text("window.VERI = " + js + ";\n", encoding="utf-8")
 sablon = WEB / "sablon.html"
 if sablon.exists():
-    html = sablon.read_text(encoding="utf-8").replace("/*__VERI__*/", "window.VERI = " + js + ";")
+    import base64
+    mimari = PROJE.parent / "makale" / "sekiller" / "sekil_mimari.png"
+    b64 = ""
+    if mimari.exists():
+        try:   # web için küçült (tek dosya hafif kalsın)
+            from PIL import Image
+            import io
+            im = Image.open(mimari).convert("RGB")
+            im = im.resize((1100, int(im.height * 1100 / im.width)))
+            tampon = io.BytesIO(); im.save(tampon, format="PNG", optimize=True)
+            b64 = base64.b64encode(tampon.getvalue()).decode("ascii")
+        except Exception:
+            b64 = base64.b64encode(mimari.read_bytes()).decode("ascii")
+    html = sablon.read_text(encoding="utf-8").replace("/*__VERI__*/", "window.VERI = " + js + ";").replace("/*__MIMARI__*/", b64)
     (WEB / "sonuc_gezgini.html").write_text(html, encoding="utf-8")
     print("yazıldı: web/sonuc_gezgini.html")
 print(f"koşu: {len(runlar)}  veri boyutu: {len(js) / 1024:.0f} KB")
