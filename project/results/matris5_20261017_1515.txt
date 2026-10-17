@@ -1,0 +1,5 @@
+﻿Matris5 başladı: 2026-10-17 15:15:22  tekrar=3 cihazlar=5000 A=ustel,ustel-rastgele B=b0,b1,b2 sürüm=e1
+--- Blok 1 (tohum 1), sıra: ustel/b2/5000  ustel-rastgele/b2/5000  ustel-rastgele/b0/5000  ustel-rastgele/b1/5000  ustel/b0/5000  ustel/b1/5000
+15:15:22  BAŞLA adim5_ustel_b2_n5000_s1_e1
+15:19:48  BİTTİ adim5_ustel_b2_n5000_s1_e1
+15:19:48  BAŞLA adim5_ustel-rastgele_b2_n5000_s1_e1
