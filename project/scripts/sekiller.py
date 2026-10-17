@@ -244,3 +244,25 @@ eksenler[0].legend(fontsize=8, loc="center right")
 fig.suptitle("N = 5.000, tohum 2: TLS'siz (v5) ve TLS'li (t1) toparlanma", fontsize=9)
 fig.tight_layout()
 kaydet(fig, "sekil_tls_toparlanma_n5000")
+
+
+# Şekil J: N=5.000, TLS'siz (v6) ve TLS'li (tls6): tepe canlı alarm p99, hücre başına (her nokta bir koşu, çizgi medyan)
+tls_tum = topla("v6", "tls6")
+tls_tum["tls"] = tls_tum["kosu"].str.endswith("_tls6")
+sira2 = [("ustel", "b0"), ("ustel", "b1"), ("ustel", "b2"), ("ustel-rastgele", "b0"), ("ustel-rastgele", "b1"), ("ustel-rastgele", "b2")]
+etiket2 = ["üstel\nB0", "üstel\nB1", "üstel\nB2", "rastgeleli\nB0", "rastgeleli\nB1", "rastgeleli\nB2"]
+fig, ax = plt.subplots(figsize=(6.8, 3.6))
+for j, (flag, ad, renk) in enumerate([(False, "TLS'siz (v6)", "#3b6ea5"), (True, "TLS (tls6)", "#c0392b")]):
+    for i, (a, b) in enumerate(sira2):
+        g = tls_tum[(tls_tum["A"] == a) & (tls_tum["B"] == b) & (tls_tum["tls"] == flag)]["tepe_p99_ms"]
+        x0 = i + (j - 0.5) * 0.28
+        ax.scatter(x0 + np.linspace(-0.05, 0.05, len(g)), g, color=renk, s=16, zorder=3, label=ad if i == 0 else None)
+        ax.hlines(g.median(), x0 - 0.09, x0 + 0.09, color=renk, lw=2)
+ax.set_yscale("log")
+ax.axhline(100, color="gray", lw=0.8, ls=":")
+ax.set_xticks(range(len(sira2)))
+ax.set_xticklabels(etiket2, fontsize=8)
+ax.set_ylabel("Tepe canlı alarm p99 (ms)")
+ax.set_title("N = 5.000: TLS'siz ve TLS'li canlı alarm gecikmesi tepesi (3 koşu/hücre; çizgi medyan)", fontsize=8.5)
+ax.legend(fontsize=8, loc="upper right")
+kaydet(fig, "sekil_tls_alarm_tepe_n5000")

@@ -27,6 +27,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 21 | 16 Ekim | Adım 6: TLS (RSA-2048, test CA, **sertifika doğrulanmaz**), 18 koşu, izleme 150 sn | Sunucuyu bağlanma aşamasında gerçekten zorlamak (Adım 4'te zorlanmadı); doğrulama maliyeti ve TLS sürümü ölçüm dışı (günlük 10) |
 | 22 | 16 Ekim | TLS matrisi tamamlandı (t1); sonuç: TLS ile sunucu zorlanıyor, rastgeleli kuralın yönü tersine döndü. Sonraki: bağlantı sonrası iş TLS'te (F1b) ve EMQX (F5) | Günlük 10 |
 | 23 | 17 Ekim | Adım 6b: TLS + bağlantı sonrası iş; toplayıcı TLS'siz kalır; N = 5.000, 6 hücre, 18 koşu, izleme 180 sn | İki yükü birlikte ölçmek (günlük 11) |
+| 24 | 17 Ekim | Adım 6b tamamlandı (tls6, 18 koşu; ilk deneme yarım kalıp devam ettirildi, yarım koşu iptal klasöründe). Sonuç: TLS'te en iyi politika B2, TLS'siz N = 5.000'de B1; en iyi politika ortama bağlı | Günlük 11 |
 
 ## Açık kararlar
 
