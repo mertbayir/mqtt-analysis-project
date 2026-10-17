@@ -1,10 +1,10 @@
-# Hasta İzleme Gibi Çok Cihazlı MQTT 5 Sistemlerinde Toplu Yeniden Bağlanma ve Bağlantı Sonrası Yük: Bir Ölçüm Çalışması
+# Hasta İzleme Gibi Çok Cihazlı MQTT 5 Sistemlerinde Toplu Yeniden Bağlanma ve Bağlantı Sonrası Yük: İki Sunucuda Bir Ölçüm Çalışması
 
-*(Çalışma başlığı. Başlık, sonuçlar belli olunca netleştirilecek.)*
+*(Çalışma başlığı; son sürümde netleştirilecek.)*
 
 **Yazar:** Mert Bayır  
 **Ders:** Bilimsel Araştırma, Proje Hazırlama ve Seminer, Sakarya Üniversitesi  
-**Durum:** TASLAK, deney sürüyor. `[ ]` işaretli yerler doldurulacak.
+**Durum:** TASLAK. Deneyler Bölüm 5.1-5.9 için tamamlandı; alarm önceliği deneyi (Bölüm 5.10) sürüyor. `[ ]` işaretli yerler doldurulacak.
 
 ---
 
@@ -22,15 +22,20 @@
 
 ## 1. Giriş
 
-*Durum: ilk taslak yazıldı, dil ve kaynaklar sonra cilalanacak.*
-
 Çok sayıda cihazın tek bir merkezi sunucuya kalıcı bağlantıyla bağlandığı sistemlerde, sunucunun ya da ağın kısa süreli kesintisi cihazların hemen hemen aynı anda yeniden bağlanmaya çalışmasına yol açar. Hasta başı monitörleri ve giyilebilir sensörler gibi tıbbi nesnelerin interneti (IoMT) dağıtımlarında bu durum önem taşır: kesinti sırasında biriken ölçümler ve sunucudan alınması gereken güncel yapılandırma, cihazlar geri döndüğü anda sunucuya yeni bir yük bindirir ve bu yük, toparlanma sürerken akmaya devam eden canlı mesajları, örneğin alarmları, geciktirebilir.
 
 Yeniden bağlanma anındaki bağlantı yükünü azaltmak için bilinen yöntem, cihazların bağlanmadan önce rastgele bir süre beklemesi ve başarısız denemelerde bekleme süresini üstel olarak artırmasıdır [1], [2]. Ancak cihaz bağlandıktan sonra da yük sürer: cihaz kesinti sırasında kaçırdığı durumu eşitler ve biriktirdiği mesajları gönderir. Bu *bağlantı sonrası yükün* bağlanma aşamasından ayrı ölçüldüğü, MQTT 5 üzerinde canlı trafik sürerken yapılmış açık bir çalışma, bildiğimiz kadarıyla bulunamamıştır. `[ ]` (arama kapsamı ve tarihi İlgili Çalışmalar'da yazılacak; Spillway okunduktan sonra bu cümle netleştirilecek)
 
-Bu çalışma yeni bir algoritma önermez. Bilinen bekleme kurallarını, açık kaynaklı bir MQTT 5 sunucusu ve kendi geliştirdiğimiz bir cihaz simülatöründen oluşan tekrarlanabilir bir ortamda karşılaştırır. Katkılarımız: (i) tekrarlanabilir bir ölçüm ortamı ve kayıt düzeni, (ii) üç bekleme kuralının toplu yeniden bağlanma altında karşılaştırması, (iii) ölçüm ortamının kendisinin sonuçları nasıl çarpıtabildiğine dair doğrulanmış bulgular (Bölüm 4). (iv) bağlantı sonrası yükün (durum eşitleme ve biriken mesajların boşaltılması) canlı alarm gecikmesine etkisinin, bağlanma aşamasından ayrı olarak ölçülmesi ve üç boşaltma politikasının karşılaştırılması (Bölüm 5.5-5.7).
+Bu çalışma yeni bir algoritma önermez. Bilinen bekleme kurallarını ve bağlantı sonrası boşaltma politikalarını, iki açık kaynaklı MQTT 5 sunucusu (tek iş parçacıklı Mosquitto ve çok iş parçacıklı EMQX) ve kendi geliştirdiğimiz bir cihaz simülatöründen oluşan tekrarlanabilir bir ortamda karşılaştırır. Dört araştırma sorusu sorulur:
 
-Çalışma tek bir bilgisayarda, sanal cihazlarla yapılmıştır; deneylerin çoğu TLS'sizdir, TLS yalnızca bağlanma aşamasında denenmiştir (Bölüm 5.4); sonuçlar bu ortama göreceli olarak raporlanır, mutlak kapasite iddiası taşımaz. Tıbbi çerçeve bir senaryo olarak kullanılmıştır, klinik güvenlik iddiası yoktur.
+- **S1.** Bağlanma aşamasında üç bekleme kuralı (sabit, üstel, rastgeleli üstel) toplu yeniden bağlanma altında nasıl davranır ve sunucu ne zaman zorlanır? (Bölüm 5.1-5.4)
+- **S2.** Cihazlar bağlandıktan sonra yaptıkları iş (durum eşitleme ve kesintide biriken mesajların boşaltılması), canlı alarm gecikmesini bağlanma aşamasından ayrı olarak ne kadar etkiler? (Bölüm 5.5-5.6, 5.8)
+- **S3.** Bu işi zamana yaymak (B2) işe yarar mı, ayarı yüke nasıl bağlıdır ve bedeli nedir? (Bölüm 5.7)
+- **S4.** Bulgular sunucuya (tek çekirdekli Mosquitto, çok çekirdekli EMQX) ve çekirdek sayısına özgü müdür? (Bölüm 5.9)
+
+Katkılarımız: (i) tekrarlanabilir bir ölçüm ortamı ve kayıt düzeni; (ii) üç bekleme kuralının toplu yeniden bağlanma altında karşılaştırması, TLS'siz ve TLS'li; (iii) ölçüm ortamının kendisinin sonuçları nasıl çarpıtabildiğine dair doğrulanmış bulgular (Bölüm 4); (iv) bağlantı sonrası yükün canlı alarm gecikmesine etkisinin bağlanma aşamasından ayrı ölçülmesi ve üç boşaltma politikasının karşılaştırılması; (v) politika sıralamasının ortama (TLS, cihaz sayısı) bağlı olduğunun ve çekirdek eklemenin tek başına çözüm olmadığının gösterilmesi; (vi) bedelin, yani kesintide biriken alarmın sunucuya ulaşma yaşının da ölçülmesi (Bölüm 5.10).
+
+Çalışma tek bir bilgisayarda ve sanal cihazlarla yapılmıştır; deneylerin çoğu TLS'sizdir, TLS yalnızca Bölüm 5.4 ve 5.8'de denenmiştir; sonuçlar bu ortama göreceli olarak raporlanır, mutlak kapasite iddiası taşımaz. Tıbbi çerçeve bir senaryo olarak kullanılmıştır, klinik güvenlik iddiası yoktur.
 
 ## 2. İlgili Çalışmalar
 
@@ -47,15 +52,11 @@ Bu çalışma yeni bir algoritma önermez. Bilinen bekleme kurallarını, açık
 
 ### 3.1 Sistem mimarisi
 
-*Durum: yazılabilir, şekil gerekli.*
-
-Ortam iki katmandan oluşur: uç cihazları temsil eden bir simülatör ve merkezi bir MQTT 5 sunucusu. İkisi de aynı bilgisayarda, ayrı Docker konteynerlerinde, aynı Docker ağı içinde çalışır. Sunucu Eclipse Mosquitto 2.1.2'dir, 2 CPU ve 2 GB bellekle sınırlanmıştır; simülatör 4 CPU ve 3 GB ile çalışır. Kimlik doğrulama kullanılmamıştır; TLS yalnızca Bölüm 5.4'te açıktır (cihazlar 8883 numaralı portta TLS ile bağlanır), diğer deneyler TLS'sizdir. Bağlantı sonrası yük deneylerinde (Bölüm 5.5-5.7) üçüncü bir bileşen eklenir: tüm cihaz mesajlarına abone olan ve gecikmeyi ölçen ayrı bir toplayıcı konteyner (2 CPU, 1 GB). Toplayıcı ayrıca cihazların durum eşitleme isteklerine yanıt verir. Aradaki bir kenar geçidi (edge gateway) katmanı kapsam dışıdır.
+Ortam üç bileşenden oluşur: uç cihazları temsil eden bir simülatör, merkezi bir MQTT 5 sunucusu ve (Bölüm 5.5 ve sonrasında) gecikmeyi ölçen bir toplayıcı. Hepsi aynı bilgisayarda, ayrı Docker konteynerlerinde, aynı Docker ağı içinde çalışır. **Sunucular:** Eclipse Mosquitto 2.1.2 (tek iş parçacıklı) ve EMQX 5.8.6 (çok iş parçacıklı, Erlang); her ikisi de 2 CPU ve 2 GB bellekle sınırlanmıştır (EMQX ayrıca 4 CPU ile denenmiştir), aynı sabit MAC adresi ve aynı IP adresiyle; anonim erişim. **Simülatör:** 4 CPU ve 3 GB. **Toplayıcı:** tüm cihaz mesajlarına abone olur, gecikmeyi ölçer ve cihazların durum eşitleme isteklerine yanıt verir (2 CPU, 1 GB). TLS yalnızca Bölüm 5.4 ve 5.8'de açıktır (cihazlar 8883 numaralı portta TLS ile bağlanır; toplayıcı TLS'siz kalır), diğer deneyler TLS'sizdir. Kimlik doğrulama kullanılmamıştır. Aradaki bir kenar geçidi (edge gateway) katmanı kapsam dışıdır.
 
 `[Şekil 1: mimari şema]`
 
 ### 3.2 Sanal cihaz ve yeniden bağlanma kuralları
-
-*Durum: yazılabilir.*
 
 Her sanal cihaz, MQTTnet 5.2 ile MQTT 5 üzerinden sunucuya bağlanan bir asenkron görevdir (kalp atışı 10 sn, bağlantı zaman aşımı 5 sn, kütüphanenin otomatik yeniden bağlanması kapalı). Bağlantı koptuğunda cihaz bir bekleme kuralına göre bekler ve yeniden dener. Her cihazın rastgele sayı üreteci, deney tekrarlanabilsin diye cihaz numarası ve deney tohumundan türetilir. Üç kural karşılaştırılmıştır:
 
@@ -67,7 +68,7 @@ Her sanal cihaz, MQTTnet 5.2 ile MQTT 5 üzerinden sunucuya bağlanan bir asenkr
 
 Rastgeleli üstel kural, [1] ve [2]'nin birleşimidir; iki standardın birebir uygulaması değildir.
 
-**İş yükü ve bağlantı sonrası politikalar (Bölüm 5.5-5.7).** Her cihaz 2 sn'de bir 128 baytlık bir vital bulgu mesajı ve 10 sn'de bir 128 baytlık bir alarm mesajı üretir (QoS 1; mesajın planlanan gönderim anı önceden belirlidir). Bağlantı yokken üretilen mesajlar cihazda bellek içi kuyrukta birikir. Cihaz **yeniden bağlandığında** (ilk açılışta değil) bir *bağlantı sonrası politika* uygular: sunucudan 4.096 baytlık güncel durumu ister (eşitleme, MQTT istek/yanıt) ve birikenleri gönderir. Üç politika karşılaştırılmıştır:
+**İş yükü ve bağlantı sonrası politikalar (Bölüm 5.5 ve sonrası).** Her cihaz 2 sn'de bir 128 baytlık bir vital bulgu mesajı ve 10 sn'de bir 128 baytlık bir alarm mesajı üretir (QoS 1; mesajın planlanan gönderim anı önceden belirlidir). Bağlantı yokken üretilen mesajlar cihazda bellek içi kuyrukta birikir. Cihaz **yeniden bağlandığında** (ilk açılışta değil) bir *bağlantı sonrası politika* uygular: sunucudan 4.096 baytlık güncel durumu ister (eşitleme, MQTT istek/yanıt) ve birikenleri gönderir. Üç politika karşılaştırılmıştır:
 
 | Politika | Tanım |
 |---|---|
@@ -77,38 +78,45 @@ Rastgeleli üstel kural, [1] ve [2]'nin birleşimidir; iki standardın birebir u
 
 ### 3.3 Kesinti senaryosu
 
-*Durum: yazılabilir.*
-
-Cihazlar 20 sn içinde yayılarak bağlanır (başlangıç fırtınası olmasın diye). Başlangıçtan 40 sn sonra sunucu konteyneri durdurulur (temiz kesinti: bağlantılar sonlanır, cihazlar kopmayı hemen öğrenir), 60 sn sonra yeniden başlatılır ve 120 sn daha izlenir. Sessiz kesinti (ağın sessizce kopması) kapsam dışıdır.
-
-Bağlantı sonrası yük deneylerinde (Bölüm 5.5-5.7) zaman çizelgesi şöyledir: ilk bağlanma 20 sn'ye yayılır, sunucu 40. saniyede durdurulur, 60 sn kapalı kalır, açıldıktan sonra 90 sn izlenir (Bölüm 5.7'de uzun pencereli politikaların boşaltması bitebilsin diye 180 sn).
+Cihazlar 20 sn içinde yayılarak bağlanır (başlangıç fırtınası olmasın diye). Başlangıçtan 40 sn sonra sunucu konteyneri durdurulur (temiz kesinti: bağlantılar sonlanır, cihazlar kopmayı hemen öğrenir), 60 sn sonra yeniden başlatılır ve sonrası izlenir: bağlanma aşaması deneylerinde (Bölüm 5.1-5.3) 90 sn, TLS'li bağlanma deneyinde (5.4) 150 sn, bağlantı sonrası yük deneylerinde (5.5 ve sonrası) 90-180 sn (uzun pencereli boşaltmanın bitebilmesi için). Sessiz kesinti (ağın sessizce kopması) kapsam dışıdır.
 
 ### 3.4 Ölçütler
-
-*Durum: tanımlar `scripts/ozet.ps1` başında.*
 
 Toparlanma süresi (TTR): sunucunun başlatıldığı andan bağlı cihazların %50, %95 ve %100'üne ulaşılana kadar geçen süre (çözünürlük 1 sn). Kesintideki ve sonrasındaki tepe bağlantı denemesi/sn. Sunucu açıkken başarısız bağlantı sayısı. Sunucu ve simülatör CPU'su (~0,7 Hz örnekleme). Bağlantı sonrası yük deneylerinde: (i) **canlı alarm gecikmesi**: toplayıcının mesajı aldığı an eksi mesajın *planlanan* gönderim anı (açık döngü, saniyelik p99); *taban* kesinti öncesi saniyelik p99'ların medyanı, *tepe* sunucu açıldıktan sonraki saniyelik p99'un en büyüğü, ayrıca p99'un 100 ms'yi aştığı saniye sayısı; (ii) **boşaltma bitişi**: sunucunun açıldığı andan son biriken mesajın toplayıcıya ulaşmasına kadar geçen süre; (iii) **eşitleme süresi** (istek-yanıt, p50 ve p99); (iv) sunucu CPU tepesi; (v) kayıp ve tekrar sayısı (mesaj numaralarıyla). Gecikme, iki konteynerin ortak çekirdek saati (CLOCK_MONOTONIC) ile ölçülür (Bölüm 4.3). Her hücre 3 tekrarla koşulmuş, **medyan ve en küçük-en büyük aralık** raporlanmıştır; güven aralığı iddiası yoktur.
 
 ### 3.5 Deney ortamı
 
-*Durum: `00_ortam.md`'den tablo taşınacak.* `[ ]`
+**Tablo 0.** Donanım ve yazılım (kaynak: `00_ortam.md`; EMQX Bölüm 5.9 için eklenmiştir).
+
+| Öğe | Değer |
+|---|---|
+| İşlemci | Intel Core i7-11600H @ 2,90 GHz, 6 çekirdek / 12 mantıksal |
+| Bellek | 15,7 GB |
+| İşletim sistemi | Windows 11 Home Single Language 10.0.26200, güç planı Yüksek performans |
+| Konteyner ortamı | Docker Desktop (Docker Engine 28.4.0), WSL2; Docker'a açık kaynak 12 CPU, yaklaşık 8,2 GB; `.wslconfig` yok (varsayılan) |
+| Sunucular | Eclipse Mosquitto 2.1.2 (`eclipse-mosquitto:2`); EMQX 5.8.6 (`emqx/emqx:5.8`, imza `sha256:a1e3d10f…`) |
+| İstemci kütüphanesi | MQTTnet 5.2.0.1603, .NET 8, MQTT 5.0 |
+| Konteyner payları | Sunucu 2 CPU / 2 GB (EMQX ayrıca 4 CPU); simülatör 4 CPU / 3 GB; toplayıcı 2 CPU / 1 GB |
+
+Sonuçlar bu makineye göreceli raporlanır. Koşular sırasında Docker'da başka bir projeye ait iki boşta konteyner çalışmaktaydı; etkisi ölçülmemiştir.
 
 ### 3.6 Kayıt ve tekrarlanabilirlik
 
-*Durum: yazılabilir.* Her koşu bir girdi dosyası (`girdi.json`), saniyelik ham çıktı (CSV), kesinti zamanları ve kod sürümü (git commit) ile kayıt defterine işlenir. Özet sayılar elle değil betikle üretilir. Hatalı koşular silinmez, geçersiz olarak işaretlenir.
+Her koşu bir girdi dosyası (`girdi.json`), saniyelik ham çıktı (CSV), kesinti zamanları ve kod sürümü (git commit) ile kayıt defterine işlenir. Özet sayılar elle değil betikle üretilir. Hatalı koşular silinmez, geçersiz olarak işaretlenir.
 
 ## 4. Ölçüm Ortamının Doğrulanması
 
-*Durum: malzeme hazır (günlük `04`, Bulgu 1 ve 5). Bu bölüm çalışmanın güvenilirlik göstergesi.*
+Bu bölüm, ölçüm düzeneğinin kendisinin sonuçları nasıl çarpıtabildiğini ve bunların nasıl bulunup düzeltildiğini anlatır. Hatalı koşular silinmemiş, geçersiz olarak işaretlenmiştir.
 
-- **4.1 Zaman aşımı hatası.** `[ ]` MQTTnet `WithTimeout`, yanıt vermeyen sunucuya TCP bağlantı kurulumunu sınırlamıyordu; cihazlar bekleme kuralı hiç devreye girmeden tek bir asılı denemede kaldı. Kesinti sırasındaki deneme sayısı incelenince fark edildi. (koşular: `adim3_*_v1`)
-- **4.2 Ad çözümlemesi artefaktı.** `[ ]` Cihazlar sunucuyu adıyla çağırdığında 5.000 cihazın toparlanması 27-69 sn sürdü, IP ile 2,1 sn. Sunucu MAC adresi ve çekirdek kuyruk taşması elenmiştir. (koşular: `v2`, `v2b`, `v3mac`, `v4ip`). Mekanizma doğrudan gözlenmedi.
+- **4.1 Zaman aşımı hatası.** İlk dört koşuda (N = 500-5.000, sürüm v1) "fırtına çıkmadı" gibi görünüyordu (sunucu CPU'su %1-39, toparlanma 4-5 sn). Saniye saniye deneme sayısına bakınca kesinti sırasında neredeyse hiç yeniden deneme olmadığı görüldü: 5.000 cihaz bir kez denedi, sonra 60 sn boyunca toplam yaklaşık 15 deneme. Neden: MQTTnet'in `WithTimeout` ayarı, yanıt vermeyen (durdurulmuş) sunucunun SYN'ine cevap gelmeyen TCP bağlantı kurulumunu sınırlamıyordu; cihazlar tek bir asılı denemede bekledi ve bekleme kuralı hiç çalışmadı. Düzeltme: `ConnectAsync` çağrısına kendi zaman aşımımız (`CancelAfter`, 5 sn) eklendi. (günlük `04`, Bulgu 1; koşular `adim3_*_v1` geçersiz işaretli)
+- **4.2 Ad çözümlemesi artefaktı.** Cihazlar sunucuya adıyla (`broker`) bağlandığında 5.000 cihazın toparlanması 27-69 sn sürdü; IP ile bağlandığında 2,1 sn (TTR %50: 1,1 sn). İki aday açıklama sınanıp reddedildi: sunucu MAC adresinin değişmesi (sabit MAC ile gecikme sürdü) ve çekirdekte dinleme kuyruğunun taşması (`ListenOverflows`, `ListenDrops`, `TCPReqQFull*`, `TCPSynRetrans` hep 0; sunucu her bağlantıyı yalnızca bir kez kabul etmişti, başarısız denemeler sunucuya hiç ulaşmamıştı). Gecikme, Docker'ın dahili ad çözümleyicisinin eşzamanlı çok sayıda sorguda yavaşlamasıyla uyumludur; mekanizma doğrudan gözlenmedi. Bundan sonra tüm koşular IP ile yapılmıştır; ad ile yapılan koşular (sürümler v2, v2b, v3mac) artefakt içerir. (günlük `04`, Bulgu 5)
 - **4.3 Saat sıçraması.** Bağlantı sonrası yük deneylerinin ilk pilotunda canlı alarm gecikmesi bazı saniyelerde negatif çıktı (−2,3 sn, −4,7 sn); bir mesajın planlanan andan önce alınması imkânsız olduğundan bu bir ölçüm hatasıydı. İnceleme iki neden gösterdi. Birincisi, cihaz zamanlayıcısı (`Task.Delay`) mesaj zamanından önce uyanıyor ve kod uyanma sonrası kontrol yapmıyordu; kontrol eklendi. İkincisi, **WSL2 sanal makinesinin duvar saati yaklaşık her 30 sn'de bir ani sıçrıyor**: kayıtlı saat bekçisi, örneğin +3.011 ms ve 100 ms sonra −3.487 ms sıçramaları yakaladı. Kalıcı çözüm olarak planlanan ve alınan anlar tek yönlü saatle (CLOCK_MONOTONIC) ölçüldü; 1.560 mesajlık doğrulama koşusunda, iki saat sıçramasına rağmen gecikme 0-20 ms çıktı. Duvar saatiyle yapılan konteynerler arası gecikme ölçümleri bu ortamda bozulabilir. (günlük `06`, Bulgu 1)
-- **4.4 Çıkarım.** `[ ]` Toplam "bağlandı" sayısı yetmez, kesinti sırasındaki deneme sayısı da doğrulanmalı; ölçüm ortamının kendisi "fırtına"yı üretebilir ya da gizleyebilir.
+- **4.4 Sunucu ayarlarının ölçüme etkisi.** EMQX'in varsayılan koruması (`force_shutdown`; istemci işleminin posta kutusu 1.000 mesajı aşarsa bağlantıyı kes), boşaltma sırasında tek toplayıcı aboneyi `mailbox_overflow` ile defalarca koparmış; toplayıcı kopunca 272.526 mesaj (üretilenin %43'ü) ve eşitleme yanıtları kaybolmuştur (pilot). Ayar, Mosquitto'da kuyruk sınırının kaldırılmasına eşdeğer bir ölçüm ayarı olarak kapatılmıştır; yani gecikme ölçümünün kendisi sunucunun varsayılan koruma davranışıyla çakışabilir ve bu, gerçek bir dağıtımda yoğun bir abonenin boşaltma anında koparılacağı anlamına gelir. Ayrıca bir istemci kodu değişikliği (TLS seçeneğinin TLS'siz modda da açık kalması) bir EMQX pilotunda hiçbir cihazın bağlanamamasına yol açmış, fark edilip düzeltilmiş; etkilenen geçerli koşu yoktur (günlük `12`).
+- **4.5 Çıkarım.** Toplam "bağlandı" sayısı yetmez; kesinti sırasındaki deneme sayısı, kayıp ve tekrar sayısı, kullanılan saat ve sunucunun varsayılan koruma davranışları ayrıca doğrulanmalıdır. Ölçüm ortamının kendisi "fırtına"yı üretebilir ya da gizleyebilir.
 
 ## 5. Bulgular
 
-*Durum: 5.1-5.3 (Adım 4, sürüm v5), 5.4 (Adım 6, TLS, sürüm t1), 5.5-5.7 (Adım 5, 5b, 5c; sürümler v6, v7, v8) 5.8 (Adım 6b, TLS'te bağlantı sonrası yük, sürüm tls6) ve 5.9 (Adım 7, ikinci sunucu EMQX, sürümler e1, e2) yazıldı.*
+*Not (yazım): 5.1-5.3 (sürüm v5), 5.4 (t1), 5.5-5.7 (v6, v7, v8), 5.8 (tls6) ve 5.9 (e1, e2) yazıldı; 5.10 (alarm önceliği, p1, p2) sürüyor. Son sürümde bu not silinecek.*
 
 Bölüm 5.1-5.3'te sunucu açılışında yalnızca *bağlanma* aşaması ölçülür (iş yükü yok); 5.5-5.7 bağlantı sonrası işi ekler. Hipotezler (H1-H4) koşulardan önce günlüğe yazılmıştır (`05_adim4_matris_v5.md`). Tüm koşular IP ile bağlanır (Bölüm 4.2). Tasarım: kural (sabit, üstel, rastgeleli üstel) × N (2.000, 5.000) = 6 hücre, her hücre 3 tekrar (tohum 1-3), bloklar içinde rastgele sırayla (18 koşu, sürüm v5); kesinti temiz, 60 sn.
 
@@ -293,15 +301,43 @@ Bölüm 5.5'teki düzenek (N = 5.000, TLS'siz, kural × B0/B1/B2, 3 tekrar) ikin
 
 ## 6. Tartışma ve Sınırlar
 
+### 6.1 Ana bulgular
+
+1. **Bağlantı sonrası iş, bağlanmanın kendisinden daha büyük bir yük olabilir.** TLS'siz ortamda 5.000 cihazın aynı anda dönmesi Mosquitto'yu zorlamamış (CPU en çok 30 / 200; Bölüm 5.3), ama dönüşün ardından yapılan eşitleme ve birikenin boşaltılması, üstel kuralla canlı alarm gecikmesini yaklaşık 30 ms'den yaklaşık 9 sn'ye çıkarmıştır (Bölüm 5.5). Bu, bağlanma yükünü azaltmaya odaklanan yöntemlerin ([1], [2]) yeterli olmayabileceğine işaret eder: bağlandıktan sonraki iş de zamanlanmalıdır.
+2. **Yük arttıkça işe yarayan politika değişir; "en iyi politika" ortama bağlıdır.** TLS'siz N = 5.000'de dönüşü rastgele dağıtmak yeterlidir (51 ms); N = 10.000'de ya da TLS'te aynı hücre doyar (6,2 sn ve 1,2 sn) ve boşaltmayı da zamana yaymak (B2) gerekir, ayarı yüke göre büyütülerek (Bölüm 5.6-5.8). Bedeli boşaltmanın uzamasıdır (yaklaşık 1,5-4 kat) ve kesintide biriken verinin gecikmesidir (Bölüm 5.10).
+3. **Rastgeleli kuralın faydası ancak sunucu zorlandığında görünür.** TLS'siz ortamda rastgeleli kural yalnızca bedel getirmiş (toparlanma uzamış), TLS'te toparlanmayı yarıdan fazla kısaltmış ve başarısız bağlantıyı sıfırlamıştır (Bölüm 5.4). Sunucu zorlanmadığı sürece "gereksiz" görünen bir mekanizmanın değeri yük arttığında ortaya çıkar.
+4. **Bulgular tek bir sunucuya ya da çekirdek sayısına özgü değildir, ama büyüklükleri öyledir.** Çok çekirdekli EMQX'te de ikinci izdiham görülmüş, politika sıralaması aynı kalmış; çekirdek sayısını ikiye katlamak (2'den 4'e) gecikmeyi yalnızca %29 azaltmıştır (Bölüm 5.9). Aynı CPU payında EMQX her hücrede Mosquitto'dan yavaş çıkmıştır.
+5. **Ölçümün kendisi dikkat ister.** Zaman aşımı hatası, ad çözümlemesi, saat sıçraması ve sunucunun varsayılan koruma ayarı sonuçları çarpıtabilecek düzeydeydi (Bölüm 4); hepsi gecikme ölçümlerinden önce yakalanıp düzeltildi.
+
+### 6.2 Uygulamaya dönük ön çıkarımlar
+
+Aşağıdakiler bu ortamdaki gözlemlerden çıkan ön önerilerdir, genel kural değildir (bkz. 6.3-6.4):
+
+- Sunucunun zorlandığı yük bölgesine yaklaşılıyorsa (TLS, çok sayıda cihaz), dönüşü rastgele dağıtmak (rastgeleli geri çekilme) en ucuz ve çoğu zaman yeterli ilk önlemdir.
+- Bu yetmiyorsa bağlantı sonrası işi de zamana yaymak (cihaz başına rastgele gecikme ve aralıklı boşaltma) gerekir; parametre (pencere, aralık) cihaz sayısıyla ve toplam yükle büyütülmelidir. Sabit bir ayar ölçek büyüyünce yetmeyebilir (Bölüm 5.6-5.7).
+- Çekirdek eklemek tek başına çözüm değildir (Bölüm 5.9).
+- Boşaltmayı geciktirmek kesintide biriken verinin (ve alarmların) ulaşmasını geciktirir; bu bedel ayrıca değerlendirilmelidir (Bölüm 5.10).
+- Test ederken toplam bağlı sayısı yetmez; deneme sayısı, kayıp, canlı trafik gecikmesi ve ölçümün saat kaynağı doğrulanmalı; sunucunun varsayılan koruma ayarları (ör. EMQX `force_shutdown`) kontrol edilmelidir.
+
+### 6.3 Geçerlilik tehditleri
+
+**İç geçerlilik.** (i) Hücre başına 3 tekrar vardır; medyan ve aralık verilmiş, güven aralığı iddia edilmemiştir; aykırı koşular çıkarılmamıştır. (ii) Karşılaştırılan sürümler (ör. TLS'siz ve TLS'li, Mosquitto ve EMQX) aynı blokta koşulmamıştır; zamanla değişen etkiler (ısınma, arka plan) tam kontrol edilmemiştir. (iii) Ölçüm düzeneği (toplayıcı, simülatör) aynı makinedeki kaynağı paylaşır; simülatör ve host CPU doygunluğu bazı koşullarda gecikmeye karışmış olabilir (Bölüm 5.3, 5.6, 5.9). (iv) Sunucu CPU'su yaklaşık 0,7 Hz örneklenmiştir; kısa tepeler kaçmış olabilir. (v) Bazı mekanizmalar (ikinci dalga, kayıp, sabit kuralın faz etkisi) doğrudan gözlenmemiş, hesapla ya da dolaylı kanıtla tutarlı bulunmuştur.
+
+**Yapı geçerliliği.** Canlı alarm gecikmesi saniyelik p99 ile temsil edilmiştir; "alarm" ve "vital" ayrımı ve mesaj sıklığı varsayımsaldır. 100 ms eşiği klinik bir eşik değildir, yalnızca taban düzeyine göre bir referanstır. Gecikme, cihazın planlanan gönderim anından ölçülür (açık döngü), yani cihaz tarafı kuyruklanması da dahildir.
+
+**Dış geçerlilik.** Tek makine, sanal cihazlar, sıfır gecikmeli ağ, temiz (sessiz olmayan) tek kesinti türü, TLS sertifikası doğrulanmadan, yalnızca iki sunucu ve ikisi de tek düğüm. Sonuçlar mutlak kapasite iddiası taşımaz; yönlerin (sıralamanın) başka ortamlara taşınıp taşınmayacağı sınanmamıştır.
+
+### 6.4 Sınırlar (ayrıntı)
+
 **Bağlanma aşaması deneylerine özgü sınırlar (Bölüm 5.1-5.3).** (i) Kesinti süresi tek (60 sn); üstel kuralın TTR'si kesinti süresine bağlı testere dişi bir fonksiyon olduğundan sonuçlar bu süreye özgüdür ve kesinti süresi taraması yapılmamıştır. (ii) Yalnızca iki cihaz sayısı (2.000, 5.000) denenmiştir. (iii) Sunucu açıkken görülen başarısız bağlantıların ve sabit kuraldaki faz etkisinin mekanizması doğrudan incelenmemiştir. (iv) Simülatörün CPU tepesi sınırın yaklaşık %61'ine çıkmıştır. (v) Koşular sırasında Docker'da başka bir projeye ait iki boşta konteyner çalışmaktaydı; etkisi ölçülmemiştir.
 
 **Bağlantı sonrası yük deneylerine özgü sınırlar.** (i) Mosquitto tek iş parçacıklıdır; bulgular çok çekirdekli bir sunucuya genellenemez. (ii) Toplayıcı tek istemcidir ve onun yavaşlaması gecikmeye karışmış olabilir; toplayıcının işlem yükü ölçülmemiştir. (iii) N = 10.000'de taban gecikmenin yükselmesi simülatörün yükünü düşündürür; doğrulanmamıştır. (iv) 39 koşunun 6'sında 1 ile 132 arasında mesaj, toplayıcıya ulaşmamıştır (toplam yaklaşık 540 bin ile 1,6 milyon mesaj içinde, yani en çok yaklaşık %0,01). Ham kayıt açıkken yapılan 12 ek koşuda (iki hücre, 6'şar tekrar) kayıp görülmemiş, olay yeniden üretilememiştir; nedeni açıklanamamıştır. Olası ama doğrulanmamış açıklamalardan biri, sunucunun açıldığı an ile toplayıcının yeniden abone olduğu an arasındaki yaklaşık 0,4-0,6 sn'lik pencerede cihazların gönderdiği mesajların abonesiz kalmasıdır (ölçülen yalnızca pencerenin varlığıdır); diğeri, durdurma anında sunucu belleğindeki iletilmemiş mesajların kaybıdır. Kaybın ham kayıt tarafından bastırılmış olması da dışlanamamıştır (günlük `09`). (v) B2 yalnızca iki ek ayarla sınanmış, ayar uzayı taranmamıştır. (vi) Biriken vital ve alarm mesajları aynı sırayla boşaltılır; alarmları önceliklendirmek gelecek çalışmadır. (vii) İş yükü (mesaj boyutu, vital ve alarm sıklığı, eşitleme boyutu) varsayımsaldır, klinik gerçekliği temsil etmez.
 
-`[ ]` Sınırlar (günlüklerden toplanacak): tek bilgisayar, sanal cihaz, sıfır gecikmeli ağ, TLS yalnızca bağlanma aşamasında denenmiş (doğrulamasız), yalnızca iki sunucu (Mosquitto ve EMQX; ikisi tek düğüm), tek kesinti türü (temiz), tekrar sayısı, CPU örnekleme sıklığı, çözünürlük 1 sn, mekanizmaların bir kısmı doğrudan gözlenmedi.
-
 ## 7. Sonuç ve Gelecek Çalışma
 
-`[ ]` Sonuç (Adım 5 için ön metin, Bölüm 5.1-5.7 birleştirilecek): bu ortamda, aynı anda dönen çok sayıda cihazın bağlantı sonrası işi (eşitleme ve birikenin boşaltılması) canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırmıştır; dönüşü dağıtmak bu etkiyi N = 5.000'de ortadan kaldırmış, N = 10.000'de yetmemiştir; boşaltmayı zamana yayan B2 politikası ancak parametreleri cihaz sayısına göre büyütüldüğünde N = 10.000'de gecikmeyi yüzlerce milisaniyeye indirmiş, bedel olarak boşaltmanın yaklaşık 4 kat uzamasına yol açmıştır. Bağlanma aşamasında ise TLS'siz ortamda sunucu zorlanmamış ve rastgeleli kuralın yalnızca bedeli ölçülmüş, TLS ile sunucu CPU'su 3,5-5,2 kat yükselmiş ve rastgeleli kural toparlanmayı yarıdan fazla kısaltıp sunucu açıkken başarısız bağlantıyı sıfırlamıştır (Bölüm 5.4). TLS ile bağlantı sonrası iş birlikte ölçüldüğünde TLS'siz ortamda en iyi olan politika (rastgeleli + B1) doymuş, B2 yeniden en iyi politika olmuştur (Bölüm 5.8): en iyi politika ortama göre değişir. İkinci bir sunucu olan çok çekirdekli EMQX'te de ikinci izdiham görülmüş, politika sıralaması aynı kalmış, çekirdek sayısını 4'e çıkarmak üstel + B1'deki gecikmeyi yalnızca %29 azaltmıştır (Bölüm 5.9). Gelecek çalışma adayları: sessiz kesinti, TLS'te oturum devam ettirme ve toplayıcının da TLS'li olması, kenar geçidi katmanı, sunucunun "ne kadar sonra gel" bilgisi vermesi, alan adı çözümlemesinin toplu yeniden bağlanmadaki rolü.
+Bu çalışma, çok cihazlı bir MQTT 5 sisteminde sunucu kesintisinden sonra toplu yeniden bağlanmayı ve cihazların bağlandıktan sonra yaptığı işi (durum eşitleme ve biriken mesajların boşaltılması) canlı alarm gecikmesi açısından, iki sunucuda, tekrarlı ve kayıtlı deneylerle ölçmüştür. Başlıca sonuçlar: (i) bağlantı sonrası iş, canlı alarm gecikmesini bağlanmanın kendisinden çok daha fazla artırabilir (Mosquitto, TLS'siz, 5.000 cihazda yaklaşık 30 ms'den yaklaşık 9 sn); (ii) dönüşü rastgele dağıtmak sunucu zorlandığında (TLS, çok sayıda cihaz) toparlanmayı ve gecikmeyi belirgin biçimde düzeltir, TLS'siz ve rahat ortamda ise yalnızca bedel getirir; (iii) boşaltmayı zamana yaymak (B2), uygun ayarla doymuş ortamlarda gecikmeyi yaklaşık %89-99 düşürür; ancak ayar yüke göre büyütülmelidir (N = 10.000'de varsayılan 30 sn / 200 ms üstelde yalnızca %53 düşürmüş, rastgelelide düşürmemiştir) ve bedeli boşaltmanın ve birikmiş verinin uzamasıdır; (iv) bu sıralama çok çekirdekli EMQX'te de geçerlidir, çekirdek eklemek tek başına çözüm değildir; (v) en iyi politika ortama göre değişir. `[ ]` (vi) Alarm önceliği (B3) sonucu (Bölüm 5.10) eklenecek.
+
+Gelecek çalışma adayları: sessiz kesinti (ağın sessizce kopması), TLS'te oturum devam ettirme ve toplayıcının da TLS'li olması, kenar geçidi katmanı, sunucunun "ne kadar sonra gel" bilgisi vermesi, N ve toplam yüke göre B2 parametresinin otomatik ayarı, kayıp mekanizmasının ham kayıtla incelenmesi, farklı kesinti süreleri.
 
 ## Kaynakça
 
