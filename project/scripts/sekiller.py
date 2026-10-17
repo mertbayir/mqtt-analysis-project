@@ -266,3 +266,27 @@ ax.set_ylabel("Tepe canlı alarm p99 (ms)")
 ax.set_title("N = 5.000: TLS'siz ve TLS'li canlı alarm gecikmesi tepesi (3 koşu/hücre; çizgi medyan)", fontsize=8.5)
 ax.legend(fontsize=8, loc="upper right")
 kaydet(fig, "sekil_tls_alarm_tepe_n5000")
+
+
+# Şekil K: N=5.000, TLS'siz: Mosquitto (v6) ve EMQX 2 CPU (e1), EMQX 4 CPU (e2): tepe canlı alarm p99, hücre başına
+em = topla("v6", "e1", "e2")
+em["sunucu"] = em["kosu"].apply(lambda s: "Mosquitto (1 çekirdek)" if s.endswith("_v6") else ("EMQX 2 CPU" if s.endswith("_e1") else "EMQX 4 CPU"))
+renkler = {"Mosquitto (1 çekirdek)": "#3b6ea5", "EMQX 2 CPU": "#c0392b", "EMQX 4 CPU": "#27ae60"}
+fig, ax = plt.subplots(figsize=(6.8, 3.6))
+for j, ad in enumerate(["Mosquitto (1 çekirdek)", "EMQX 2 CPU", "EMQX 4 CPU"]):
+    for i, (a, b) in enumerate(sira2):
+        g = em[(em["A"] == a) & (em["B"] == b) & (em["sunucu"] == ad)]["tepe_p99_ms"]
+        if g.empty:
+            continue
+        x0 = i + (j - 1) * 0.24
+        ax.scatter(x0 + np.linspace(-0.04, 0.04, len(g)), g, color=renkler[ad], s=15, zorder=3, label=ad if i == 0 or (ad == "EMQX 4 CPU" and i == 1) else None)
+        ax.hlines(g.median(), x0 - 0.08, x0 + 0.08, color=renkler[ad], lw=2)
+ax.set_yscale("log")
+ax.axhline(100, color="gray", lw=0.8, ls=":")
+ax.set_xticks(range(len(sira2)))
+ax.set_xticklabels(etiket2, fontsize=8)
+ax.set_ylabel("Tepe canlı alarm p99 (ms)")
+ax.set_title("N = 5.000, TLS'siz: Mosquitto ve EMQX'te canlı alarm gecikmesi tepesi (çizgi medyan)", fontsize=8.5)
+h_, l_ = ax.get_legend_handles_labels()
+ax.legend(dict(zip(l_, h_)).values(), dict(zip(l_, h_)).keys(), fontsize=8, loc="upper right")
+kaydet(fig, "sekil_emqx_alarm_tepe_n5000")

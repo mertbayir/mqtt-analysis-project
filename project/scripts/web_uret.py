@@ -137,12 +137,12 @@ hipotezler = [
     ("Adım 6b", "HF3", "TLS'te rastgeleli + B1 tabanın ≥ 10 katı", D, "1.234 ms"),
     ("Adım 6b", "HF4", "TLS'te B2, B1'e göre ≥ %50 düşürür", D, "%89"),
     ("Adım 6b", "HF5", "Tekrar 0, kayıp ≤ 1", D, "18 koşuda 0"),
-    ("Adım 7 (EMQX)", "HE1", "EMQX 2 CPU, üstel + B1: tepe ≥ 10 × taban", B_, "pilotta 12,6 sn"),
-    ("Adım 7 (EMQX)", "HE2", "EMQX'te B2, B1'e göre ≥ %50 düşürür", B_, ""),
-    ("Adım 7 (EMQX)", "HE3", "EMQX'te rastgeleli + B1: tepe ≥ 5 × taban", B_, ""),
-    ("Adım 7 (EMQX)", "HE4", "EMQX'te B0 tepesi < 100 ms", B_, ""),
-    ("Adım 7 (EMQX)", "HE5", "EMQX 4 CPU, üstel + B1: tepe 2 CPU'nun ≥ %50 altında", B_, ""),
-    ("Adım 7 (EMQX)", "HE6", "Tekrar 0, kayıp ≤ 1", B_, ""),
+    ("Adım 7 (EMQX)", "HE1", "EMQX 2 CPU, üstel + B1: tepe ≥ 10 × taban", D, "16.188 ms (Mosquitto 9.158)"),
+    ("Adım 7 (EMQX)", "HE2", "EMQX'te B2, B1'e göre ≥ %50 düşürür", K, "üstelde %99; rastgelelide B2 daha yüksek (163 vs 93 ms)"),
+    ("Adım 7 (EMQX)", "HE3", "EMQX'te rastgeleli + B1: tepe ≥ 5 × taban", C, "93 ms (≈ 3 × taban)"),
+    ("Adım 7 (EMQX)", "HE4", "EMQX'te B0 tepesi < 100 ms", C, "üstelde 112 ms"),
+    ("Adım 7 (EMQX)", "HE5", "EMQX 4 CPU, üstel + B1: tepe 2 CPU'nun ≥ %50 altında", C, "11.527 vs 16.188 ms (%29); CPU 389/400"),
+    ("Adım 7 (EMQX)", "HE6", "Tekrar 0, kayıp ≤ 1", K, "tekrar 0; kayıp 17/30 koşuda > 1 (en çok 69)"),
 ]
 hip = [{"adim": a, "id": i, "metin": m, "durum": d, "kanit": k} for a, i, m, d, k in hipotezler]
 
