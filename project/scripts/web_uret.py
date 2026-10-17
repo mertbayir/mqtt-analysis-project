@@ -175,6 +175,11 @@ if sablon.exists():
         except Exception:
             b64 = base64.b64encode(mimari.read_bytes()).decode("ascii")
     html = sablon.read_text(encoding="utf-8").replace("/*__VERI__*/", "window.VERI = " + js + ";").replace("/*__MIMARI__*/", b64)
+    model_js = (WEB / "model.js").read_text(encoding="utf-8") if (WEB / "model.js").exists() else ""
+    par = WEB / "model_param.json"
+    art = WEB / "model_artik.json"
+    param_js = ("window.MODEL_PARAM = " + par.read_text(encoding="utf-8") + ";\nwindow.MODEL_ARTIK = " + (art.read_text(encoding="utf-8") if art.exists() else "[]") + ";") if par.exists() else ""
+    html = html.replace("/*__MODEL__*/", model_js).replace("/*__PARAM__*/", param_js)
     (WEB / "sonuc_gezgini.html").write_text(html, encoding="utf-8")
     print("yazıldı: web/sonuc_gezgini.html")
 print(f"koşu: {len(runlar)}  veri boyutu: {len(js) / 1024:.0f} KB")

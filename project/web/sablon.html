@@ -94,6 +94,27 @@ table.heat td:not(.empty):hover { outline: 2px solid var(--accent); }
 .method .card { font-size: 13.5px; }
 footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
 .tip { position: fixed; pointer-events: none; background: #1c2330; color: #fff; padding: 6px 9px; border-radius: 7px; font-size: 12px; z-index: 20; display: none; max-width: 260px; }
+.simhead { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.modelband { background: #7a3e00; color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .6px; padding: 3px 10px; border-radius: 6px; }
+.rozet { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--chip); color: var(--ink); }
+.rozet.ok { background: var(--ok); color: #fff; } .rozet.tah { background: var(--warn); color: #111; } .rozet.sap { background: var(--bad); color: #fff; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.chip { cursor: pointer; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-size: 12.5px; color: var(--ink); }
+.chip:hover { border-color: var(--accent); }
+.simstage { display: grid; grid-template-columns: minmax(300px, 560px) 1fr; gap: 14px; align-items: start; }
+@media (max-width: 900px) { .simstage { grid-template-columns: 1fr; } }
+canvas#simCanvas { width: 100%; height: auto; background: radial-gradient(circle at 50% 50%, var(--chip), transparent 80%); border-radius: 12px; display: block; }
+.gauge { display: flex; align-items: center; gap: 14px; margin: 4px 0 10px; }
+.gauge .disk { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 17px; color: #fff; background: var(--ok); transition: background .25s; line-height: 1.1; }
+.gauge .disk small { display: block; font-size: 10.5px; font-weight: 500; opacity: .9; }
+.mvo { background: var(--chip); border-radius: 10px; padding: 8px 12px; font-size: 13px; margin-top: 8px; }
+.mvo b { color: var(--ink); }
+.ctlrow { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; margin-bottom: 10px; }
+.ctlrow label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 3px; min-width: 120px; }
+.ctlrow input[type=range] { accent-color: var(--accent); }
+.ctlrow .chk { flex-direction: row; align-items: center; gap: 6px; min-width: 0; }
+button.kes { background: var(--bad); color: #fff; border-color: var(--bad); font-weight: 600; }
+button.ac { background: var(--ok); color: #fff; border-color: var(--ok); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 </head>
@@ -104,7 +125,7 @@ footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
   <div class="cards" id="kpis"></div>
 </header>
 <nav><div class="wrap">
-  <a href="#ne">Ne oluyor?</a><a href="#canlandirma">Canlandırma</a><a href="#harita">Tepe haritası</a><a href="#cikarim">Çıkarımlar</a><a href="#hipotez">Hipotez karnesi</a><a href="#yontem">Nasıl ölçtük?</a>
+  <a href="#ne">Ne oluyor?</a><a href="#simulasyon">Simülasyon</a><a href="#canlandirma">Gerçek koşular</a><a href="#harita">Tepe haritası</a><a href="#cikarim">Çıkarımlar</a><a href="#hipotez">Hipotez karnesi</a><a href="#yontem">Nasıl ölçtük?</a>
   <button id="tema" aria-label="Açık ya da koyu tema">Tema</button>
 </div></nav>
 
@@ -121,8 +142,53 @@ footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
   <div class="panel" style="margin-top:14px"><img alt="Sistem mimarisi ve deney zaman çizelgesi" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:6px" src="data:image/png;base64,/*__MIMARI__*/"></div>
 </section>
 
+<section id="simulasyon">
+  <h2>Canlı simülasyon</h2>
+  <p class="lead">Ortada MQTT sunucusu, etrafında cihazlar. Sunucuyu aniden kes, aç, ayarları değiştir ve ne olduğunu izle. <b>Bu bir modeldir, ölçüm değildir:</b> parametreleri deney sonuçlarımıza göre ayarlandı; ölçtüğümüz senaryolarda ölçümle yan yana gösterilir, ölçmediklerimizde "tahmin" yazar.</p>
+  <div class="panel">
+    <div class="simhead"><span class="modelband">MODEL, ÖLÇÜM DEĞİL</span><span class="rozet" id="simRozet">–</span><span class="rozet" id="simSapma" style="display:none"></span></div>
+    <div class="chips" id="simChips"></div>
+    <div class="ctlrow">
+      <label>Sunucu<select id="cSunucu"><option value="mosquitto">Mosquitto (1 çekirdek)</option><option value="emqx2">EMQX (2 CPU)</option><option value="emqx4">EMQX (4 CPU)</option></select></label>
+      <label class="chk"><input type="checkbox" id="cTls"> TLS</label>
+      <label>Cihaz sayısı: <b id="oN">5.000</b><input type="range" id="cN" min="1000" max="10000" step="500" value="5000"></label>
+      <label>Bekleme kuralı<select id="cA"><option value="sabit">Sabit (1 sn)</option><option value="ustel" selected>Üstel</option><option value="ustel-rastgele">Rastgeleli üstel</option></select></label>
+      <label>Bağlantı sonrası politika<select id="cB"><option value="b0">B0: biriken atılır</option><option value="b1" selected>B1: hemen boşalt</option><option value="b2">B2: ayrık</option><option value="b3">B3: alarm önce, vital ayrık</option></select></label>
+      <label id="lW">Pencere W: <b id="oW">30 sn</b><input type="range" id="cW" min="10" max="120" step="10" value="30"></label>
+      <label id="lI">Aralık: <b id="oI">200 ms</b><input type="range" id="cI" min="100" max="1000" step="50" value="200"></label>
+      <label>Kesinti süresi: <b id="oK">60 sn</b><input type="range" id="cK" min="10" max="120" step="10" value="60"></label>
+      <label class="chk"><input type="checkbox" id="cOto" checked> Otomatik senaryo (40. sn'de kes)</label>
+      <label>Hız<select id="cS"><option value="3">3×</option><option value="6" selected>6×</option><option value="12">12×</option><option value="24">24×</option></select></label>
+    </div>
+    <div class="ctlrow">
+      <button class="primary" id="bBaslat">▶ Başlat</button>
+      <button class="kes" id="bKes">⚡ Sunucuyu kes</button>
+      <button class="ac" id="bAc">⏻ Sunucuyu aç</button>
+      <button id="bSifirla">↺ Sıfırla</button>
+    </div>
+    <div class="simstage">
+      <div>
+        <canvas id="simCanvas" width="560" height="560" aria-label="Sunucu ve cihazların canlı simülasyonu"></canvas>
+        <div class="status"><span id="simClock">t = 0 sn</span><span id="simState" class="badge">hazır</span></div>
+      </div>
+      <div>
+        <div class="gauge"><div class="disk" id="simDisk"><div><span id="simAlarm">–</span><small>canlı alarm p99 (ms)</small></div></div>
+          <div class="kpis" style="flex:1;margin-top:0">
+            <div class="kpi"><div class="v" id="sBagli">–</div><div class="l">bağlı cihaz</div></div>
+            <div class="kpi"><div class="v" id="sDeneme">–</div><div class="l">deneme / sn</div></div>
+            <div class="kpi"><div class="v" id="sKuyruk">–</div><div class="l">sunucu kuyruğu (sn)</div></div>
+          </div></div>
+        <div class="chartbox"><h3>Bağlı cihaz sayısı</h3><svg id="sBagliCh" viewBox="0 0 640 150" role="img" aria-label="Bağlı cihaz sayısı"></svg></div>
+        <div class="chartbox"><h3>Canlı alarm gecikmesi, p99 (ms, log ölçek; kesikli mavi: gerçek ölçüm)</h3><svg id="sAlarmCh" viewBox="0 0 640 190" role="img" aria-label="Canlı alarm gecikmesi"></svg></div>
+        <div class="mvo" id="simMvo">–</div>
+      </div>
+    </div>
+  </div>
+  <p class="hint">Model, tek bir sunucu kuyruğu ve cihaz bekleme kurallarından oluşan basit bir yapıdır; mesaj kaybı, rastgele aykırı koşular, ağ gecikmesi ve bloklar arası değişkenlik yoktur. Parametreler <code>scripts/model_kalibrasyon.mjs</code> ile ölçümlere uydurulmuştur.</p>
+</section>
+
 <section id="canlandirma">
-  <h2>Canlandırma</h2>
+  <h2>Gerçek koşular (tekrar oynat)</h2>
   <p class="lead">Bir koşu seç ve oynat. Noktalar cihazlardır: yeşil bağlı, gri bağlantısız, turuncu yeniden deniyor. Altındaki grafikte canlı alarm gecikmesini görürsün. İstersen aynı koşulda başka bir politikayı üst üste çizdir.</p>
   <div class="panel">
     <div class="controls">
@@ -198,6 +264,8 @@ footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
 <div class="tip" id="tip"></div>
 
 <script>/*__VERI__*/</script>
+<script>/*__MODEL__*/</script>
+<script>/*__PARAM__*/</script>
 <script>
 "use strict";
 const V = window.VERI, RUNS = V.runlar;
@@ -265,6 +333,7 @@ function makeChart(svg, o) {
     el("rect", { x: x(o.tdur - o.t0), y: T, width: Math.max(0, x(-o.t0) - x(o.tdur - o.t0)), height: ph, fill: css("--bad"), opacity: .07 }, svg);
     el("line", { x1: x(o.tdur - o.t0), x2: x(o.tdur - o.t0), y1: T, y2: T + ph, stroke: css("--bad"), "stroke-width": 1.5, "stroke-dasharray": "4 3" }, svg);
   }
+  (o.bands || []).forEach((b) => el("rect", { x: x(b[0]), y: T, width: Math.max(0, x(b[1]) - x(b[0])), height: ph, fill: b[2], opacity: .09 }, svg));
   if (o.hline) el("line", { x1: L, x2: W - R, y1: y(o.hline), y2: y(o.hline), stroke: mut, "stroke-dasharray": "2 3" }, svg);
   o.series.forEach((s) => {
     let d = "", pen = false;
@@ -422,10 +491,204 @@ fillSelect($("selCond"), conds.map((c) => [c, condLabel(c)]), S.cond);
   render();
 })();
 
+
+/* ---------- canlı simülasyon (model) ---------- */
+(function simulasyon() {
+  const MM = window.MQTTModel, PAR = window.MODEL_PARAM || {}, ART = window.MODEL_ARTIK || [];
+  if (!MM || !PAR.mosquitto) { $("simulasyon").style.display = "none"; return; }
+  const SC = { cvs: $("simCanvas") }; SC.cx = SC.cvs.getContext("2d");
+  const SIM = { sim: null, playing: false, last: 0, acc: 0, olcum: null, serial: 0, dalga: [], kesAn: null, acAn: null, ciz: 0, sonCiz: 0 };
+  const val = (id) => $(id).value;
+  const B_DISP = { b0: "B0", b1: "B1", b2: "B2", b3: "B3" };
+  const FMT = (n) => fmt(n);
+
+  function cfgOku() {
+    const b = val("cB");
+    return { N: +val("cN"), A: val("cA"), B: b, W: +val("cW"), I: +val("cI"), tls: $("cTls").checked, sunucu: val("cSunucu"), kesinti: +val("cK"), oto: $("cOto").checked };
+  }
+  function etiketB(c) {   // ölçüm hücresi etiketi (b2-w90i500 gibi)
+    if ((c.B === "b2" || c.B === "b3") && (c.W !== 30 || c.I !== 200)) return `${c.B}-w${c.W}i${c.I}`;
+    return c.B;
+  }
+  function olcumBul(c) {   // bu yapılandırmanın ölçüm hücresi (model_artik) ve gerçek koşuları
+    const be = etiketB(c);
+    const art = ART.find((r) => r.aile === "adim5" && r.sunucu === c.sunucu && !!r.tls === c.tls && r.N === c.N && r.A === c.A && r.B === be);
+    if (!art) return null;
+    const cpu = c.sunucu === "emqx4" ? 4 : 2, sun = c.sunucu === "mosquitto" ? "mosquitto" : "emqx";
+    const runs = RUNS.filter((r) => r.aile === "adim5" && r.sunucu === sun && (sun === "mosquitto" || r.cpu === cpu) && r.tls === c.tls && r.N === c.N && r.A === c.A && r.B === be && r.ozet);
+    runs.sort((a, b) => Math.abs(a.ozet.tepe - art.olcum.tepe) - Math.abs(b.ozet.tepe - art.olcum.tepe));
+    return { art, run: runs[0] || null };
+  }
+
+  function kur() {
+    const c = cfgOku();
+    $("cTls").disabled = c.sunucu !== "mosquitto"; if (c.sunucu !== "mosquitto") $("cTls").checked = false;
+    $("lW").style.display = $("lI").style.display = (c.B === "b2" || c.B === "b3") ? "" : "none";
+    $("oN").textContent = FMT(c.N); $("oW").textContent = c.W + " sn"; $("oI").textContent = c.I + " ms"; $("oK").textContent = c.kesinti + " sn";
+    const cc = cfgOku();
+    SIM.cfg = cc;
+    const p = PAR[cc.sunucu];
+    SIM.sim = new MM.Sim({ N: cc.N, A: cc.A, B: cc.B, W: cc.W, I: cc.I, tls: cc.tls, seed: 1 + (SIM.serial++ % 7), dt: 0.05, kesZamani: cc.oto ? 40 : null, acZamani: cc.oto ? 40 + cc.kesinti : null }, p);
+    SIM.olcum = cc.kesinti === 60 && cc.oto ? olcumBul(cc) : null;
+    SIM.dalga = []; SIM.kesAn = SIM.acAn = null;
+    // cihaz konumları: altın açılı sarmal (sunucu etrafında dolu halka)
+    const N = cc.N, R = 262, r0 = 66; SIM.px = new Float32Array(N); SIM.py = new Float32Array(N);
+    const g = Math.PI * (3 - Math.sqrt(5));
+    for (let i = 0; i < N; i++) { const r = r0 + (R - r0) * Math.sqrt((i + 0.5) / N), a = i * g; SIM.px[i] = 280 + r * Math.cos(a); SIM.py[i] = 280 + r * Math.sin(a); }
+    SIM.nokta = N <= 3000 ? 3.2 : N <= 6000 ? 2.6 : 2.1;
+    // rozet
+    const o = SIM.olcum, rz = $("simRozet"), sp = $("simSapma");
+    const bulundu = olcumBul(cc);
+    const olcumlu = bulundu && cc.kesinti === 60 && cc.oto;
+    if (olcumlu) { rz.textContent = "ölçülmüş senaryo"; rz.className = "rozet ok"; } else { rz.textContent = cc.oto ? "tahmin (bu kombinasyon ölçülmedi)" : "tahmin (elle kesinti, ölçülmedi)"; rz.className = "rozet tah"; }
+    if (olcumlu) {
+      sp.style.display = ""; sp.textContent = bulundu.art.tuttu ? `model ölçüme yakın (${bulundu.art.oran.toFixed(2).replace(".", ",")}×)` : `modelde sapma var (${bulundu.art.oran.toFixed(2).replace(".", ",")}×)`;
+      sp.className = "rozet " + (bulundu.art.tuttu ? "ok" : "sap");
+    } else sp.style.display = "none";
+    ciz(); grafik(); gostergeler();
+  }
+
+  function durumRenk() { const st = css("--ok"), off = css("--off"), tr = css("--warn"); return [st, off, tr]; }
+
+  function ciz() {
+    const sim = SIM.sim, cx = SC.cx, N = sim.cfg.N, w = SC.cvs.width;
+    cx.clearRect(0, 0, w, w);
+    const [ok, off, tr] = durumRenk(), cyan = "#2bb7c4", koyu = css("--chip");
+    const pt = SIM.nokta, kes = !sim.up;
+    // örnek darbe çizgileri (deneyen / boşaltan cihazlardan merkeze)
+    cx.lineWidth = 1;
+    let cizilen = 0;
+    for (let k = 0; k < 400 && cizilen < 70; k++) {
+      const i = (k * 7919 + (sim.t * 13 | 0)) % N, st = sim.st[i];
+      if (st === 2 || sim.flushVar[i]) { cx.strokeStyle = st === 2 ? "rgba(215,154,0,.35)" : "rgba(43,183,196,.35)"; cx.beginPath(); cx.moveTo(SIM.px[i], SIM.py[i]); cx.lineTo(280, 280); cx.stroke(); cizilen++; }
+    }
+    // cihazlar
+    for (let i = 0; i < N; i++) {
+      const st = sim.st[i];
+      cx.fillStyle = sim.flushVar[i] ? cyan : st === 0 ? ok : st === 2 ? tr : off;
+      cx.fillRect(SIM.px[i] - pt / 2, SIM.py[i] - pt / 2, pt, pt);
+    }
+    // şok dalgaları
+    SIM.dalga = SIM.dalga.filter((d) => performance.now() - d.t0 < 1200);
+    for (const d of SIM.dalga) {
+      const a = (performance.now() - d.t0) / 1200; cx.strokeStyle = d.renk; cx.globalAlpha = 1 - a; cx.lineWidth = 3;
+      cx.beginPath(); cx.arc(280, 280, 60 + a * 230, 0, 6.283); cx.stroke(); cx.globalAlpha = 1;
+    }
+    // sunucu
+    cx.fillStyle = kes ? "#7b1d14" : "#1b4a7a"; cx.strokeStyle = kes ? "#ef6a5b" : "#6aa8f0"; cx.lineWidth = 3;
+    cx.beginPath(); cx.roundRect(280 - 52, 280 - 52, 104, 104, 14); cx.fill(); cx.stroke();
+    // yük halkası (CPU) ve kuyruk çubuğu
+    const sn = sim._sn, yuk = Math.min(1, (sim.seri.yuk.length ? sim.seri.yuk[sim.seri.yuk.length - 1] : 0));
+    cx.lineWidth = 6; cx.strokeStyle = "rgba(255,255,255,.18)"; cx.beginPath(); cx.arc(280, 280, 60, 0, 6.283); cx.stroke();
+    cx.strokeStyle = yuk > 0.85 ? "#ef6a5b" : yuk > 0.5 ? "#f0b429" : "#46c27b"; cx.beginPath(); cx.arc(280, 280, 60, -1.5708, -1.5708 + 6.283 * yuk); cx.stroke();
+    const kg = sim.W / sim._mu(), kq = Math.min(1, kg / 10);
+    cx.fillStyle = "rgba(255,255,255,.2)"; cx.fillRect(280 - 40, 280 + 30, 80, 8);
+    cx.fillStyle = kq > 0.5 ? "#ef6a5b" : kq > 0.1 ? "#f0b429" : "#46c27b"; cx.fillRect(280 - 40, 280 + 30, 80 * kq, 8);
+    cx.fillStyle = "#fff"; cx.font = "bold 12px system-ui"; cx.textAlign = "center";
+    cx.fillText(kes ? "KAPALI" : "MQTT", 280, 273); cx.font = "10px system-ui"; cx.fillText(kes ? "sunucu" : "sunucusu", 280, 288);
+  }
+
+  function grafik() {
+    const sim = SIM.sim, s = sim.seri, n = Math.max(110, s.t.length + 1), yb = Math.ceil(sim.cfg.N / 1000) * 1000;
+    const pad = (arr) => { const o = new Array(n).fill(null); for (let k = 0; k < arr.length; k++) o[s.t[k]] = arr[k]; return o; };
+    const bagli = pad(s.bagli), alarm = pad(s.alarm);
+    const kesAn = SIM.kesAn, acAn = SIM.acAn;
+    const bands = kesAn != null ? [[kesAn, acAn != null ? acAn : n - 1, css("--bad")]] : [];
+    makeChart($("sBagliCh"), { W: 640, H: 150, t0: 0, n, series: [{ y: bagli, color: css("--ok") }], ymin: 0, ymax: yb, ticks: [0, yb / 2, yb], bands });
+    const ser = [{ y: alarm, color: css("--bad") }];
+    const ol = SIM.olcum && SIM.olcum.run;
+    if (ol) {
+      const acT = 40 + SIM.cfg.kesinti, ya = new Array(n).fill(null);
+      for (let k = 0; k < ol.alarm.length; k++) { const tm = acT + ol.t0 + k; if (tm >= 0 && tm < n) ya[tm] = ol.alarm[k]; }
+      ser.push({ y: ya, color: css("--blue2"), dash: "5 3" });
+    }
+    makeChart($("sAlarmCh"), { W: 640, H: 190, t0: 0, n, series: ser, log: true, ymin: 10, ymax: 30000, ticks: [10, 100, 1000, 10000], hline: 100, bands });
+  }
+
+  function gostergeler() {
+    const sim = SIM.sim, s = sim.seri, i = s.t.length - 1, N = sim.cfg.N;
+    $("simClock").textContent = `t = ${sim.t.toFixed(0)} sn` + (sim.up ? "" : "  (sunucu kapalı)");
+    const bag = i >= 0 ? s.bagli[i] : 0, den = i >= 0 ? s.deneme[i] : 0, al = i >= 0 ? s.alarm[i] : null, kq = i >= 0 ? s.kuyruk[i] : 0;
+    $("sBagli").textContent = FMT(sim.bagli); $("sDeneme").textContent = FMT(den); $("sKuyruk").textContent = (sim.W / sim._mu()).toFixed(1).replace(".", ",");
+    const alVal = sim.up && sim.bagli > 0 ? Math.max(1000 * (sim.W / sim._mu() + sim.p.L0), 0) : null;
+    const dsk = $("simDisk"); $("simAlarm").textContent = al == null && alVal == null ? "–" : FMT(al != null ? al : alVal);
+    const v = al != null ? al : (alVal || 0);
+    dsk.style.background = al == null && !sim.up ? "#7b1d14" : v > 1000 ? "var(--bad)" : v > 100 ? "var(--warn)" : "var(--ok)";
+    if (v > 100 && v <= 1000 && al != null) dsk.style.color = "#111"; else dsk.style.color = "#fff";
+    const st = $("simState");
+    if (!sim.up) { st.textContent = "SUNUCU KAPALI"; st.className = "badge off"; }
+    else if (sim.t < 20 && sim.bagli < N * 0.99) { st.textContent = "İLK BAĞLANMA"; st.className = "badge try"; }
+    else if (v > 100) { st.textContent = "ALARMLAR GECİKİYOR"; st.className = "badge off"; }
+    else if (sim.bagli < N * 0.99) { st.textContent = "YENİDEN BAĞLANIYOR"; st.className = "badge try"; }
+    else { st.textContent = "NORMAL"; st.className = "badge on"; }
+    // model vs ölçüm kutusu
+    let mevcutTepe = 0;
+    for (let k = 0; k < s.t.length; k++) if (SIM.acAn != null && s.t[k] >= SIM.acAn && s.alarm[k] != null && s.alarm[k] > mevcutTepe) mevcutTepe = s.alarm[k];
+    const yas50 = sim.yasYuzdelik(0.5), yasM = sim.yasMax;
+    let h = `Model (şu ana kadar): tepe alarm gecikmesi <b>${FMT(mevcutTepe)} ms</b>`;
+    if (yas50 != null) h += ` · birikmiş alarmın yaşı p50 <b>${yas50} sn</b>, en büyük <b>${FMT(yasM)} sn</b>`;
+    const o = SIM.olcum;
+    if (o) h += `<br>Ölçüm (${o.art.olcum.n} koşunun medyanı): tepe <b>${FMT(o.art.olcum.tepe)} ms</b>` + (o.art.olcum.yasP50 != null ? ` · yaş p50 <b>${FMT(o.art.olcum.yasP50, 0)} sn</b>` : "") + ` · model son durumda ${FMT(o.art.model.tepe)} ms (kalibrasyon tablosu)`;
+    else h += `<br>Ölçüm: bu kombinasyon için yok (otomatik senaryo, kesinti 60 sn ve ölçülmüş hücre seçilirse ölçüm izi çizilir).`;
+    $("simMvo").innerHTML = h;
+  }
+
+  function dalgaEkle(renk) { SIM.dalga.push({ t0: performance.now(), renk }); }
+  function tik(ts) {
+    if (!SIM.playing) return;
+    if (!SIM.last) SIM.last = ts;
+    const dt = Math.min(0.1, (ts - SIM.last) / 1000); SIM.last = ts;
+    SIM.acc += dt * +val("cS");
+    const adim = Math.floor(SIM.acc / 0.05); SIM.acc -= adim * 0.05;
+    const sim = SIM.sim, onceUp = sim.up;
+    for (let k = 0; k < adim; k++) {
+      const upOnce = sim.up; sim.adim();
+      if (upOnce && !sim.up) { SIM.kesAn = Math.floor(sim.t); dalgaEkle("#ef6a5b"); }
+      if (!upOnce && sim.up) { SIM.acAn = Math.floor(sim.t); dalgaEkle("#46c27b"); }
+    }
+    if (ts - SIM.sonCiz > 40) { ciz(); SIM.sonCiz = ts; }
+    if (ts - SIM.ciz > 400) { grafik(); gostergeler(); SIM.ciz = ts; }
+    if (sim.t >= 40 + SIM.cfg.kesinti + 150 && SIM.cfg.oto) { durdur(); grafik(); gostergeler(); return; }
+    requestAnimationFrame(tik);
+  }
+  function baslat() { SIM.playing = true; SIM.last = 0; $("bBaslat").textContent = "⏸ Duraklat"; requestAnimationFrame(tik); }
+  function durdur() { SIM.playing = false; $("bBaslat").textContent = "▶ Başlat"; }
+
+  $("bBaslat").onclick = () => { if (SIM.playing) { durdur(); return; } if (SIM.cfg.oto && SIM.sim.t >= 40 + SIM.cfg.kesinti + 150) kur(); baslat(); };
+  $("bSifirla").onclick = () => { durdur(); kur(); };
+  $("bKes").onclick = () => { const sim = SIM.sim; if (!sim.up) return; sim.kes(); SIM.kesAn = Math.floor(sim.t); dalgaEkle("#ef6a5b"); if (!SIM.playing) baslat(); };
+  $("bAc").onclick = () => { const sim = SIM.sim; if (sim.up) return; sim.ac(); SIM.acAn = Math.floor(sim.t); dalgaEkle("#46c27b"); if (!SIM.playing) baslat(); };
+  ["cSunucu", "cTls", "cN", "cA", "cB", "cW", "cI", "cK", "cOto"].forEach((id) => ($(id).onchange = $(id).oninput = () => { durdur(); kur(); }));
+
+  // hazır senaryolar
+  const HAZIR = [
+    ["Mosquitto · 5.000 · üstel · B1 (ikinci izdiham)", { s: "mosquitto", N: 5000, A: "ustel", B: "b1" }],
+    ["… B2 ile düzelir", { s: "mosquitto", N: 5000, A: "ustel", B: "b2" }],
+    ["… rastgeleli dönüş + B1", { s: "mosquitto", N: 5000, A: "ustel-rastgele", B: "b1" }],
+    ["10.000 · rastgeleli · B1 (doyma)", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b1" }],
+    ["10.000 · rastgeleli · B2 90/500", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b2", W: 90, I: 500 }],
+    ["10.000 · rastgeleli · B3 90/500", { s: "mosquitto", N: 10000, A: "ustel-rastgele", B: "b3", W: 90, I: 500 }],
+    ["TLS · 5.000 · üstel · B0", { s: "mosquitto", N: 5000, A: "ustel", B: "b0", tls: true }],
+    ["TLS · 5.000 · rastgeleli · B1", { s: "mosquitto", N: 5000, A: "ustel-rastgele", B: "b1", tls: true }],
+    ["TLS · 5.000 · rastgeleli · B3", { s: "mosquitto", N: 5000, A: "ustel-rastgele", B: "b3", tls: true }],
+    ["EMQX 2 CPU · 5.000 · üstel · B1", { s: "emqx2", N: 5000, A: "ustel", B: "b1" }],
+    ["EMQX 4 CPU · 5.000 · üstel · B1", { s: "emqx4", N: 5000, A: "ustel", B: "b1" }],
+  ];
+  $("simChips").innerHTML = HAZIR.map((h, i) => `<button class="chip" data-i="${i}">${h[0]}</button>`).join("");
+  $("simChips").onclick = (e) => {
+    const b = e.target.closest(".chip"); if (!b) return; const h = HAZIR[+b.dataset.i][1];
+    durdur(); $("cSunucu").value = h.s; $("cTls").checked = !!h.tls; $("cN").value = h.N; $("cA").value = h.A; $("cB").value = h.B;
+    $("cW").value = h.W || 30; $("cI").value = h.I || 200; $("cK").value = 60; $("cOto").checked = true; kur(); baslat();
+  };
+  kur();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { ciz(); grafik(); });
+  window.__simTema = () => { ciz(); grafik(); };
+})();
+
 /* ---------- tema ---------- */
 $("tema").onclick = () => {
   const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-  r.dataset.theme = dark ? "light" : "dark"; load();
+  r.dataset.theme = dark ? "light" : "dark"; load(); if (window.__simTema) window.__simTema();
 };
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => load());
 
