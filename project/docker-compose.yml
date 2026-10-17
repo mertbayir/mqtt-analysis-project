@@ -13,6 +13,9 @@ services:
       - ./mosquitto/certs:/mosquitto/certs:ro
     ports:
       - "1883:1883"   # Yalnızca Windows'tan elle denemek için. Deneyde simülatör bu portu KULLANMAZ.
+    networks:
+      default:
+        ipv4_address: 172.21.0.2   # Sabit IP (zaten bu adresi alıyordu); Adım 9 sessiz kesintide ağa aynı IP ile yeniden bağlanabilmesi için
 
   sim:
     build: ./src/Simulator
@@ -37,3 +40,11 @@ services:
       BROKER_PORT: "1883"
     volumes:
       - ./results:/results
+
+networks:
+  default:
+    # Alt ağ, önceden Docker'ın otomatik seçtiği ile aynı (172.21.0.0/16). Sabit tanımlanması, `docker network connect --ip`
+    # ile sunucuyu aynı IP'ye geri bağlamak (Adım 9, sessiz kesinti) için gerekli.
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

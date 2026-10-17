@@ -13,6 +13,7 @@ var sureSn = int.Parse(Environment.GetEnvironmentVariable("DURATION_SEC") ?? "75
 var tohum = int.Parse(Environment.GetEnvironmentVariable("SEED") ?? "1");
 var csvYolu = Environment.GetEnvironmentVariable("CSV_PATH") ?? "results/adim2.csv";
 Device.TlsAcik = Environment.GetEnvironmentVariable("TLS") == "1";   // Adım 6: cihazlar TLS ile bağlanır (port 8883)
+Device.AckZamanAsimiSn = int.Parse(Environment.GetEnvironmentVariable("ACK_TIMEOUT_SEC") ?? "0");   // Adım 9: yayın onayı zaman aşımı (0 = yok)
 var yayilimSn = double.Parse(Environment.GetEnvironmentVariable("START_SPREAD_SEC") ?? "0",
     System.Globalization.CultureInfo.InvariantCulture);
 
@@ -83,6 +84,7 @@ var girdi = new
     baglanti_sonrasi_politika = isYuku.B.Aciklama,
     uretim_bitis_sn = isYuku.UretimBitisSn,
     tls = Device.TlsAcik,
+    ack_zaman_asimi_sn = Device.AckZamanAsimiSn,
     kutuphane_otomatik_yeniden_baglanma = false,
     dotnet = Environment.Version.ToString(),
     ozet_aralik_sn = 1

@@ -1,0 +1,7 @@
+mono_s,sinif,adet,p50_ms,p95_ms,p99_ms,max_ms
+30195,canli_alarm,2,4,10,10,10
+30195,canli_vital,33,6,21,26,26
+30196,canli_alarm,9,5,8,8,8
+30196,canli_vital,41,6,9,10,10
+30197,canli_alarm,4,2,5,5,5
+30197,canli_vital,23,7,9,9,9

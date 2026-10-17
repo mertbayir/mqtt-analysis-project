@@ -54,6 +54,23 @@ def analiz(k):
     ulasti = sim["bagli"].cummax() >= math.ceil(0.9 * n)
     kopma = int(sim.loc[ulasti & (sim["bagli"] == 0), "saniye"].iloc[0])
     basla = kopma + kapali
+    kesinti_turu = str(k.get("kesinti_turu", "temiz"))
+    sessiz_yayilim = float("nan")
+    if kesinti_turu == "sessiz":
+        # Sessiz kesintide bağlı sayısı sıfıra 10-15 sn'de iner; kopma ve başlama anları olay zamanlarından alınır
+        ol = open(SONUC / f"{ad}.olaylar.txt", encoding="utf-8-sig").read().splitlines()
+
+        def _t(satir):
+            h, m, sn = satir.split()[0].split(":")
+            return int(h) * 3600 + int(m) * 60 + float(sn)
+        t_sim = _t(next(x for x in ol if "simulator basladi" in x))
+        t_kes = _t(next(x for x in ol if "docker stop" in x and "bitti" not in x))
+        t_ac = _t(next(x for x in ol if "docker start" in x))
+        kopma = int(round(t_kes - t_sim))
+        basla = t_ac - t_sim
+        after = sim[sim["saniye"] >= kopma]
+        ilk0 = after.loc[after["bagli"] == 0, "saniye"]
+        sessiz_yayilim = float(ilk0.iloc[0] - kopma) if len(ilk0) else float("nan")
 
     col = pd.read_csv(SONUC / f"{ad}.collector.csv")
     col["t"] = col["mono_s"] - t0
@@ -98,7 +115,7 @@ def analiz(k):
 
     return {
         "kosu": ad, "A": k["politika"].split("|")[0], "B": k["politika"].split("|")[1], "cihaz": n, "tohum": int(k["tohum"]),
-        "kapali_sn": kapali,
+        "kapali_sn": kapali, "kesinti": kesinti_turu, "dusus_suresi_sn": sessiz_yayilim,
         "taban_p99_ms": float(taban.median()) if len(taban) else float("nan"),
         "tepe_p99_ms": float(sonra_a.max()) if len(sonra_a) else float("nan"),
         "esik_ustu_sn": int((sonra_a > ESIK_MS).sum()),

@@ -1,0 +1,2 @@
+kosu,A,B,cihaz,tohum,kapali_sn,kesinti,dusus_suresi_sn,taban_p99_ms,tepe_p99_ms,esik_ustu_sn,vital_tepe_p99_ms,bosaltma_bitis_sn,bosaltma_tepe_mesaj,sync_p50_ms,sync_p99_ms,sync_hata,flush_bitis_p50_sn,flush_bitis_max_sn,uretilen,alinan,atilan,kayip,tekrar,negatif_gecikme,saat_sicramasi,srv_cpu_tepe,bir_alarm_adet,bir_alarm_yas_p50_s,bir_alarm_yas_p95_s,bir_alarm_yas_max_s,alarm_flush_bitis_max_sn
+adim5_ustel_b1-sessiz_n500_s1_s9test4,ustel,b1-sessiz,500,1,40.5,sessiz,13.0,13.0,75.0,0,75.0,10.0,6827,0.6,37.4,273,10.3,10.9,37478,37454,0,24,0,0,2,29.66,2053,30.1,49.3,50.4,

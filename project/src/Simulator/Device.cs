@@ -23,6 +23,8 @@ public class Device
     public const int KalpAtisiSn = 10;
     public const int BaglantiZamanAsimiSn = 5;
     public static bool TlsAcik;   // Adım 6: TLS ile bağlan (Program.cs TLS=1 ortam değişkeninden ayarlar)
+    // Adım 9 (sessiz kesinti): yayın onayı (PUBACK) bu süre içinde gelmezse bağlantı ölü sayılır ve kapatılır (0 = süre sınırı yok, önceki adımlardaki davranış)
+    public static int AckZamanAsimiSn;
 
     private readonly int _id;
     private readonly string _host;
@@ -230,11 +232,44 @@ public class Device
                 .WithPayload(Encoding.ASCII.GetBytes(yuk))
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
                 .Build();
-            await _client!.PublishAsync(msg, dur);
+            CancellationToken jeton = dur;
+            CancellationTokenSource? ack = null;
+            if (AckZamanAsimiSn > 0)
+            {
+                ack = CancellationTokenSource.CreateLinkedTokenSource(dur);
+                ack.CancelAfter(TimeSpan.FromSeconds(AckZamanAsimiSn));
+                jeton = ack.Token;
+            }
+            try { await _client!.PublishAsync(msg, jeton); }
+            finally { ack?.Dispose(); }
             return true;
         }
-        catch (OperationCanceledException) { return false; }
-        catch { Stats.GonderimHatasi(); return false; }
+        catch (OperationCanceledException)
+        {
+            if (!dur.IsCancellationRequested && AckZamanAsimiSn > 0)
+            {
+                // Onay gelmedi: bağlantı sessizce ölmüş olabilir. Bağlantıyı kapat, yeniden bağlanma kuralı devreye girsin.
+                Stats.GonderimHatasi();
+                BaglantiyiKapat();
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Stats.GonderimHatasi();
+            // MQTTnet yayın onayı beklerken kendi zaman aşımını (5 sn) hata olarak verir ama bağlantıyı kapatmaz.
+            // Sessiz kesintide cihazın kopmayı fark edebilmesi için (AckZamanAsimiSn > 0) bağlantıyı biz kapatırız.
+            if (AckZamanAsimiSn > 0 && ex.GetType().Name == "MqttCommunicationTimedOutException") BaglantiyiKapat();
+            return false;
+        }
+    }
+
+    private void BaglantiyiKapat()
+    {
+        _ = Task.Run(async () =>
+        {
+            try { using var c = new CancellationTokenSource(2000); await _client!.DisconnectAsync(new MqttClientDisconnectOptions(), c.Token); } catch { }
+        });
     }
 
     // ---- İş yükü: bağlantı sonrası (eşitle + boşalt) --------------------------------------

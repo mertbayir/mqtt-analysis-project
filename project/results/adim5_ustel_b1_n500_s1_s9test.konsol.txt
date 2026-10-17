@@ -1,0 +1,18 @@
+cihaz=500 sunucu=172.21.0.2:1883 süre=135sn tohum=1 politika=UstelGeriCekilme(ilk=1sn, tavan=30sn)
+t=  1sn  bağlı=  50  deneme/sn=  50  hata/sn=   0
+t=  2sn  bağlı=  99  deneme/sn=  49  hata/sn=   0
+t=  3sn  bağlı= 148  deneme/sn=  49  hata/sn=   0
+t=  4sn  bağlı= 200  deneme/sn=  52  hata/sn=   0
+t=  5sn  bağlı= 252  deneme/sn=  52  hata/sn=   0
+t=  6sn  bağlı= 300  deneme/sn=  49  hata/sn=   0
+t=  7sn  bağlı= 350  deneme/sn=  49  hata/sn=   0
+t=  8sn  bağlı= 401  deneme/sn=  51  hata/sn=   0
+t=  9sn  bağlı= 453  deneme/sn=  52  hata/sn=   0
+t= 10sn  bağlı= 500  deneme/sn=  47  hata/sn=   0
+t= 11sn  bağlı= 500  deneme/sn=   0  hata/sn=   0
+t= 12sn  bağlı= 500  deneme/sn=   0  hata/sn=   0
+t= 13sn  bağlı= 500  deneme/sn=   0  hata/sn=   0
+t= 14sn  bağlı= 500  deneme/sn=   0  hata/sn=   0
+t= 15sn  bağlı= 500  deneme/sn=   0  hata/sn=   0
+t= 16sn  bağlı= 500  deneme/sn=   0  hata/sn=   0
+t= 17sn  bağlı= 500  deneme/sn=   0  hata/sn=   0

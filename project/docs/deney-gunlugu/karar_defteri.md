@@ -33,6 +33,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 27 | 17 Ekim | Adım 8 tamamlandı (P1 9 + P2 12 koşu): B3 alarm önceliği birikmiş alarmın yaşını B1 düzeyine indiriyor, canlı alarmı B2 kadar koruyor; üstel + TLS'te canlı alarm bedeli var. Bloklar arası değişkenlik büyük: karşılaştırmalar aynı blokta. Sonraki: makale cilası son tur (ilgili çalışmalar sizde), web arayüzü, Şekil 1 | Günlük 13 |
 | 28 | 17 Ekim | Web arayüzüne canlı simülasyon eklendi: basit sunucu modeli (`web/model.js`), ölçümlere kalibre (28/38 hücre kabul ölçütünde); 'MODEL, ÖLÇÜM DEĞİL' etiketi, ölçülmüş senaryoda model-vs-ölçüm kutusu, tutmayan hücreler listeli; makaleye girmez | Günlük 14 |
 | 29 | 17 Ekim | Web arayüzü yeniden tasarlandı (ödev teslimi için): Satoshi yazı tipi (Fontshare'den indirildi, base64 gömülü, `web/fonts/`), sadeleştirilmiş bölümler (Problem, Simülasyon, Sonuçlar sekmeleri, Çıkarımlar, Yöntem), gelişmiş ayarlar katlanır, hipotez karnesi katlanır, açık/koyu tema, telefon genişliğinde taşma yok | Web arayüzü |
+| 30 | 17 Ekim | Adım 9 sessiz kesinti: ağ sabit alt ağ + sabit sunucu IP (docker-compose.yml), `-KesintiTuru sessiz` (docker network disconnect/connect), yayın onayı zaman aşımında bağlantıyı kapatma (`-AckSn 10`, iki kesinti türünde de açık); bütçe: bilgisayar en çok 1-2 saat açık | Günlük 15 |
 
 ## Açık kararlar
 
