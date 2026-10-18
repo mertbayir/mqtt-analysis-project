@@ -3,7 +3,7 @@
 Kullanım:  python scripts/web_uret.py
 Girdi:     results/deney_kayitlari.csv, her koşunun <ad>.csv (saniyelik bağlı sayısı), <ad>.girdi.json,
            <ad>.collector.csv (canlı alarm gecikmesi), results/ozet_adim4*_kosular.csv, ozet_adim5_*_kosular.csv
-Çıktı:     web/veri.js (yalnızca veri), web/sonuc_gezgini.html (şablon + veri, tek dosya, internetsiz çalışır)
+Çıktı:     web/veri.js (yalnızca veri), web/sonuc_gezgini.html ve web/simulasyon.html (şablon + veri, ayrı tek dosyalar, internetsiz çalışır)
 
 Zaman ekseni: 0 = sunucunun yeniden başlatıldığı an (kopma + kapalı süre). Yeni koşular (EMQX) bitince betik
 yeniden çalıştırılır; eksik dosyalı koşular atlanır (uyarı yazar).
@@ -182,7 +182,8 @@ if sablon.exists():
             b64 = base64.b64encode(tampon.getvalue()).decode("ascii")
         except Exception:
             b64 = base64.b64encode(mimari.read_bytes()).decode("ascii")
-    html = sablon.read_text(encoding="utf-8").replace("/*__VERI__*/", "window.VERI = " + js + ";").replace("/*__MIMARI__*/", b64)
+    ortak_js = (WEB / "ortak.js").read_text(encoding="utf-8")
+    stil_css = (WEB / "stil.css").read_text(encoding="utf-8")
     model_js = (WEB / "model.js").read_text(encoding="utf-8") if (WEB / "model.js").exists() else ""
     par = WEB / "model_param.json"
     art = WEB / "model_artik.json"
@@ -194,8 +195,18 @@ if sablon.exists():
         if yol.exists():
             fontcss += ('@font-face{font-family:"Satoshi";font-style:normal;font-weight:' + str(agirlik) +
                         ';font-display:swap;src:url(data:font/woff2;base64,' + _b64.b64encode(yol.read_bytes()).decode("ascii") + ') format("woff2");}\n')
-    html = html.replace("/*__FONTS__*/", fontcss)
-    html = html.replace("/*__MODEL__*/", model_js).replace("/*__PARAM__*/", param_js)
-    (WEB / "sonuc_gezgini.html").write_text(html, encoding="utf-8")
-    print("yazıldı: web/sonuc_gezgini.html")
+    veri_js = "window.VERI = " + js + ";"
+
+    def birlestir(ad_sablon, ad_cikti):
+        html = (WEB / ad_sablon).read_text(encoding="utf-8")
+        html = html.replace("/*__STIL__*/", stil_css).replace("/*__FONTS__*/", fontcss)
+        html = html.replace("/*__ORTAK__*/", ortak_js).replace("/*__VERI__*/", veri_js).replace("/*__MIMARI__*/", b64)
+        html = html.replace("/*__MODEL__*/", model_js).replace("/*__PARAM__*/", param_js)
+        (WEB / ad_cikti).write_text(html, encoding="utf-8")
+        print("yazıldı: web/" + ad_cikti)
+
+    birlestir("sablon.html", "sonuc_gezgini.html")
+    if (WEB / "simulasyon_sablon.html").exists():
+        birlestir("simulasyon_sablon.html", "simulasyon.html")
+
 print(f"koşu: {len(runlar)}  veri boyutu: {len(js) / 1024:.0f} KB")
