@@ -1,0 +1,54 @@
+﻿Matris5 başladı: 2026-10-18 19:55:45  tekrar=4 cihazlar=5000 A=ustel,ustel-rastgele B=b1 sürüm=k10
+--- Blok 1 (tohum 1), sıra: ustel/b1-k15/5000  ustel-rastgele/b1/5000  ustel/b1/5000  ustel-rastgele/b1-k15/5000  ustel/b1-k180/5000  ustel-rastgele/b1-k180/5000
+19:55:45  BAŞLA adim5_ustel_b1-k15_n5000_s1_k10
+19:59:06  BİTTİ adim5_ustel_b1-k15_n5000_s1_k10
+19:59:06  BAŞLA adim5_ustel-rastgele_b1_n5000_s1_k10
+20:03:10  BİTTİ adim5_ustel-rastgele_b1_n5000_s1_k10
+20:03:10  BAŞLA adim5_ustel_b1_n5000_s1_k10
+20:07:14  BİTTİ adim5_ustel_b1_n5000_s1_k10
+20:07:14  BAŞLA adim5_ustel-rastgele_b1-k15_n5000_s1_k10
+20:10:35  BİTTİ adim5_ustel-rastgele_b1-k15_n5000_s1_k10
+20:10:35  BAŞLA adim5_ustel_b1-k180_n5000_s1_k10
+20:16:42  BİTTİ adim5_ustel_b1-k180_n5000_s1_k10
+20:16:42  BAŞLA adim5_ustel-rastgele_b1-k180_n5000_s1_k10
+20:22:48  BİTTİ adim5_ustel-rastgele_b1-k180_n5000_s1_k10
+--- Blok 2 (tohum 2), sıra: ustel/b1/5000  ustel-rastgele/b1/5000  ustel-rastgele/b1-k180/5000  ustel/b1-k180/5000  ustel/b1-k15/5000  ustel-rastgele/b1-k15/5000
+20:22:48  BAŞLA adim5_ustel_b1_n5000_s2_k10
+20:26:55  BİTTİ adim5_ustel_b1_n5000_s2_k10
+20:26:55  BAŞLA adim5_ustel-rastgele_b1_n5000_s2_k10
+20:31:01  BİTTİ adim5_ustel-rastgele_b1_n5000_s2_k10
+20:31:01  BAŞLA adim5_ustel-rastgele_b1-k180_n5000_s2_k10
+20:37:06  BİTTİ adim5_ustel-rastgele_b1-k180_n5000_s2_k10
+20:37:06  BAŞLA adim5_ustel_b1-k180_n5000_s2_k10
+20:43:12  BİTTİ adim5_ustel_b1-k180_n5000_s2_k10
+20:43:12  BAŞLA adim5_ustel_b1-k15_n5000_s2_k10
+20:46:33  BİTTİ adim5_ustel_b1-k15_n5000_s2_k10
+20:46:33  BAŞLA adim5_ustel-rastgele_b1-k15_n5000_s2_k10
+20:49:54  BİTTİ adim5_ustel-rastgele_b1-k15_n5000_s2_k10
+--- Blok 3 (tohum 3), sıra: ustel/b1-k180/5000  ustel/b1/5000  ustel-rastgele/b1-k180/5000  ustel/b1-k15/5000  ustel-rastgele/b1/5000  ustel-rastgele/b1-k15/5000
+20:49:54  BAŞLA adim5_ustel_b1-k180_n5000_s3_k10
+20:56:00  BİTTİ adim5_ustel_b1-k180_n5000_s3_k10
+20:56:00  BAŞLA adim5_ustel_b1_n5000_s3_k10
+21:00:05  BİTTİ adim5_ustel_b1_n5000_s3_k10
+21:00:05  BAŞLA adim5_ustel-rastgele_b1-k180_n5000_s3_k10
+21:06:10  BİTTİ adim5_ustel-rastgele_b1-k180_n5000_s3_k10
+21:06:10  BAŞLA adim5_ustel_b1-k15_n5000_s3_k10
+21:09:31  BİTTİ adim5_ustel_b1-k15_n5000_s3_k10
+21:09:31  BAŞLA adim5_ustel-rastgele_b1_n5000_s3_k10
+21:13:36  BİTTİ adim5_ustel-rastgele_b1_n5000_s3_k10
+21:13:36  BAŞLA adim5_ustel-rastgele_b1-k15_n5000_s3_k10
+21:16:58  BİTTİ adim5_ustel-rastgele_b1-k15_n5000_s3_k10
+--- Blok 4 (tohum 4), sıra: ustel/b1-k180/5000  ustel-rastgele/b1/5000  ustel/b1-k15/5000  ustel-rastgele/b1-k15/5000  ustel-rastgele/b1-k180/5000  ustel/b1/5000
+21:16:58  BAŞLA adim5_ustel_b1-k180_n5000_s4_k10
+21:23:03  BİTTİ adim5_ustel_b1-k180_n5000_s4_k10
+21:23:03  BAŞLA adim5_ustel-rastgele_b1_n5000_s4_k10
+21:27:08  BİTTİ adim5_ustel-rastgele_b1_n5000_s4_k10
+21:27:08  BAŞLA adim5_ustel_b1-k15_n5000_s4_k10
+21:30:27  BİTTİ adim5_ustel_b1-k15_n5000_s4_k10
+21:30:27  BAŞLA adim5_ustel-rastgele_b1-k15_n5000_s4_k10
+21:33:49  BİTTİ adim5_ustel-rastgele_b1-k15_n5000_s4_k10
+21:33:49  BAŞLA adim5_ustel-rastgele_b1-k180_n5000_s4_k10
+21:39:54  BİTTİ adim5_ustel-rastgele_b1-k180_n5000_s4_k10
+21:39:54  BAŞLA adim5_ustel_b1_n5000_s4_k10
+21:43:58  BİTTİ adim5_ustel_b1_n5000_s4_k10
+Matris5 bitti: 2026-10-18 21:43:58

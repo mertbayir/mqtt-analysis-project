@@ -1,0 +1,27 @@
+{
+  "benzersiz_alinan": {
+    "canli_alarm": 63127,
+    "canli_vital": 315608,
+    "biriken_vital": 46478,
+    "biriken_alarm": 9283
+  },
+  "tekrar_alinan": 0,
+  "sync_yanit_verilen": 3786,
+  "bozuk_mesaj": 0,
+  "negatif_gecikmeli_mesaj_20ms_alti": 0,
+  "en_negatif_gecikme_ms": 0,
+  "baglanti_olaylari": [
+    "2026-10-18T17:07:23.5389461Z baglandi mono_ms=757646",
+    "2026-10-18T17:08:04.4681595Z koptu mono_ms=798573",
+    "2026-10-18T17:08:04.5755817Z koptu mono_ms=798680",
+    "2026-10-18T17:08:04.6781600Z koptu mono_ms=798783",
+    "2026-10-18T17:08:04.7791080Z koptu mono_ms=798884",
+    "2026-10-18T17:08:04.8808870Z koptu mono_ms=798985",
+    "2026-10-18T17:08:07.9763007Z koptu mono_ms=802081",
+    "2026-10-18T17:08:11.0886682Z koptu mono_ms=805193",
+    "2026-10-18T17:08:14.1877293Z koptu mono_ms=808292",
+    "2026-10-18T17:08:17.2962828Z koptu mono_ms=811401",
+    "2026-10-18T17:08:20.4060791Z koptu mono_ms=814510",
+    "2026-10-18T17:08:21.5604296Z baglandi mono_ms=815663"
+  ]
+}

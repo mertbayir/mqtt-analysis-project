@@ -32,10 +32,11 @@ SURUMLER = [
     ("p1", "adim5", "ozet_adim5_p1_kosular.csv"),
     ("p2", "adim5", "ozet_adim5_p2_kosular.csv"),
     ("s9", "adim5", "ozet_adim5_s9_kosular.csv"),
+    ("k10", "adim5", "ozet_adim5_k10_kosular.csv"),
 ]
 
 kayit = pd.read_csv(SONUC / "deney_kayitlari.csv", encoding="utf-8-sig")
-KAPSAM = (-115, 175)   # saniye, sunucu açılışına göre
+KAPSAM = (-190, 175)   # saniye, sunucu açılışına göre
 
 
 def sayi(x, nd=1):
@@ -161,6 +162,13 @@ hipotezler += [
     ("Adım 9 (sessiz kesinti)", "HS3", "Rastgeleli + B1: iki kesintide de tepe < 300 ms", C, "sessizde 638 ms"),
     ("Adım 9 (sessiz kesinti)", "HS4", "Sessizde cihaz tarafı gönderim hatası daha fazla", D, "≈ 35.000 vs 322-616"),
     ("Adım 9 (sessiz kesinti)", "HS5", "Tekrar 0, kayıp ≤ 1", D, "12 koşuda en çok 1"),
+]
+hipotezler += [
+    ("Adım 10 (kesinti süresi)", "HK1", "Üstel + B1: tepe(15) ≤ 0,7×tepe(60) ve tepe(180) ≥ 1,5×tepe(60)", D, "oranlar 0,21 ve 2,21; model doyma öngörmüştü (1,0 ve 1,35)"),
+    ("Adım 10 (kesinti süresi)", "HK2", "Rastgeleli + B1: 15 ve 60 sn'de tepe < 300 ms, 180 sn'de > 300 ms", D, "242, 49 ve 1.529 ms (15 sn'de bir koşu 433)"),
+    ("Adım 10 (kesinti süresi)", "HK3", "Her sürede rastgeleli, üstelden ≥ 5× düşük tepe", D, "8×, 185×, 13×"),
+    ("Adım 10 (kesinti süresi)", "HK4", "Tekrar 0, kayıp ≤ 1", C, "tekrar 0; ama 4 koşuda kayıp (255, 314, 2, 1)"),
+    ("Adım 10 (kesinti süresi)", "HK5", "Model 6 hücrenin ≥ 4'ünde tepeyi 2 kat içinde bulur", D, "4/6 (üstel 15 sn 4,8× ve rastgeleli 60 sn 4,5× tutmadı)"),
 ]
 hip = [{"adim": a, "id": i, "metin": m, "durum": d, "kanit": k} for a, i, m, d, k in hipotezler]
 

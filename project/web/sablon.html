@@ -124,7 +124,7 @@
     <div class="card"><b>Senaryo</b><span>Cihazlar 20 sn'de bağlanır; 40. saniyede sunucu durur, 60 sn kapalı kalır, sonra açılır. Her cihaz 2 sn'de bir vital, 10 sn'de bir alarm gönderir.</span></div>
     <div class="card"><b>Ölçüm</b><span>Gecikme, mesajın alındığı an ile planlanan gönderim anı arasındaki fark; tek yönlü saatle ölçülür. Her hücre en az 3 tekrar, medyan ve aralık verilir.</span></div>
   </div>
-  <div class="card limits"><b>Sınırlar.</b> Tek makine, sanal cihazlar, temiz kesinti; TLS sertifikası doğrulanmadı; iş yükü varsayımsaldır. Sonuçlar bu ortama göre yorumlanmalı, mutlak kapasite iddiası taşımaz. Canlı simülasyon bir modeldir, ölçüm değildir. Kayıt: her koşunun girdisi, çıktısı ve kod sürümü saklanmıştır; hatalı koşular silinmemiş, işaretlenmiştir.</div>
+  <div class="card limits"><b>Sınırlar.</b> Tek makine, sanal cihazlar, temiz kesinti; TLS sertifikası doğrulanmadı; iş yükü varsayımsaldır. Sonuçlar bu ortama göre yorumlanmalı, mutlak kapasite iddiası taşımaz. Canlı simülasyon bir modeldir, ölçüm değildir; yalnızca 60 sn'lik kesinti için doğrulanmıştır (15 sn'de üstel kuralda tepeyi yaklaşık 5 kat büyük gösterir). Kayıt: her koşunun girdisi, çıktısı ve kod sürümü saklanmıştır; hatalı koşular silinmemiş, işaretlenmiştir.</div>
   <details class="acc"><summary>Sistem şeması ve zaman çizelgesi</summary>
     <div class="fig"><img alt="Sistem mimarisi ve deney zaman çizelgesi" src="data:image/png;base64,/*__MIMARI__*/"></div>
   </details>
@@ -140,8 +140,8 @@
 "use strict";
 const V = window.VERI, RUNS = V.runlar;
 const AAD = { "sabit": "Sabit (1 sn)", "ustel": "Üstel", "ustel-rastgele": "Rastgeleli üstel" };
-const BAD = { "b0": "B0: biriken atılır", "b1": "B1: hemen boşalt", "b2": "B2: ayrık (30 sn / 200 ms)", "b2-w60i1000": "B2: ayrık (60 sn / 1 sn)", "b2-w90i500": "B2: ayrık (90 sn / 500 ms)", "b3": "B3: alarm önce, vital ayrık (30/200)", "b3-w90i500": "B3: alarm önce, vital ayrık (90/500)", "b1-sessiz": "B1, sessiz kesinti" };
-const BKISA = { "b0": "B0", "b1": "B1", "b2": "B2 30/200", "b2-w60i1000": "B2 60/1000", "b2-w90i500": "B2 90/500", "b3": "B3 30/200", "b3-w90i500": "B3 90/500", "b1-sessiz": "B1 sessiz" };
+const BAD = { "b0": "B0: biriken atılır", "b1": "B1: hemen boşalt", "b2": "B2: ayrık (30 sn / 200 ms)", "b2-w60i1000": "B2: ayrık (60 sn / 1 sn)", "b2-w90i500": "B2: ayrık (90 sn / 500 ms)", "b3": "B3: alarm önce, vital ayrık (30/200)", "b3-w90i500": "B3: alarm önce, vital ayrık (90/500)", "b1-sessiz": "B1, sessiz kesinti", "b1-k15": "B1, 15 sn kesinti", "b1-k180": "B1, 180 sn kesinti" };
+const BKISA = { "b0": "B0", "b1": "B1", "b2": "B2 30/200", "b2-w60i1000": "B2 60/1000", "b2-w90i500": "B2 90/500", "b3": "B3 30/200", "b3-w90i500": "B3 90/500", "b1-sessiz": "B1 sessiz", "b1-k15": "B1 15 sn", "b1-k180": "B1 180 sn" };
 const AKISA = { "sabit": "sabit", "ustel": "üstel", "ustel-rastgele": "rastgeleli" };
 const condKey = (r) => [r.aile, r.sunucu, r.cpu, r.tls ? 1 : 0, r.N].join("|");
 function condLabel(k) {
@@ -153,7 +153,7 @@ const conds = [...new Set(RUNS.map(condKey))].sort((a, b) => {
   const pa = a.split("|"), pb = b.split("|");
   return (pa[0] === pb[0] ? 0 : pa[0] === "adim5" ? -1 : 1) || ((pa[1] === 'mosquitto' ? 0 : 1) - (pb[1] === 'mosquitto' ? 0 : 1)) || +pa[2] - +pb[2] || +pa[3] - +pb[3] || +pa[4] - +pb[4];
 });
-const BORDER = ["b0", "b1", "b1-sessiz", "b2", "b3", "b2-w60i1000", "b2-w90i500", "b3-w90i500"], AORDER = ["sabit", "ustel", "ustel-rastgele"];
+const BORDER = ["b0", "b1", "b1-sessiz", "b1-k15", "b1-k180", "b2", "b3", "b2-w60i1000", "b2-w90i500", "b3-w90i500"], AORDER = ["sabit", "ustel", "ustel-rastgele"];
 
 /* ---------- üst kartlar ---------- */
 function medTepe(f) { return med(RUNS.filter(f).map((r) => r.ozet && r.ozet.tepe)); }
