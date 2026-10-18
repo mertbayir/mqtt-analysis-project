@@ -4,7 +4,7 @@
 
 **Yazar:** Mert Bayır  
 **Ders:** Bilimsel Araştırma, Proje Hazırlama ve Seminer, Sakarya Üniversitesi  
-**Durum:** TASLAK. Tüm deneyler (Bölüm 5.1-5.10) tamamlandı. `[ ]` işaretli yerler (ilgili çalışmalar, kaynak künyeleri) doldurulacak.
+**Durum:** TASLAK. Tüm deneyler (Bölüm 5.1-5.12) tamamlandı. İlgili Çalışmalar yazıldı (18 Ekim); kalan `[ ]` işaretleri taranacak.
 
 ---
 
@@ -24,7 +24,7 @@ In systems where many devices connect to a single MQTT 5 broker, a broker outage
 
 Çok sayıda cihazın tek bir merkezi sunucuya kalıcı bağlantıyla bağlandığı sistemlerde, sunucunun ya da ağın kısa süreli kesintisi cihazların hemen hemen aynı anda yeniden bağlanmaya çalışmasına yol açar. Hasta başı monitörleri ve giyilebilir sensörler gibi tıbbi nesnelerin interneti (IoMT) dağıtımlarında bu durum önem taşır: kesinti sırasında biriken ölçümler ve sunucudan alınması gereken güncel yapılandırma, cihazlar geri döndüğü anda sunucuya yeni bir yük bindirir ve bu yük, toparlanma sürerken akmaya devam eden canlı mesajları, örneğin alarmları, geciktirebilir.
 
-Yeniden bağlanma anındaki bağlantı yükünü azaltmak için bilinen yöntem, cihazların bağlanmadan önce rastgele bir süre beklemesi ve başarısız denemelerde bekleme süresini üstel olarak artırmasıdır [1], [2]. Ancak cihaz bağlandıktan sonra da yük sürer: cihaz kesinti sırasında kaçırdığı durumu eşitler ve biriktirdiği mesajları gönderir. Bu *bağlantı sonrası yükün* bağlanma aşamasından ayrı ölçüldüğü, MQTT 5 üzerinde canlı trafik sürerken yapılmış açık bir çalışma, bildiğimiz kadarıyla bulunamamıştır. `[ ]` (arama kapsamı ve tarihi İlgili Çalışmalar'da yazılacak; Spillway okunduktan sonra bu cümle netleştirilecek)
+Yeniden bağlanma anındaki bağlantı yükünü azaltmak için bilinen yöntem, cihazların bağlanmadan önce rastgele bir süre beklemesi ve başarısız denemelerde bekleme süresini üstel olarak artırmasıdır [1], [2]. Ancak cihaz bağlandıktan sonra da yük sürer: cihaz kesinti sırasında kaçırdığı durumu eşitler ve biriktirdiği mesajları gönderir. Bu *bağlantı sonrası yükün* bağlanma aşamasından ayrı ölçüldüğü, MQTT 5 üzerinde canlı trafik sürerken yapılmış açık bir çalışma, bildiğimiz kadarıyla bulunamamıştır. (arama kapsamı ve sınırı Bölüm 2.6'da). Bu soruya en yakın çalışmalar, tek istemcili geri yükleme [7], hücresel çekirdekte sunucu tarafı hız sınırı [6] ve tek geçitli öncelikli geri doldurma simülasyonudur [8]; farkımız Bölüm 2'de açıklanmıştır.
 
 Bu çalışma yeni bir algoritma önermez. Bilinen bekleme kurallarını ve bağlantı sonrası boşaltma politikalarını, iki açık kaynaklı MQTT 5 sunucusu (tek iş parçacıklı Mosquitto ve çok iş parçacıklı EMQX) ve kendi geliştirdiğimiz bir cihaz simülatöründen oluşan tekrarlanabilir bir ortamda karşılaştırır. Dört araştırma sorusu sorulur:
 
@@ -33,20 +33,54 @@ Bu çalışma yeni bir algoritma önermez. Bilinen bekleme kurallarını ve bağ
 - **S3.** Bu işi zamana yaymak (B2) işe yarar mı, ayarı yüke nasıl bağlıdır ve bedeli nedir? (Bölüm 5.7)
 - **S4.** Bulgular sunucuya (tek çekirdekli Mosquitto, çok çekirdekli EMQX) ve çekirdek sayısına özgü müdür? (Bölüm 5.9)
 
-Katkılarımız: (i) tekrarlanabilir bir ölçüm ortamı ve kayıt düzeni; (ii) üç bekleme kuralının toplu yeniden bağlanma altında karşılaştırması, TLS'siz ve TLS'li; (iii) ölçüm ortamının kendisinin sonuçları nasıl çarpıtabildiğine dair doğrulanmış bulgular (Bölüm 4); (iv) bağlantı sonrası yükün canlı alarm gecikmesine etkisinin bağlanma aşamasından ayrı ölçülmesi ve üç boşaltma politikasının karşılaştırılması; (v) politika sıralamasının ortama (TLS, cihaz sayısı) bağlı olduğunun ve çekirdek eklemenin tek başına çözüm olmadığının gösterilmesi; (vi) bedelin, yani kesintide biriken alarmın sunucuya ulaşma yaşının da ölçülmesi ve bu bedeli azaltmaya yönelik küçük bir politikanın (B3, alarm öncelikli boşaltma) önerilip değerlendirilmesi (Bölüm 5.10). Bu bir ölçüm çalışmasıdır; yeni bir algoritma önerisi iddiası taşımaz. B3'ün dayandığı fikir, yani öncelikli ve hız sınırlı geri doldurma, sera IoT'si için tek bir uç geçitte simülasyonla değerlendirilmiştir `[Bi26]`; biz bu fikirleri çok cihazlı, gerçek MQTT sunucularında ve canlı alarm gecikmesi ölçütüyle değerlendirir, hangi koşullarda fayda ve bedel getirdiğini raporlarız.
+Katkılarımız: (i) tekrarlanabilir bir ölçüm ortamı ve kayıt düzeni; (ii) üç bekleme kuralının toplu yeniden bağlanma altında karşılaştırması, TLS'siz ve TLS'li; (iii) ölçüm ortamının kendisinin sonuçları nasıl çarpıtabildiğine dair doğrulanmış bulgular (Bölüm 4); (iv) bağlantı sonrası yükün canlı alarm gecikmesine etkisinin bağlanma aşamasından ayrı ölçülmesi ve üç boşaltma politikasının karşılaştırılması; (v) politika sıralamasının ortama (TLS, cihaz sayısı) bağlı olduğunun ve çekirdek eklemenin tek başına çözüm olmadığının gösterilmesi; (vi) bedelin, yani kesintide biriken alarmın sunucuya ulaşma yaşının da ölçülmesi ve bu bedeli azaltmaya yönelik küçük bir politikanın (B3, alarm öncelikli boşaltma) önerilip değerlendirilmesi (Bölüm 5.10). Bu bir ölçüm çalışmasıdır; yeni bir algoritma önerisi iddiası taşımaz. B3'ün dayandığı fikir, yani öncelikli ve hız sınırlı geri doldurma, sera IoT'si için tek bir uç geçitte simülasyonla değerlendirilmiştir [8]; biz bu fikirleri çok cihazlı, gerçek MQTT sunucularında ve canlı alarm gecikmesi ölçütüyle değerlendirir, hangi koşullarda fayda ve bedel getirdiğini raporlarız.
 
 Çalışma tek bir bilgisayarda ve sanal cihazlarla yapılmıştır; deneylerin çoğu TLS'sizdir, TLS yalnızca Bölüm 5.4 ve 5.8'de denenmiştir; sonuçlar bu ortama göreceli olarak raporlanır, mutlak kapasite iddiası taşımaz. Tıbbi çerçeve bir senaryo olarak kullanılmıştır, klinik güvenlik iddiası yoktur.
 
 ## 2. İlgili Çalışmalar
 
-*Durum (18 Ekim): kaynaklar okundu; cümle taslakları, atıf yerleri ve uyarılar `kaynaklar/OKUMA_NOTLARI.md` içinde. Bu bölüm o taslaklardan yazılacak; okunmayanlar (PrioMQTT, Gelishvili, gri literatür) okunmadan eklenmez.*
+Bu bölüm, çalışmamızın dayandığı ve ona en yakın yayınları, her birinin ne yaptığını ve bizden farkını özetler. Bölüm 2.6 arama kapsamını ve sınırını belirtir.
 
-- **Standartlar ve bilinen yöntemler:** RFC 6455 §7.2.3 ilk yeniden bağlanmanın rastgele geciktirilmesini ve sonraki denemelerde kesilmiş ikili üstel geri çekilmeyi önerir [1]. RFC 5626 §4.5 üst sınırı `W = min(en çok, taban × 2^hata)` olarak tanımlar ve gerçek beklemeyi W'nin %50-%100'ü arasında rastgele seçer [2]. Bu çalışmanın bekleme kuralları bu iki standarttan türetilmiştir (Bölüm 3.2).
-- `[ ]` Metastabil çöküş ve yeniden deneme güçlenmesi (Huang ve ark., Isaacs ve ark.)
-- `[ ]` Telekom çekirdek ağında senkron yeniden bağlanma (**Spillway**, en yakın çalışma; **okunacak**)
-- `[ ]` Biriken mesajları boşaltma (Domingues ve ark.)
-- `[ ]` Tıbbi IoT bağlamında MQTT çalışmaları
-- `[ ]` MQTT 5 standardı: neden kodları, "ne kadar sonra gel" bilgisini taşıyan bir alanın bulunmadığı (standart metninden doğrulanacak)
+### 2.1 Yeniden bağlanma kuralları ve eşzamanlılık
+
+WebSocket protokolü, kopma sonrası çok sayıda istemcinin hemen ve ısrarla yeniden bağlanmasının sunucuda bir hizmet engelleme saldırısına benzer bir etki yaratabileceğini belirtir; ilk yeniden bağlanmanın rastgele geciktirilmesini (0-5 sn arası bir değer makul bir ilk gecikmedir) ve sonraki denemelerin kesilmiş ikili üstel geri çekilme gibi bir yöntemle uzatılmasını önerir [1, §7.2.3]. SIP için RFC 5626 bekleme üst sınırını `W = min(en çok, taban × 2^ardışık hata)` olarak tanımlar, gerçek beklemeyi W'nin %50-%100'ü arasında düzgün rastgele seçer ve varsayılan olarak taban 30 sn (ya da 90 sn) ile tavan 1800 sn önerir [2, §4.5]. SIP'te sunucu, 503 yanıtındaki `Retry-After` başlığıyla istemcinin beklemesini uzatabilir [2, §4.5]; MQTT 5'te bunun sayısal karşılığı yoktur (Bölüm 2.4). Bu çalışmanın bekleme kuralları bu iki standarttan türetilmiştir (Bölüm 3.2).
+
+Rastgele gecikmenin kuramsal dayanağı Floyd ve Jacobson'a aittir: bağımsız görünen çok sayıda işlem istemeden eşzamanlı hâle gelebilir, eşzamanlı olmayandan eşzamanlıya geçiş yavaş değil ani bir faz geçişidir ve eşzamanlılığı önlemek için eklenmesi gereken rastgelelik şaşırtıcı derecede büyüktür; yazarlar basit bir kural olarak zamanlayıcıyı her turda ortalama periyodun %50-%150'si aralığında düzgün rastgele kurmayı önerir [3, §5.3, §7]. Aynı çalışma, bir sunucu arızadan ya da yoğunluktan toparlanırken istemcilerin kurtarma işlemlerinde eşzamanlı hâle gelmesini ve toparlanmanın bu yüzden gecikmesini bir örnek olarak anar [3, §1]. Çalışma sürekli periyodik mesajlara (yönlendirme güncellemeleri) odaklanır; bizim durumumuz ise kesintinin tüm cihazları aynı anda başlattığı tek seferlik bir eşzamanlamadır.
+
+### 2.2 Eşzamanlı yeniden bağlanma, yeniden deneme ve aşırı yük
+
+Huang ve ark., kamuya açık olay raporlarından metastabil çöküş örnekleri (tetikleyici kalktıktan sonra bile sürüp giden aşırı yük) derlemiş ve en yaygın sürdürücü etkinin yeniden deneme politikası olduğunu bildirmiştir (raporlanan 21 olayın 11'i) [4, §2]. Aynı çalışma, tetikleyicinin süresi uzadıkça sistemin daha kırılgan hâle geldiğini kuramsal olarak savunur ve bir deneyde tetikleyiciyi 10 sn yerine 9 sn tutmanın çöküşü önlediğini gösterir [4, §3.5, §5.2]. Isaacs ve ark., metastabil çöküşe duyarlı bölgeyi önceden bulmak için kuyruk modeli, ayrık olay simülasyonu, emülatör ve gerçek sistemde stres testinden oluşan bir araç zinciri önerir; soyut modellerin nicel tahminlerinin sapabileceğini ve gerçek sistemde doğrulamanın en inandırıcı adım olduğunu vurgular [5, §3, §6]. İki çalışma da istek/cevap servislerini ele alır; yeniden bağlanma, kalıcı bağlantı ve MQTT bu çalışmaların kapsamı dışındadır.
+
+Eşzamanlı yeniden bağlanmanın ardışık aşırı yük yarattığı, hücresel çekirdek ağlarında da raporlanmıştır. Xie ve ark. (Spillway), bölgesel bir arızanın milyonlarca cihazı aynı anda koparması ve cihazların yaklaşık aynı anda yeniden bağlanmaya çalışması hâlinde iç kuyrukların dolduğunu, isteklerin cihazın zaman aşımından sonra işlenip boşa çalışıldığını ve yeniden denemelerin bir geri besleme döngüsü kurduğunu anlatır [6, §2.3]. Çözümleri sunucu tarafındadır: standart hız sınırı parametrelerini (jeton kovası, oturum hız sınırı, kuyruk derinliği gibi) bir sayısal ikiz ve Bayes optimizasyonuyla ayarlayıp önceden kurmak; beş yıllık bir dağıtım ve geçmiş olaylara karşı doğrulama rapor edilir [6, §7-8]. Optimize edilen kritik parametreler ağ elemanlarının hız sınırlarıdır; cihaz tarafı geri çekilme taban süresi, jitter aralığı ve deneme sayısı kritik sayılmaz [6, Tablo 7]. Çalışma MQTT veya WebSocket gibi uygulama katmanı kalıcı bağlantıları, bağlantı sonrası birikmiş veriyi ya da mesaj gecikmesini ele almaz. Bizim çalışmamız bu üç noktada farklıdır.
+
+### 2.3 Kopma sonrası biriken verinin geri yüklenmesi
+
+Domingues ve ark., kopma sırasında yerel veritabanında biriken sensör verisinin MQTT ile sunucuya geri yüklenmesini incelemiştir: bağlantı döner dönmez sunucu özel bir konuya yayın yaparak geri yüklemeyi başlatır, istemci veriyi parçalar hâlinde gönderir ve bitiş mesajı yollar [7, §3]. Asıl soru tek bir mesajın en uygun yük boyutudur; dijital sağlık senaryosunda (hasta yatağında akıllı kutu) tek bir istemciyle yapılan 4.300 testte yaklaşık 13 MB'lık yük en kısa geri yükleme süresini vermiş ve bu değer kesinti süresine bağlı çıkmamıştır [7, §5]. Çok küçük parçaların tek istemcide bile sunucuda kuyruk yarattığı (saniyede yaklaşık 300 mesaj) bildirilmiştir [7, §5]. Geri yükleme sürerken canlı veri de gönderildiğinde geri yükleme süresinin neredeyse değişmediği görülmüş, ancak canlı mesajın gecikmesi bir ölçüt olarak raporlanmamıştır [7, §5]. Yazarlar, aynı anda geri yükleme yapan istemci sayısının etkisinin incelenmesini gelecek çalışmaya bırakır [7, §6]. Bizim çalışmamız bu soruyu 10.000 cihaza kadar ve canlı alarm gecikmesi ölçütüyle ele alır.
+
+Bi ve ark., sera IoT'sinde uç geçit ile bulut arasındaki kopmalar için bir mekanizma önerir; bağlantı dönünce biriken her şeyi hemen yüklemenin patlamaya ve yüksek öncelikli olayların gecikmesine yol açtığını, bu nedenle olay-öncelikli ve kademeli hız sınırlı bir geri doldurma kullandıklarını anlatır [8, §3.3]. Tek bir geçitle yapılan simülasyonda hız sınırı zirve verimi düşürmüş, öncelik ise yüksek öncelikli olayların bitişini belirgin biçimde öne çekmiştir [8, §5.1, §5.6]. Bu fikirler, B3'ün (Bölüm 3.2) dayandığı fikre yakındır. Çalışma bir MQTT sunucusu, çok sayıda cihaz, bekleme kuralı ve canlı mesaj gecikmesi içermez; yazarlar sonuçların bir saha platformunda doğrulanmadığını belirtir [8, §5.8].
+
+### 2.4 MQTT 5 standardı ve sunucunun ipuçları
+
+MQTT 5.0 standardı, sunucunun yoğunluğunu `Server busy` ve `Connection rate exceeded` gibi neden kodlarıyla bildirmesine, `Server Reference` ile istemciyi başka bir sunucuya yönlendirmesine ve `Server Keep Alive` ile istemcinin canlı tutma süresini değiştirmesine izin verir [9, §3.2.2.2, §3.2.2.3.14, §3.2.2.3.16]. Oturum (`Session Expiry Interval`) ve ileti ömrü (`Message Expiry Interval`) için de özellikler tanımlar [9, §3.1.2.11.2, §3.3.2.3.3]. Standardın özellik tablosunda ve metin taramamızda, istemciye ne kadar bekleyeceğini bildiren bir özellik ya da geri çekilme ve rastgelelik önerisi bulunamadı; yeniden bağlanma zamanlaması istemci politikasına bırakılmıştır. Karşılaştırma için: SIP'te sunucu `Retry-After` ile bekleme süresi bildirebilir [2, §4.5]; Spillway'in yazarları da 3GPP'de uçtan uca geri basınç protokolünün bulunmamasını bir ders olarak belirtir [6, §9].
+
+### 2.5 Tıbbi çerçeve
+
+Tıbbi nesnelerin interneti çerçevesi için bu taslakta dayanağımız Domingues ve ark.'nın dijital sağlık senaryosudur [7]. Başka tıbbi IoT çalışmaları bu taslakta okunmadığı için burada özetlenmemiştir.
+
+### 2.6 Konumumuz ve arama kapsamı
+
+| Çalışma | Katman ve sistem | Cihaz sayısı | Ele alınan | Ölçüt | Bizden farkı |
+|---|---|---|---|---|---|
+| [1], [2], [3] | Standartlar ve kuram | Yok / simülasyon | Bekleme kuralı, rastgelelik | Kuramsal / simülasyon | Kuralları gerçek sunucuda ölçmüyorlar |
+| [4], [5] | İstek/cevap servisleri | Tek/birkaç istemci | Yeniden deneme, metastabilite | Gecikme, çöküş | Kalıcı bağlantı, yeniden bağlanma ve MQTT yok |
+| [6] | 5G çekirdek sinyalleşmesi | Milyonlar (model ve gerçek olay) | Sunucu tarafı hız sınırı | Geri düşen kullanıcı, toparlanma süresi | Sunucu tarafı; MQTT, birikmiş veri ve canlı gecikme yok |
+| [7] | MQTT (Mosquitto) | 1 | Birikmiş veriyi geri yükleme, yük boyutu | Geri yükleme süresi, verim | Tek istemci; canlı gecikme ölçüt değil |
+| [8] | Sera IoT, uç geçit | 1 geçit | Öncelikli, hız sınırlı geri doldurma | Zirve verim, tamamlanma süresi | Simülasyon; MQTT sunucusu, çok cihaz, canlı gecikme yok |
+| **Bu çalışma** | MQTT 5 (Mosquitto, EMQX) | 500-10.000 | Bekleme kuralı ve bağlantı sonrası boşaltma politikası | **Canlı alarm gecikmesi**, birikmiş alarmın yaşı | |
+
+Özetle: yeniden bağlanma kuralları standartlarla önerilmiş [1], [2] ve eşzamanlılığın kuramı kurulmuş [3]; yeniden denemenin aşırı yükü sürdürdüğü gösterilmiş [4], [5] ve hücresel çekirdekte sunucu tarafında azaltılmış [6]; biriken verinin geri yüklenmesi tek istemci için incelenmiş [7] ve öncelikli, hız sınırlı geri doldurma tek bir geçit için simüle edilmiştir [8]. Bildiğimiz kadarıyla bu parçaları, yani çok cihazlı bir MQTT 5 sisteminde cihaz tarafı bekleme kuralını ve bağlantı sonrası boşaltma politikasını canlı mesaj gecikmesi ölçütüyle gerçek sunucularda birlikte inceleyen açık bir ölçüm çalışması bulunamamıştır.
+
+**Arama kapsamı ve sınırı.** Bu cümle sistematik bir literatür taramasına dayanmaz ve yokluğun kanıtı değildir. Arama Ekim 2026'da genel web araması ve açık erişimli yayıncı sayfaları üzerinden yapılmış, atıf yapılan çalışmalar tam metinden (kısmen tam metinden) okunmuştur; Google Scholar ve ücretli veritabanları (IEEE Xplore, Scopus, Web of Science) taranmamıştır. Yalnızca özet düzeyinde görülen çalışmalar (örneğin mesaj önceliği üzerine MQTT çalışmaları) atıf listesine alınmamıştır.
 
 ## 3. Yöntem
 
@@ -66,7 +100,7 @@ Her sanal cihaz, MQTTnet 5.2 ile MQTT 5 üzerinden sunucuya bağlanan bir asenkr
 | Üstel | `min(30, 1 × 2^(n−1))` sn, rastgelelik yok |
 | Rastgeleli üstel | 1. bekleme U(0, 5) sn [1]; sonrakiler `W = min(30, 1 × 2^(n−1))` olmak üzere U(0,5·W, W) [2] |
 
-Rastgeleli üstel kural, [1] ve [2]'nin birleşimidir; iki standardın birebir uygulaması değildir.
+Rastgeleli üstel kural, [1] ve [2]'nin birleşimidir; iki standardın birebir uygulaması değildir. Özellikle [2]'nin varsayılan sabitleri (taban 30 sn ya da 90 sn, tavan 1800 sn) kullanılmamıştır: bekleme, kesinti ve ölçüm süresine uygun olacak biçimde taban 1 sn ve tavan 30 sn alınmıştır. [2]'nin varsayılanlarıyla ilk yeniden deneme ilk başarısızlıktan 30-60 sn sonra olurdu ve tavana ulaşınca denemeler arası 15-30 dakika olurdu [2, §4.5].
 
 **İş yükü ve bağlantı sonrası politikalar (Bölüm 5.5 ve sonrası).** Her cihaz 2 sn'de bir 128 baytlık bir vital bulgu mesajı ve 10 sn'de bir 128 baytlık bir alarm mesajı üretir (QoS 1; mesajın planlanan gönderim anı önceden belirlidir). Bağlantı yokken üretilen mesajlar cihazda bellek içi kuyrukta birikir. Cihaz **yeniden bağlandığında** (ilk açılışta değil) bir *bağlantı sonrası politika* uygular: sunucudan 4.096 baytlık güncel durumu ister (eşitleme, MQTT istek/yanıt) ve birikenleri gönderir. Dört politika karşılaştırılmıştır (B3, Bölüm 5.10'da):
 
@@ -77,9 +111,11 @@ Rastgeleli üstel kural, [1] ve [2]'nin birleşimidir; iki standardın birebir u
 | B2 (ayrık) | Bağlandıktan sonra U(0, W) sn bekle, eşitle, birikeni *a* ms aralıkla gönder. W = 30 sn ve a = 200 ms (varsayılan); Bölüm 5.7'de (W, a) = (60 sn, 1 sn) ve (90 sn, 500 ms) de denenmiştir |
 | B3 (alarm öncelikli) | Bağlanır bağlanmaz, eşitlemeden önce, kesintide biriken **alarmlar** peş peşe gönderilir (cihaz başına yaklaşık 6-7 mesaj); kalan (vital) mesajlar B2 gibi (U(0, W) gecikme, eşitleme, *a* ms aralık) boşaltılır |
 
+Cihazın bağlandıktan sonra sunucudan durum istemesi ve biriken veriyi göndermesi, [7]'deki istek-yanıt temelli geri yükleme akışına tasarım olarak benzer. Farklar: [7]'de geri yüklemeyi sunucu başlatır ve değiştirilen tek ayar parça boyutudur; bizde eşitleme isteğini cihaz başlatır ve boşaltmanın zamanlaması ile sırası (B0-B3) politika olarak değiştirilir. B3'ün dayandığı öncelikli ve hız sınırlı geri doldurma fikri [8]'de tek bir geçit için simüle edilmiştir.
+
 ### 3.3 Kesinti senaryosu
 
-Cihazlar 20 sn içinde yayılarak bağlanır (başlangıç fırtınası olmasın diye). Başlangıçtan 40 sn sonra sunucu konteyneri durdurulur (temiz kesinti: bağlantılar sonlanır, cihazlar kopmayı hemen öğrenir), 60 sn sonra yeniden başlatılır ve sonrası izlenir: bağlanma aşaması deneylerinde (Bölüm 5.1-5.3) 90 sn, TLS'li bağlanma deneyinde (5.4) 150 sn, bağlantı sonrası yük deneylerinde (5.5 ve sonrası) 90-180 sn (uzun pencereli boşaltmanın bitebilmesi için). Sessiz kesinti (ağın sessizce kopması) kapsam dışıdır.
+Cihazlar 20 sn içinde yayılarak bağlanır (başlangıç fırtınası olmasın diye). Başlangıçtan 40 sn sonra sunucu konteyneri durdurulur (temiz kesinti: bağlantılar sonlanır, cihazlar kopmayı hemen öğrenir), 60 sn sonra yeniden başlatılır ve sonrası izlenir: bağlanma aşaması deneylerinde (Bölüm 5.1-5.3) 90 sn, TLS'li bağlanma deneyinde (5.4) 150 sn, bağlantı sonrası yük deneylerinde (5.5 ve sonrası) 90-180 sn (uzun pencereli boşaltmanın bitebilmesi için). Bu temel senaryodan ayrılan iki durum Bölüm 5.11'de (sessiz kesinti: ağın sessizce kopması) ve Bölüm 5.12'de (15 ve 180 sn kesinti) incelenmiştir.
 
 ### 3.4 Ölçütler
 
@@ -413,9 +449,23 @@ Gelecek çalışma adayları: sessiz kesintinin B2/B3, TLS ve EMQX ile de denenm
 
 Bkz. `kaynakca.md`. Metinde geçenler:
 
-[1] I. Fette ve A. Melnikov, "The WebSocket Protocol," RFC 6455, IETF, Aralık 2011. `[künye kontrol]`
+[1] I. Fette ve A. Melnikov, "The WebSocket Protocol," RFC 6455, IETF, Aralık 2011.
 
-[2] C. Jennings, R. Mahy ve F. Audet, "Managing Client-Initiated Connections in the Session Initiation Protocol (SIP)," RFC 5626, IETF, Ekim 2009. `[künye kontrol]`
+[2] C. Jennings, Ed., R. Mahy, Ed. ve F. Audet, Ed., "Managing Client-Initiated Connections in the Session Initiation Protocol (SIP)," RFC 5626, IETF, Ekim 2009.
+
+[3] S. Floyd ve V. Jacobson, "The Synchronization of Periodic Routing Messages," IEEE/ACM Transactions on Networking, c. 2, s. 2, s. 122-136, Nisan 1994.
+
+[4] L. Huang, M. Magnusson, A. B. Muralikrishna, S. Estyak, R. Isaacs, A. Aghayev, T. Zhu ve A. Charapko, "Metastable Failures in the Wild," 16th USENIX Symposium on Operating Systems Design and Implementation (OSDI 22), Carlsbad, s. 73-90, Temmuz 2022.
+
+[5] R. Isaacs, P. Alvaro, R. Majumdar, K.-K. Muniswamy-Reddy, M. Salamati ve S. Soudjani, "Analyzing Metastable Failures," Workshop on Hot Topics in Operating Systems (HotOS '25), Banff, Mayıs 2025, doi:10.1145/3713082.3730380.
+
+[6] H. Xie, J. Liu, C. Yang, Y. He, L. Chen, D. Li, M. Fu, X. Chen ve S. Chen, "Open the Floodgates in a Digital Twin: Experiences of Building Spillway for 100M+-User Signaling Storms in Cellular Core Networks," ACM SIGCOMM 2026 Conference, s. 1779-1797, doi:10.1145/3789240.3829205.
+
+[7] M. Domingues, J. N. Faria ve D. Portugal, "Dimensioning payload size for fast retransmission of MQTT packets in the wake of network disconnections," EURASIP Journal on Wireless Communications and Networking, 2024:2, doi:10.1186/s13638-023-02327-3.
+
+[8] H. Bi, Y. Zhang, J. Jiang ve T. Guan, "Resilient End-Edge-Cloud Collaboration for Control Continuity and Closed-Loop Alarm Management in Solar Greenhouse IoT Systems Under Degraded Network Conditions," Applied Sciences, c. 16, s. 11, 5191, doi:10.3390/app16115191, Mayıs 2026.
+
+[9] *MQTT Version 5.0*, OASIS Standard, 7 Mart 2019.
 
 ## Ekler
 
