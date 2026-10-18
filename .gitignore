@@ -6,3 +6,8 @@ project/results/*.ham.csv
 
 # Test sertifikalari (yerel, atilabilir). Anahtarlar depoya girmez; scripts/tls_sertifika.sh ile uretilir.
 project/mosquitto/certs/
+
+# Ucuncu taraf makale kopyalari (telif; yalnizca yerel). Dizin ve analiz notu (INDEX.md, ANALIZ.md) depoya girer.
+kaynaklar/*.pdf
+kaynaklar/*.txt
+kaynaklar/metin/
