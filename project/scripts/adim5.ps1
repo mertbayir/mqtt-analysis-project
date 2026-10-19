@@ -45,6 +45,8 @@ New-Item -ItemType Directory -Force $klasor | Out-Null
 $bEtiket = if (($B -eq "b2" -or $B -eq "b3") -and ($B2PencereSn -ne 30 -or $B2AralikMs -ne 200)) { "${B}-w${B2PencereSn}i${B2AralikMs}" } else { $B }
 if ($KesintiTuru -eq "sessiz") { $bEtiket = "$bEtiket-sessiz" }
 if ($KesintiSn -ne 60) { $bEtiket = "$bEtiket-k$KesintiSn" }   # Adım 10: kesinti süresi taraması
+if ($VitalSn -ne 2) { $bEtiket = "$bEtiket-v$VitalSn" }   # Adım 11: iş yükü duyarlılığı
+if ($AlarmSn -ne 10) { $bEtiket = "$bEtiket-a$AlarmSn" }
 $ad = "adim5_${A}_${bEtiket}_n${Cihaz}_s${Tohum}_${Surum}"
 $sureSn = $OncesiSn + $KesintiSn + $SonrasiSn + 5
 $colSureSn = $sureSn + 30

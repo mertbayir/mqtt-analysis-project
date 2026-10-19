@@ -35,6 +35,7 @@ Raporun "Tasarım kararları ve gerekçeleri" bölümü için. Her karar: **ne, 
 | 29 | 17 Ekim | Web arayüzü yeniden tasarlandı (ödev teslimi için): Satoshi yazı tipi (Fontshare'den indirildi, base64 gömülü, `web/fonts/`), sadeleştirilmiş bölümler (Problem, Simülasyon, Sonuçlar sekmeleri, Çıkarımlar, Yöntem), gelişmiş ayarlar katlanır, hipotez karnesi katlanır, açık/koyu tema, telefon genişliğinde taşma yok | Web arayüzü |
 | 30 | 17 Ekim | Adım 9 sessiz kesinti: ağ sabit alt ağ + sabit sunucu IP (docker-compose.yml), `-KesintiTuru sessiz` (docker network disconnect/connect), yayın onayı zaman aşımında bağlantıyı kapatma (`-AckSn 10`, iki kesinti türünde de açık); bütçe: bilgisayar en çok 1-2 saat açık | Günlük 15 |
 | 31 | 18 Ekim | Adım 10 kesinti süresi taraması (15/60/180 sn; Mosquitto, N = 5.000, B1, üstel ve rastgeleli; 4 tekrar, 24 koşu): `matris5.ps1 -KesintiSureleri`, 60 sn dışı sürelerin adına `-k<sn>` eki; modelin tahmini ölçümden önce günlüğe yazıldı (ön-kayıtlı sınav); bütçe: bilgisayar 3-4 saat (kullanıcı onayı), gerçek süre 1 sa 49 dk | Günlük 16 |
+| 32 | 19 Ekim | İş yükü sıklıklarının (vital 2 sn, alarm 10 sn) **seçim gerekçesi kayıtlı değil** (19 Ekim'de fark edildi; yalnızca 'varsayımsal' notu var). Adım 11: sıklıklara duyarlılık sınanıyor (`matris5.ps1 -IsYukleri`, koşu adına `-v<sn>`/`-a<sn>` eki); makaleye varsayım açıkça yazılacak | Günlük 17 |
 
 ## Açık kararlar
 
